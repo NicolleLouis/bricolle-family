@@ -6,7 +6,7 @@ authors = ["Louis Nicolle <louisxnicolle@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = "^3.11"
 django = "^4.2"
 django-bootstrap-v5 = "^1.0.11"
 gunicorn = "^21.2.0"
