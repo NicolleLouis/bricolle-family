@@ -13,3 +13,5 @@ env/
 # Ignore static and media files (optional)
 staticfiles/
 media/
+
+.idea/
