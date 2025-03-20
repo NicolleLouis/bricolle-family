@@ -1,0 +1,15 @@
+{% extends 'helpinglouis/base.html' %}
+{% block content %}
+
+{% if name_coup_de_coeur_list %}
+<h1>Voilà la liste des prénoms coup de coeur !</h1>
+    <ul>
+    {% for name in name_coup_de_coeur_list %}
+        <li>{{ name.name }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>Aucun coup de coeur n'a été trouvé pour le moment.</p>
+{% endif %}
+
+{% endblock %}

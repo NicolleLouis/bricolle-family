@@ -1,0 +1,10 @@
+{% extends 'helpinglouis/base.html' %}
+{% block content %}
+<h2>Login</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Login</button>
+</form>
+<p>New here? <a href="{% url 'helpinglouis:register' %}">Create an account</a></p>
+{% endblock %}

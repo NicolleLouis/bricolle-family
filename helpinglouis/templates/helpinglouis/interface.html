@@ -1,0 +1,72 @@
+{% extends 'helpinglouis/base.html' %}
+{% block content %}
+
+<div class="container d-flex justify-content-center align-items-center mt-2 mb-3">
+        <form method="post" action="{% url 'helpinglouis:interface' %}">
+            {% csrf_token %}
+            <input type="hidden" name="gender" value="all">
+            <button type="submit" class="btn btn-link filter-btn {% if gender_filter == 'all' %}selected{% endif %}">
+                All
+            </button>
+        </form>
+        
+        <form method="post" action="{% url 'helpinglouis:interface' %}">
+            {% csrf_token %}
+            <input type="hidden" name="gender" value="boys">
+            <button type="submit" class="btn btn-link filter-btn {% if gender_filter == 'boys' %}selected{% endif %}">
+                Boys
+            </button>
+        </form>
+        
+        <form method="post" action="{% url 'helpinglouis:interface' %}">
+            {% csrf_token %}
+            <input type="hidden" name="gender" value="girls">
+            <button type="submit" class="btn btn-link filter-btn {% if gender_filter == 'girls' %}selected{% endif %}">
+                Girls
+            </button>
+        </form>
+
+</div>
+<div class="container d-flex justify-content-center align-items-center">
+
+    <div class="card custom-rounded shadow" style="width: 27rem; height: 33rem">
+
+
+
+        <div class="card-body text-center d-flex flex-column justify-content-between">
+            <div class="text-center">
+                {% if name %}
+                    <h1 class="{% if name.sex %}custom-name-girl{% else %}custom-name-boy{% endif %}" style="margin-top: 120px;">{{ name.name }}</h1>
+                {% else %}
+                    <h1 class="text-muted mt-5">No names available.</h1>
+                {% endif %}
+            </div>
+            <div>
+                {% if error_message %}
+                <p><strong>{{ error_message }}</strong></p>
+                 {% endif %}
+            </div>
+
+            <form action="{% url 'helpinglouis:vote' %}" method="post">
+                {% csrf_token %}
+   
+                <fieldset class="vote-buttons d-flex justify-content-center align-items-center gap-4" style="margin-bottom: 30px;">
+                    <button type="submit" name="score" value="non" class="vote-btn btn-dislike">
+                        <i class="fas fa-times"></i>
+                    </button>
+
+                    <button type="submit" name="score" value="coup_de_coeur" class="vote-btn btn-neutral">
+                        <i class="fas fa-heart"></i>
+                    </button>
+
+                    <button type="submit" name="score" value="oui" class="vote-btn btn-like">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <input type="hidden" name="name_id" value="{{ name.id }}">
+                    <input type="hidden" name="gender" value="{{ gender_filter }}"> 
+                </fieldset>
+            </form> 
+        </div>
+    </div>
+</div>
+{% endblock %}
