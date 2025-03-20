@@ -1,4 +1,4 @@
-{% extends 'helpinglouis/base.html' %}
+{% extends 'baby_name/base.html' %}
 {% block content %}
 
 <h2>Register</h2>
@@ -7,5 +7,5 @@
     {{ form.as_p }}
     <button type="submit">Sign Up</button>
 </form>
-<p>Already have an account? <a href="{% url 'helpinglouis:login' %}">Log in</a></p>
+<p>Already have an account? <a href="{% url 'baby_name:login' %}">Log in</a></p>
 {% endblock %}

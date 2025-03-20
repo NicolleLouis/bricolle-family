@@ -1,8 +1,8 @@
-{% extends 'helpinglouis/base.html' %}
+{% extends 'baby_name/base.html' %}
 {% block content %}
 
 <div class="container d-flex justify-content-center align-items-center mt-2 mb-3">
-        <form method="post" action="{% url 'helpinglouis:interface' %}">
+        <form method="post" action="{% url 'baby_name:interface' %}">
             {% csrf_token %}
             <input type="hidden" name="gender" value="all">
             <button type="submit" class="btn btn-link filter-btn {% if gender_filter == 'all' %}selected{% endif %}">
@@ -10,7 +10,7 @@
             </button>
         </form>
         
-        <form method="post" action="{% url 'helpinglouis:interface' %}">
+        <form method="post" action="{% url 'baby_name:interface' %}">
             {% csrf_token %}
             <input type="hidden" name="gender" value="boys">
             <button type="submit" class="btn btn-link filter-btn {% if gender_filter == 'boys' %}selected{% endif %}">
@@ -18,7 +18,7 @@
             </button>
         </form>
         
-        <form method="post" action="{% url 'helpinglouis:interface' %}">
+        <form method="post" action="{% url 'baby_name:interface' %}">
             {% csrf_token %}
             <input type="hidden" name="gender" value="girls">
             <button type="submit" class="btn btn-link filter-btn {% if gender_filter == 'girls' %}selected{% endif %}">
@@ -47,7 +47,7 @@
                  {% endif %}
             </div>
 
-            <form action="{% url 'helpinglouis:vote' %}" method="post">
+            <form action="{% url 'baby_name:vote' %}" method="post">
                 {% csrf_token %}
    
                 <fieldset class="vote-buttons d-flex justify-content-center align-items-center gap-4" style="margin-bottom: 30px;">

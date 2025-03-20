@@ -2,13 +2,13 @@ import csv
 import os
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from helpinglouis.models import Name
+from baby_name.models import Name
 
 class Command(BaseCommand):
     help = "Importe des prénoms depuis un fichier CSV fixe"
 
     def handle(self, *args, **kwargs):
-        fichier_csv = os.path.join(settings.BASE_DIR, "helpinglouis", "data", "prenoms.csv")
+        fichier_csv = os.path.join(settings.BASE_DIR, "baby_name", "data", "prenoms.csv")
 
         with open(fichier_csv, newline="", encoding="utf-8-sig") as csvfile:
             reader = csv.DictReader(csvfile, delimiter=";")

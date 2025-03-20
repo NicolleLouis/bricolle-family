@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from helpinglouis.enum import NameChoice
+from baby_name.enum import NameChoice
 
 User = get_user_model()
 

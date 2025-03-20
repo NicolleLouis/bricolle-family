@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('score', models.CharField(choices=[('oui', 'Oui'), ('non', 'Non'), ('coup_de_coeur', 'Coup de cœur')], default='non', max_length=20)),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('name', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='helpinglouis.name')),
+                ('name', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='baby_name.name')),
             ],
         ),
     ]

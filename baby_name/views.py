@@ -16,7 +16,7 @@ def index(request):
     context = {
         "name_coup_de_coeur_list": name_coup_de_coeur_list
     }
-    return render(request, "helpinglouis/index.html", context) 
+    return render(request, "baby_name/index.html", context)
 
 def results(request):
     name_coup_de_coeur_list_boys = Name.objects.filter(
@@ -47,7 +47,7 @@ def results(request):
         "name_yes_list_boys": name_yes_list_boys,
         "name_yes_list_girls": name_yes_list_girls,
     }
-    return render(request, "helpinglouis/results.html", context) 
+    return render(request, "baby_name/results.html", context)
 
 def interface(request):
 
@@ -79,7 +79,7 @@ def interface(request):
         "choices": choices, 
         "gender_filter": gender_filter 
     }
-    return render(request, "helpinglouis/interface.html", context)
+    return render(request, "baby_name/interface.html", context)
 
 def vote(request):
     name_id = request.POST.get('name_id')
@@ -95,9 +95,9 @@ def vote(request):
                 user=request.user,
                 score=score
             )
-        return redirect('helpinglouis:interface')
+        return redirect('baby_name:interface')
     else:
-        return redirect("helpinglouis:interface")
+        return redirect("baby_name:interface")
     
 def register(request):
     if request.method == "POST":
@@ -105,10 +105,10 @@ def register(request):
         if form.is_valid():
             user = form.save()
             login(request, user)  
-            return redirect("helpinglouis")  
+            return redirect("baby_name")
     else:
         form = UserCreationForm()
-    return render(request, "helpinglouis/register.html", {"form": form})
+    return render(request, "baby_name/register.html", {"form": form})
 
 def user_login(request):
     if request.method == "POST":
@@ -116,11 +116,11 @@ def user_login(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect("helpinglouis:index")  # Redirect after login
+            return redirect("baby_name:index")  # Redirect after login
     else:
         form = AuthenticationForm()
-    return render(request, "helpinglouis/login.html", {"form": form})
+    return render(request, "baby_name/login.html", {"form": form})
 
 def user_logout(request):
     logout(request)
-    return redirect("helpinglouis:login")
+    return redirect("baby_name:login")
