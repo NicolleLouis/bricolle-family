@@ -58,11 +58,11 @@ def interface(request):
         gender_filter = request.session.get("gender_filter", "all") 
 
     if gender_filter == "boys":
-        names_left = Name.objects.filter(evaluation__isnull=True, sex=False) 
+        names_left = Name.objects.filter(sex=False).exclude(evaluation__user=request.user) 
     elif gender_filter == "girls":
-        names_left = Name.objects.filter(evaluation__isnull=True, sex=True)  
+        names_left = Name.objects.filter(sex=True).exclude(evaluation__user=request.user) 
     else:
-        names_left = Name.objects.filter(evaluation__isnull=True) 
+        names_left = Name.objects.exclude(evaluation__user=request.user) 
 
 
     if names_left.exists(): 
