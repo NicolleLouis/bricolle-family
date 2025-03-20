@@ -19,12 +19,33 @@ def index(request):
     return render(request, "helpinglouis/index.html", context) 
 
 def results(request):
-    name_coup_de_coeur_list = Name.objects.filter(evaluation__score="coup_de_coeur", evaluation__user=request.user).distinct()
-    name_yes_list = Name.objects.filter(evaluation__score="yes", evaluation__user=request.user).distinct()
+    name_coup_de_coeur_list_boys = Name.objects.filter(
+        evaluation__score="coup_de_coeur", 
+        evaluation__user=request.user,
+        sex=False
+    ).distinct()
+    name_coup_de_coeur_list_girls= Name.objects.filter(
+        evaluation__score="coup_de_coeur", 
+        evaluation__user=request.user,
+        sex=True
+    ).distinct()
+    name_yes_list_boys = Name.objects.filter(
+        evaluation__score="oui", 
+        evaluation__user=request.user,
+        sex=False
+    ).distinct()
+
+    name_yes_list_girls = Name.objects.filter(
+        evaluation__score="oui", 
+        evaluation__user=request.user,
+        sex=True
+    ).distinct()
     
     context = {
-        "name_coup_de_coeur_list": name_coup_de_coeur_list,
-        "name_yes_list": name_yes_list,
+        "name_coup_de_coeur_list_boys": name_coup_de_coeur_list_boys,
+        "name_coup_de_coeur_list_girls": name_coup_de_coeur_list_girls,
+        "name_yes_list_boys": name_yes_list_boys,
+        "name_yes_list_girls": name_yes_list_girls,
     }
     return render(request, "helpinglouis/results.html", context) 
 

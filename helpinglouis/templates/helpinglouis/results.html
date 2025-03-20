@@ -1,25 +1,51 @@
 {% extends 'helpinglouis/base.html' %}
 {% block content %}
+<div class="container d-flex justify-content-center">
+    <div class="col-md-4 ">
+        <h4 class="bg-secondary text-light py-2 rounded text-center">Ma liste de Prénoms </h4>
+        <h6 class="bg-secondary text-light py-2 rounded text-center">Mes Coups de Coeur </h6>
+        <div class="row">
+            <div class="col-md-6">
+                <ul class="list-group">
+                    {% for name in name_coup_de_coeur_list_boys %}
+                    <li class="list-group-item list-group-item-action">
+                        {{ name.name }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <ul class="list-group">
+                    {% for name in name_coup_de_coeur_list_girls %}
+                    <li class="list-group-item list-group-item-action">
+                        {{ name.name }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
 
-<div class="card-body">
-    <h4 class="bg-secondary text-light py-2 rounded text-center">Ma liste de Prénoms </h4>
-    <h6 class="bg-secondary text-light py-2 rounded text-center">Mes Coups de Coeur </h6>
-    <ul class="list-group">
-        {% for name in name_coup_de_coeur_list %}
-        <li class="list-group-item list-group-item-action">
-            {{ name.name }}
-        </li>
-        {% endfor %}
-    </ul>
-
-    <h6 class="bg-secondary text-light py-2 rounded text-center">Mes prénoms</h6>
-    <ul class="list-group">
-        {% for name in name_yes_list %}
-        <li class="list-group-item list-group-item-action">
-            {{ name.name }}
-        </li>
-        {% endfor %}
-    </ul>
-</div>
+        <h6 class="bg-secondary text-light py-2 rounded text-center mt-2">Mes prénoms</h6>
+        <div class="row">
+            <div class="col-md-6">
+                <ul class="list-group">
+                    {% for name in name_yes_list_boys %}
+                    <li class="list-group-item list-group-item-action">
+                        {{ name.name }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <ul class="list-group">
+                    {% for name in name_yes_list_girls %}
+                    <li class="list-group-item list-group-item-action">
+                        {{ name.name }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
