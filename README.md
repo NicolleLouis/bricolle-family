@@ -1,5 +1,9 @@
 # Bricolle Family project
 
+Management is available with [Render](https://dashboard.render.com/)
+
+---
+
 Modules list
 
 1. Baby name
