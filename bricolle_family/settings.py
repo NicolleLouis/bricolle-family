@@ -25,7 +25,9 @@ SECRET_KEY = 'django-insecure-u^!m4#o8xfvg@p3mzf75z@5p@u&!^#2mv#iwba72!$f-hr@2+8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "bricolle-family.onrender.com",
+]
 
 
 # Application definition
