@@ -25,6 +25,12 @@ class Evaluation(models.Model):
     elo = models.IntegerField(default=1000)
     nb_duels = models.IntegerField(default=0)
 
+    class Meta:
+        unique_together = ('name', 'user')
+
+    def __str__(self):
+       return f"Note #{self.user.name} -> #{self.name}"
+
     def update_elo_against(self, opponent, k=20):
         diff = opponent.elo - self.elo
         expected = 1 / (1 + 10 ** (diff / 400))
