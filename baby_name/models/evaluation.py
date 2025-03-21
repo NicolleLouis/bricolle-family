@@ -1,18 +1,9 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django.db import models
 
 from baby_name.enum import NameChoice
+from baby_name.models import Name
 
-User = get_user_model()
-
-class Name(models.Model):
-    name = models.CharField(max_length=200)
-    sex = models.BooleanField(
-        help_text= "True for a girl"
-    )
-
-    def __str__(self):
-       return self.name
 
 class Evaluation(models.Model):
     name = models.ForeignKey(Name, on_delete=models.CASCADE)
@@ -31,14 +22,22 @@ class Evaluation(models.Model):
     def __str__(self):
        return f"Note {self.user.username} -> {self.name}"
 
-    def update_elo_against(self, opponent, k=20):
+    def win_game(self, opponent):
+        k = 20
         diff = opponent.elo - self.elo
         expected = 1 / (1 + 10 ** (diff / 400))
         delta = round(k * (1 - expected))
 
         self.elo += delta
-        opponent.elo -= delta
+        self.nb_duels += 1
+        self.save()
 
-        for eval in [self,opponent]:
-            eval.nb_duels += 1
-            eval.save()
+    def lose_game(self, opponent):
+        k = 20
+        diff = opponent.elo - self.elo
+        expected = 1 / (1 + 10 ** (diff / 400))
+        delta = round(k * (1 - expected))
+
+        self.elo -= delta
+        self.nb_duels += 1
+        self.save()

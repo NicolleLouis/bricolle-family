@@ -2,10 +2,12 @@ import random
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.db.models import Exists, OuterRef
 
-from .models import Name, Evaluation, NameChoice, User
+from .enum import NameChoice
+from .models import Name, Evaluation
 
 def index(request):
     name_coup_de_coeur_list = Name.objects.filter(evaluation__score="coup_de_coeur").distinct()
@@ -135,18 +137,16 @@ def ranking(request):
     return render(request, "baby_name/ranking.html", context)
 
 def ranking_vote(request):
-    try:
-        winner_id = request.POST.get('winner_id')
-        loser_id = request.POST.get('loser_id')
+    winner_id = request.POST.get('winner_id')
+    loser_id = request.POST.get('loser_id')
 
-        winner_eval = get_object_or_404(Evaluation, name__id = winner_id, user=request.user)
-        loser_eval = get_object_or_404(Evaluation, name__id = loser_id, user=request.user)
+    winner_eval = get_object_or_404(Evaluation, name__id = winner_id, user=request.user)
+    loser_eval = get_object_or_404(Evaluation, name__id = loser_id, user=request.user)
 
-        winner_eval.update_elo_against(loser_eval)
+    winner_eval.win_game(loser_eval)
+    loser_eval.lose_game(winner_eval)
 
-        return redirect('baby_name:ranking')
-    except Exception as e:
-        breakpoint()
+    return redirect('baby_name:ranking')
 
 
 def leaderboard(request):
