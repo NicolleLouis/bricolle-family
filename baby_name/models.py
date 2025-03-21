@@ -29,7 +29,7 @@ class Evaluation(models.Model):
         unique_together = ('name', 'user')
 
     def __str__(self):
-       return f"Note #{self.user.name} -> #{self.name}"
+       return f"Note {self.user.username} -> {self.name}"
 
     def update_elo_against(self, opponent, k=20):
         diff = opponent.elo - self.elo
