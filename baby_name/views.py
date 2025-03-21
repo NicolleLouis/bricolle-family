@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.db.models import Exists, OuterRef
 
-from .enum import NameChoice
+from baby_name.constants.name_choice import NameChoice
 from .models import Name, Evaluation
 
 def index(request):
