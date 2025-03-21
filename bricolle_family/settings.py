@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-u^!m4#o8xfvg@p3mzf75z@5p@u&!^#2mv#iwba72!$f-hr@2+8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "True") == "True"
+DEBUG = True
 
 ALLOWED_HOSTS = [
     "bricolle-family.onrender.com",
@@ -85,7 +85,7 @@ DATABASES = {
     }
 }
 
-if not DEBUG:
+if not os.getenv("DEBUG", "True") == "True":
     DATABASE_URL = os.getenv('DATABASE_URL')
     DATABASES['default'] = dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
 
