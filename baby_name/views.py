@@ -86,11 +86,12 @@ def vote(request):
     request.session["gender_filter"] = gender_filter
     
     if score:
-        Evaluation.objects.create(
-                name=name,
-                user=request.user,
-                score=score
-            )
+        evaluation, _created = Evaluation.objects.get_or_create(
+            name=name,
+            user=request.user,
+        )
+        evaluation.score = score
+        evaluation.save()
         return redirect('baby_name:interface')
     else:
         return redirect("baby_name:interface")
@@ -134,15 +135,19 @@ def ranking(request):
     return render(request, "baby_name/ranking.html", context)
 
 def ranking_vote(request):
-    winner_id = request.POST.get('winner_id')
-    loser_id = request.POST.get('loser_id')
-    
-    winner_eval = get_object_or_404(Evaluation, name__id = winner_id, user=request.user)
-    loser_eval = get_object_or_404(Evaluation, name__id = loser_id, user=request.user)
+    try:
+        winner_id = request.POST.get('winner_id')
+        loser_id = request.POST.get('loser_id')
 
-    winner_eval.update_elo_against(loser_eval)
+        winner_eval = get_object_or_404(Evaluation, name__id = winner_id, user=request.user)
+        loser_eval = get_object_or_404(Evaluation, name__id = loser_id, user=request.user)
 
-    return redirect('baby_name:ranking')
+        winner_eval.update_elo_against(loser_eval)
+
+        return redirect('baby_name:ranking')
+    except Exception as e:
+        breakpoint()
+
 
 def leaderboard(request):
     all_users = User.objects.all()

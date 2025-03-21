@@ -6,3 +6,6 @@ migrate:
 
 migrations:
 	poetry run python manage.py makemigrations
+
+console:
+	poetry run python manage.py console
