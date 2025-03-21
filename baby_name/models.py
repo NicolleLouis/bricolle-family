@@ -23,3 +23,17 @@ class Evaluation(models.Model):
         choices=NameChoice.choices,
         default=NameChoice.NON
     )
+    elo = models.IntegerField(default=1000)
+    nb_duels = models.IntegerField(default=0)
+
+    def update_elo_against(self, opponent, k=20):
+        diff = opponent.elo - self.elo
+        expected = 1 / (1 + 10 ** (diff / 400))
+        delta = round(k * (1 - expected))
+
+        self.elo += delta
+        opponent.elo -= delta
+
+        for eval in [self,opponent]:
+            eval.nb_duels += 1
+            eval.save()

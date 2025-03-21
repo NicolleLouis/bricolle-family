@@ -34,6 +34,6 @@ class NameAdmin(admin.ModelAdmin):
 
 @admin.register(Evaluation)
 class EvaluationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'user','score')
+    list_display = ('name', 'user','score', 'elo')
     list_filter = ('user','score','name__sex')
     search_fields = ["name__name"]

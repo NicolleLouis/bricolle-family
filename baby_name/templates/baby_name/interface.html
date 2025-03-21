@@ -2,37 +2,27 @@
 {% block content %}
 
 <div class="container d-flex justify-content-center align-items-center mt-2 mb-3">
-        <form method="post" action="{% url 'baby_name:interface' %}">
-            {% csrf_token %}
-            <input type="hidden" name="gender" value="all">
-            <button type="submit" class="btn btn-link filter-btn {% if gender_filter == 'all' %}selected{% endif %}">
-                All
-            </button>
-        </form>
-        
-        <form method="post" action="{% url 'baby_name:interface' %}">
-            {% csrf_token %}
-            <input type="hidden" name="gender" value="boys">
-            <button type="submit" class="btn btn-link filter-btn {% if gender_filter == 'boys' %}selected{% endif %}">
-                Boys
-            </button>
-        </form>
-        
-        <form method="post" action="{% url 'baby_name:interface' %}">
-            {% csrf_token %}
-            <input type="hidden" name="gender" value="girls">
-            <button type="submit" class="btn btn-link filter-btn {% if gender_filter == 'girls' %}selected{% endif %}">
-                Girls
-            </button>
-        </form>
+    <form method="post" action="{% url 'baby_name:interface' %}">
+        {% csrf_token %}
+        <button type="submit" name="gender" value="all"
+            class="btn btn-link filter-btn {% if gender_filter == 'all' %}selected{% endif %}">
+            All
+        </button>
 
+        <button type="submit" name="gender" value="boys" 
+            class="btn btn-link filter-btn {% if gender_filter == 'boys' %}selected{% endif %}">
+            Boys
+        </button>
+
+        <button type="submit" name="gender" value="girls" 
+            class="btn btn-link filter-btn {% if gender_filter == 'girls' %}selected{% endif %}">
+            Girls
+        </button>
+    </form>
 </div>
+
 <div class="container d-flex justify-content-center align-items-center">
-
     <div class="card custom-rounded shadow" style="width: 27rem; height: 33rem">
-
-
-
         <div class="card-body text-center d-flex flex-column justify-content-between">
             <div class="text-center">
                 {% if name %}
