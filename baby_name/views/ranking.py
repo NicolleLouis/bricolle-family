@@ -1,42 +1,32 @@
 import random
 
-from django.db.models import Exists, OuterRef
 from django.shortcuts import get_object_or_404, render, redirect
 
 from baby_name.models import Name, Evaluation
+from baby_name.repositories.name import NameRepository
+
 
 class Ranking:
     @staticmethod
     def form(request):
         sex_to_rank = random.choice([True, False])
 
-        user_evaluated_names = Name.objects.filter(
+        rankable_names = NameRepository.get_all_rankable_names(
             sex=sex_to_rank,
-            evaluation__user=request.user
-        ).distinct()
-
-        ranking_names = user_evaluated_names.filter(
-            Exists(
-                Evaluation.objects.filter(
-                    name=OuterRef('pk'),
-                    score__in=["oui", "coup_de_coeur"]
-                )
-            )
+            user=request.user
         )
 
-        # Randomly picks two names
-        if ranking_names.exists():
-            random_name_1 = random.choice(ranking_names)
-            ranking_names = ranking_names.exclude(id=random_name_1.id)
-            random_name_2 = random.choice(ranking_names)
-            (random_id_1, random_id_2) = (random_name_1.id, random_name_2.id)
-            name_1 = get_object_or_404(Name, id=random_id_1)
-            name_2 = get_object_or_404(Name, id=random_id_2)
-        else:
-            name_1 = None
-            name_2 = None
+        if len(rankable_names) < 2:
+            return render(
+                request,
+                "baby_name/error.html",
+                {"message": "Not enough names to rank."}
+            )
 
-            # Context
+        random_name_1, random_name_2 = random.sample(list(rankable_names), 2)
+        name_1 = get_object_or_404(Name, id=random_name_1.id)
+        name_2 = get_object_or_404(Name, id=random_name_2.id)
+
         context = {
             "name_1": name_1,
             "name_2": name_2,

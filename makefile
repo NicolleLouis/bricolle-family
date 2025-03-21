@@ -9,3 +9,6 @@ migrations:
 
 console:
 	poetry run python manage.py console
+
+test:
+	poetry run pytest
