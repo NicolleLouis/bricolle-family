@@ -5,7 +5,6 @@ from baby_name.enum import NameChoice
 
 User = get_user_model()
 
-# Create your models here.
 class Name(models.Model):
     name = models.CharField(max_length=200)
     sex = models.BooleanField(

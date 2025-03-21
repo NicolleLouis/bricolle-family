@@ -7,7 +7,6 @@ from django.db.models import Exists, OuterRef
 
 from .models import Name, Evaluation, NameChoice, User
 
-
 def index(request):
     name_coup_de_coeur_list = Name.objects.filter(evaluation__score="coup_de_coeur").distinct()
    
@@ -34,7 +33,6 @@ def results(request):
         evaluation__user=request.user,
         sex=False
     ).distinct()
-
     name_yes_list_girls = Name.objects.filter(
         evaluation__score="oui", 
         evaluation__user=request.user,
@@ -50,7 +48,6 @@ def results(request):
     return render(request, "baby_name/results.html", context)
 
 def interface(request):
-    #Filter information
     if request.method == "POST":
         gender_filter = request.POST.get("gender", "all")
         request.session["gender_filter"] = gender_filter  
@@ -65,7 +62,6 @@ def interface(request):
     else:
         names_left = Name.objects.exclude(evaluation__user=request.user) 
 
-    #Get one name
     if names_left.exists(): 
         random_name = random.choice(names_left)
         random_id=random_name.id
@@ -73,7 +69,6 @@ def interface(request):
     else: 
         name = None
 
-    #Context elements
     choices = NameChoice.choices
     context = {
         "name": name,
@@ -194,7 +189,7 @@ def user_login(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect("baby_name:index")  # Redirect after login
+            return redirect("baby_name:index")
     else:
         form = AuthenticationForm()
     return render(request, "baby_name/login.html", {"form": form})
