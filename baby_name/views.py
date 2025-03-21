@@ -30,7 +30,6 @@ def results(request):
         evaluation__user=request.user,
         sex=False
     ).distinct()
-
     name_yes_list_girls = Name.objects.filter(
         evaluation__score="oui", 
         evaluation__user=request.user,
@@ -46,7 +45,6 @@ def results(request):
     return render(request, "baby_name/results.html", context)
 
 def interface(request):
-
     if request.method == "POST":
         gender_filter = request.POST.get("gender", "all")
         request.session["gender_filter"] = gender_filter  
@@ -60,14 +58,12 @@ def interface(request):
     else:
         names_left = Name.objects.exclude(evaluation__user=request.user) 
 
-
     if names_left.exists(): 
         random_name = random.choice(names_left)
         random_id=random_name.id
         name = get_object_or_404(Name, id=random_id)
     else: 
         name = None
-
 
     choices = NameChoice.choices
     context = {
@@ -112,7 +108,7 @@ def user_login(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect("baby_name:index")  # Redirect after login
+            return redirect("baby_name:index")
     else:
         form = AuthenticationForm()
     return render(request, "baby_name/login.html", {"form": form})
