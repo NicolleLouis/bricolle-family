@@ -1,13 +1,9 @@
 import random
 from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.shortcuts import get_object_or_404, render, redirect
 
-# Create your views here.
-from django.http import HttpResponse
-
-from .models import Name, Evaluation, NameChoice, User
+from .models import Name, Evaluation, NameChoice
 
 
 def index(request):
