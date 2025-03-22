@@ -55,8 +55,8 @@ class NameRepository:
     @staticmethod
     def get_unscored_name(gender_filter: str, user: User):
         if gender_filter == "boys":
-            return Name.objects.filter(sex=False).exclude(evaluation__user=user)
+            return Name.objects.filter(sex=False).exclude(evaluations__user=user)
         elif gender_filter == "girls":
-            return Name.objects.filter(sex=True).exclude(evaluation__user=user)
+            return Name.objects.filter(sex=True).exclude(evaluations__user=user)
         else:
-            return Name.objects.exclude(evaluation__user=user)
+            return Name.objects.exclude(evaluations__user=user)
