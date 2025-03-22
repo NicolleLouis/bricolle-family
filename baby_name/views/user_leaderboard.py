@@ -4,7 +4,7 @@ from django.shortcuts import render
 from baby_name.models import Evaluation
 
 
-def leaderboard(request):
+def user_leaderboard(request):
     all_users = User.objects.all()
     rankings_boys = {}
     rankings_girls = {}
@@ -30,4 +30,4 @@ def leaderboard(request):
         "rankings_girls": rankings_girls,
     }
 
-    return render(request, "baby_name/leaderboard.html", context)
+    return render(request, "baby_name/user_leaderboard.html", context)

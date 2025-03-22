@@ -60,7 +60,7 @@ class Vote:
             sex = True
 
         if sex is not None:
-            priority_names = NameRepository.get_priority_scores(sex=sex, user=user)
+            priority_names = NameRepository.get_priority_to_score(sex=sex, user=user)
             if priority_names.exists():
                 return random.choice(priority_names)
 

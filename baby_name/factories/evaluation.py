@@ -13,3 +13,4 @@ class EvaluationFactory(factory.django.DjangoModelFactory):
     name = factory.SubFactory(NameFactory)
     user = factory.SubFactory(UserFactory)
     score = factory.Faker('random_element', elements=NameChoice.choices)
+    elo = factory.Faker('random_int', min=900, max=1100)

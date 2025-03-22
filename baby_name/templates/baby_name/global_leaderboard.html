@@ -1,0 +1,36 @@
+{% extends 'baby_name/base.html' %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6">
+            <ul class="list-group">
+                <h2>Garçons</h2>
+                {% for system, ranking in male_rankings.items %}
+                    <h3>Ranking: {{ system }}</h3>
+                    {% for name, score in ranking %}
+                        <ul>
+                            <li>{{ name }} — Score: {{ score }}</li>
+                        </ul>
+                    {% endfor %}
+                    {% if not forloop.last %}
+                        <hr class="my-4">{% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <ul class="list-group">
+                <h2>Filles</h2>
+                {% for system, ranking in female_rankings.items %}
+                    <h3>Ranking: {{ system }}</h3>
+                    {% for name, score in ranking %}
+                        <ul>
+                            <li>{{ name }} — Score: {{ score }}</li>
+                        </ul>
+                    {% endfor %}
+                    {% if not forloop.last %}
+                    <hr class="my-4">{% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}

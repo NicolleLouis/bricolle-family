@@ -11,7 +11,7 @@ class Ranking:
     def form(request):
         sex_to_rank = random.choice([True, False])
 
-        rankable_names = NameRepository.get_all_rankables(
+        rankable_names = NameRepository.get_all_rankables_per_user(
             sex=sex_to_rank,
             user=request.user
         )

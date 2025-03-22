@@ -6,7 +6,16 @@ from baby_name.models import Name, Evaluation
 
 class NameRepository:
     @classmethod
-    def get_all_rankables(cls, sex: bool, user: User):
+    def get_all_globally_evaluated(cls, sex: bool):
+        users = User.objects.all()
+        names = Name.objects.filter(sex=sex)
+        for user in users:
+            evaluated_names = Evaluation.objects.filter(user=user).values('name')
+            names = names.filter(id__in=evaluated_names)
+        return names
+
+    @classmethod
+    def get_all_rankables_per_user(cls, sex: bool, user: User):
         positive_names = cls.get_all_positives(sex=sex)
         linked_evaluations = Evaluation.objects.filter(
             user=user,
@@ -29,7 +38,7 @@ class NameRepository:
         )
 
     @classmethod
-    def get_priority_scores(cls, sex: bool, user: User):
+    def get_priority_to_score(cls, sex: bool, user: User):
         positive_names = cls.get_all_positives(sex=sex)
         all_ids = positive_names.values_list('id', flat=True)
         linked_evaluations = Evaluation.objects.filter(
