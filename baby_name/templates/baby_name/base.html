@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prénoms</title>
 
-    <link rel="stylesheet" href="{% static 'baby_name/style.css'%}">
+    <link rel="stylesheet" href="{% static 'baby_name/style.css' %}">
 
-    <!-- Chargement de Bootstrap via Django Bootstrap4 -->
     {% load bootstrap5 %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
@@ -17,44 +16,44 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-      const elements = document.querySelectorAll(".name-text");
-  
-      elements.forEach(el => {
-        let fontSize = 80; // taille de départ en pixels (tu peux ajuster)
-  
-        el.style.fontSize = fontSize + "px";
-  
-        // Réduire la taille tant que ça dépasse la largeur ou la hauteur du parent
-        while (
-          (el.scrollWidth > el.offsetWidth || el.scrollHeight > el.offsetHeight) &&
-          fontSize > 20 // taille minimale
-        ) {
-          fontSize -= 1;
-          el.style.fontSize = fontSize + "px";
-        }
-      });
+        const elements = document.querySelectorAll(".name-text");
+
+        elements.forEach(el => {
+            let fontSize = 80; // taille de départ en pixels (tu peux ajuster)
+
+            el.style.fontSize = fontSize + "px";
+
+            // Réduire la taille tant que ça dépasse la largeur ou la hauteur du parent
+            while (
+                (el.scrollWidth > el.offsetWidth || el.scrollHeight > el.offsetHeight) &&
+                fontSize > 20 // taille minimale
+                ) {
+                fontSize -= 1;
+                el.style.fontSize = fontSize + "px";
+            }
+        });
     });
 </script>
 
 <body>
-    <!-- Header -->
+<!-- Header -->
 
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light px-3">
-            <div class="container-fluid">
+<header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light px-3">
+        <div class="container-fluid">
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu"
-                aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu"
+                    aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <div class="collapse navbar-collapse" id="navbarMenu">
-                    <ul class="navbar-nav me-auto">
+            <div class="collapse navbar-collapse" id="navbarMenu">
+                <ul class="navbar-nav me-auto">
 
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'baby_name:index' %}">Accueil</a>
-                        </li>
-                        {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'baby_name:index' %}">Accueil</a>
+                    </li>
+                    {% if user.is_authenticated %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'baby_name:interface' %}">Vote</a>
                         </li>
@@ -65,29 +64,32 @@
                             <a class="nav-link" href="{% url 'baby_name:ranking' %}">Duels</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'baby_name:leaderboard' %}">Classements</a>
+                            <a class="nav-link" href="{% url 'baby_name:user_leaderboard' %}">Classements par user</a>
                         </li>
-                        {% endif %}
-                    </ul>
-                    <div>
-                        {% if user.is_authenticated %}
-                            <span>Bonjour, {{ user.username }}!</span>
-                            <a class="btn btn-primary ms-3" href="{% url 'baby_name:logout' %}">Se déconnecter</a>
-                        {% else %}
-                            <a class="btn btn-primary" href="{% url 'baby_name:login' %}">Se connecter</a>
-                        {% endif %}
-                    </div>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'baby_name:global_leaderboard' %}">Classements général</a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <div>
+                    {% if user.is_authenticated %}
+                        <span>Bonjour, {{ user.username }}!</span>
+                        <a class="btn btn-primary ms-3" href="{% url 'baby_name:logout' %}">Se déconnecter</a>
+                    {% else %}
+                        <a class="btn btn-primary" href="{% url 'baby_name:login' %}">Se connecter</a>
+                    {% endif %}
                 </div>
             </div>
-        </nav>
-    </header>
+        </div>
+    </nav>
+</header>
 
-    <!-- Contenu -->
-    <div class="container">
-        {% block content %}
-        {% endblock %}
-    </div>
+<!-- Contenu -->
+<div class="container">
+    {% block content %}
+    {% endblock %}
+</div>
 
-    <!-- Footer (si tu en as un) -->
+<!-- Footer (si tu en as un) -->
 </body>
 </html>

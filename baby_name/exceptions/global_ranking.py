@@ -1,0 +1,2 @@
+class GlobalRankingException(Exception):
+    pass

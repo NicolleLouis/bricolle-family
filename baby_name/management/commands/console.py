@@ -1,23 +1,17 @@
+import random
+
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User
-from baby_name.models import Evaluation
+
+from baby_name.constants.computation_system import ComputationSystem
+from baby_name.services.global_ranking import GlobalRanking
+
 
 class Command(BaseCommand):
     help = "Random stuff"
 
     def handle(self, *args, **kwargs):
-        users = User.objects.all()
-        for user in users:
-            names = self.get_names_evaluated(user)
-            for name in names:
-                evaluations = Evaluation.objects.filter(user=user, name=name)
-                if len(evaluations) > 1:
-                    evaluations.exclude(id=evaluations.first().id).delete()
-
-    @staticmethod
-    def get_names_evaluated(user: User):
-        evaluations = Evaluation.objects.filter(user=user)
-        names = []
-        for evaluation in evaluations:
-            names.append(evaluation.name)
-        return list(set(names))
+        sex = random.choice([True, False])
+        ranking = GlobalRanking(sex=sex, computation_system=ComputationSystem.FLAT)
+        ranking.generate_ranking()
+        names = ranking.extract_best_name(10)
+        print(names)
