@@ -30,13 +30,12 @@ class GlobalRanking:
             self.ranked_names[name.name] = self.get_name_score(name)
 
     def sort_order(self):
-        return self.computation_system == ComputationSystem.ELO
+        return self.computation_system != ComputationSystem.ELO
 
     def extract_best_name(self, sample_size=10):
         sorted_names = sorted(
             self.ranked_names.items(),
             key=lambda item: item[1],
-            reverse=self.sort_order()
         )
         return sorted_names[:sample_size]
 
