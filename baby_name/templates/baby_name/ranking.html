@@ -1,14 +1,20 @@
 {% extends 'baby_name/base.html' %}
 {% block content %}
-
-<form method="post" action="{% url 'baby_name:ranking_vote' %}">
-    {% csrf_token %}
-    <input type="hidden" name="loser_id" value="{{name_2.id}}">
-    <button type="submit" name="winner_id" value="{{ name_1.id }}">{{name_1.name}}</button>
-</form>
-<form method="post" action="{% url 'baby_name:ranking_vote' %}">
-    {% csrf_token %}
-    <input type="hidden" name="loser_id" value="{{name_1.id}}">
-    <button type="submit" name="winner_id" value="{{ name_2.id }}">{{name_2.name}}</button>
-</form>
+<div class="duel-container">
+    <form method="post" action="{% url 'baby_name:ranking_vote' %}" class="duel-card">
+      {% csrf_token %}
+      <input type="hidden" name="loser_id" value="{{ name_2.id }}">
+      <button type="submit" name="winner_id" value="{{ name_1.id }}" class="name-button name-text {% if name_1.sex %}girl{% else %}boy{% endif %}">
+        {{ name_1.name }}
+      </button>
+    </form>
+  
+    <form method="post" action="{% url 'baby_name:ranking_vote' %}" class="duel-card">
+      {% csrf_token %}
+      <input type="hidden" name="loser_id" value="{{ name_1.id }}">
+      <button type="submit" name="winner_id" value="{{ name_2.id }}" class="name-button name-text {% if name_2.sex %}girl{% else %}boy{% endif %}">
+        {{ name_2.name }}
+      </button>
+    </form>
+  </div>
 {% endblock %}

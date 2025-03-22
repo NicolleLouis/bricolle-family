@@ -26,7 +26,7 @@
         <div class="card-body text-center d-flex flex-column justify-content-between">
             <div class="text-center">
                 {% if name %}
-                    <h1 class="{% if name.sex %}custom-name-girl{% else %}custom-name-boy{% endif %}" style="margin-top: 120px;">{{ name.name }}</h1>
+                    <h1 class="name-text {% if name.sex %}custom-name-girl{% else %}custom-name-boy{% endif %}" style="margin-top: 120px;">{{ name.name }}</h1>
                 {% else %}
                     <h1 class="text-muted mt-5">No names available.</h1>
                 {% endif %}
