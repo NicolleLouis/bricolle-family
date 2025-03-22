@@ -1,26 +1,31 @@
 {% extends 'baby_name/base.html' %}
 {% block content %}
-<div class="col-md-6">
-    <ul class="list-group">
-        <h2>Classement Garçons</h2>
-        {% for username, evaluations in rankings_boys.items %}
-            <h4>{{ username }}</h4>
-            <ul>
-                {% for eval in evaluations %}
-                    <li>{{ eval.name.name }} — Elo: {{ eval.elo }}</li>
-                {% endfor %}
-            </ul>
-        {% endfor %}
-        
-        <h2>Classement Filles</h2>
-        {% for username, evaluations in rankings_girls.items %}
-            <h4>{{ username }}</h4>
-            <ul>
-                {% for eval in evaluations %}
-                    <li>{{ eval.name.name }} — Elo: {{ eval.elo }}</li>
-                {% endfor %}
-            </ul>
-        {% endfor %}
-    </ul>
+<div class="row">
+    <div class="col-md-6">
+        <ul class="list-group">
+            <h2>Classement Garçons</h2>
+            {% for username, evaluations in rankings_boys.items %}
+                <h4>{{ username }}</h4>
+                <ul>
+                    {% for eval in evaluations %}
+                        <li>{{ eval.name.name }} — Elo: {{ eval.elo }}</li>
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-md-6">
+        <ul class="list-group">
+            <h2>Classement Filles</h2>
+            {% for username, evaluations in rankings_girls.items %}
+                <h4>{{ username }}</h4>
+                <ul>
+                    {% for eval in evaluations %}
+                        <li>{{ eval.name.name }} — Elo: {{ eval.elo }}</li>
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+        </ul>
+    </div>
 </div>
 {% endblock %}
