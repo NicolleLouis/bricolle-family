@@ -8,7 +8,7 @@ class NameRepository:
     @classmethod
     def get_all_globally_evaluated(cls, sex: bool):
         users = User.objects.all()
-        names = Name.objects.filter(sex=sex)
+        names = cls.get_all_positives(sex)
         for user in users:
             evaluated_names = Evaluation.objects.filter(user=user).values('name')
             names = names.filter(id__in=evaluated_names)

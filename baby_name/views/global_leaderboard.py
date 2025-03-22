@@ -21,8 +21,6 @@ def global_leaderboard(request):
             names = ranking.extract_best_name(10)
             rankings[sex][system.value] = names
 
-    print(rankings)
-
     context = {
         'male_rankings': rankings[False],
         'female_rankings': rankings[True],

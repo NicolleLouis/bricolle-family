@@ -164,7 +164,11 @@ def test_get_all_globally_evaluated_case_complete(db):
     users = UserFactory.create_batch(2)
     name = NameFactory(sex=sex)
     for user in users:
-        EvaluationFactory(name=name, user=user)
+        EvaluationFactory(
+            name=name,
+            user=user,
+            score=NameChoice.OUI.value
+        )
     result = NameRepository.get_all_globally_evaluated(sex)
     assert len(result) == 1
     assert result[0] == name
