@@ -36,6 +36,7 @@ class GlobalRanking:
         sorted_names = sorted(
             self.ranked_names.items(),
             key=lambda item: item[1],
+            reverse=not self.sort_order()
         )
         return sorted_names[:sample_size]
 
