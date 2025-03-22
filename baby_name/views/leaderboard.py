@@ -14,13 +14,15 @@ def leaderboard(request):
         rankings_boys[username] = Evaluation.objects.filter(
             user=user,
             name__sex=False,
-            nb_duels__gte=3
+            nb_duels__gte=3,
+            elo__gte=1000,
         ).order_by('-elo')[:15]
 
         rankings_girls[username] = Evaluation.objects.filter(
             user=user,
             name__sex=True,
-            nb_duels__gte=3
+            nb_duels__gte=3,
+            elo__gte=1000,
         ).order_by('-elo')[:15]
 
     context = {
