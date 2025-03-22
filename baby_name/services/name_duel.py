@@ -32,7 +32,7 @@ class NameDuel:
         evaluation_score = {evaluation.name: evaluation.elo for evaluation in evaluations}
         reference_elo = evaluation_score[name_1]
         name_2 = min(
-            self.rankable_names,
+            (name for name in self.rankable_names if name != name_1),
             key=lambda name: abs(evaluation_score[name] - reference_elo)
         )
         return name_1, name_2
