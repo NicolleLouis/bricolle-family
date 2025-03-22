@@ -1,0 +1,2 @@
+class NameDuelException(Exception):
+    pass

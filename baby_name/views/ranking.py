@@ -4,28 +4,13 @@ from django.shortcuts import get_object_or_404, render, redirect
 
 from baby_name.models import Name, Evaluation
 from baby_name.repositories.name import NameRepository
+from baby_name.services.name_duel import NameDuel
 
 
 class Ranking:
     @staticmethod
     def form(request):
-        sex_to_rank = random.choice([True, False])
-
-        rankable_names = NameRepository.get_all_rankables_per_user(
-            sex=sex_to_rank,
-            user=request.user
-        )
-
-        if len(rankable_names) < 2:
-            return render(
-                request,
-                "baby_name/error.html",
-                {"message": "Not enough names to rank."}
-            )
-
-        random_name_1, random_name_2 = random.sample(list(rankable_names), 2)
-        name_1 = get_object_or_404(Name, id=random_name_1.id)
-        name_2 = get_object_or_404(Name, id=random_name_2.id)
+        name_1, name_2 = NameDuel(request.user).get_names()
 
         context = {
             "name_1": name_1,
