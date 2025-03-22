@@ -7,7 +7,7 @@ from baby_name.models import Name
 
 
 class Evaluation(models.Model):
-    name = models.ForeignKey(Name, on_delete=models.CASCADE)
+    name = models.ForeignKey(Name, on_delete=models.CASCADE, related_name='evaluations')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     score = models.CharField(
         max_length=20,
