@@ -13,6 +13,8 @@ import dj_database_url
 import os
 from pathlib import Path
 
+from django.conf.global_settings import STORAGES
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -124,7 +126,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STORAGES["staticfiles"] = {"BACKEND": 'whitenoise.storage.CompressedManifestStaticFilesStorage'}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

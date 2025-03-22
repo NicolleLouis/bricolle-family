@@ -1,6 +1,5 @@
 from baby_name.constants.name_choice import NameChoice
 from baby_name.factories.evaluation import EvaluationFactory
-from baby_name.factories.user import UserFactory
 from baby_name.repositories.evaluation import EvaluationRepository
 
 

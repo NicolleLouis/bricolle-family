@@ -36,6 +36,7 @@ class NameAdmin(admin.ModelAdmin):
     list_display = ('name', 'print_sex')
     list_filter = (CustomSexFilter,)
     search_fields = ["name"]
+    ordering = ('name',)
 
     @admin.display(description="Sexe")
     def print_sex(self, obj):
