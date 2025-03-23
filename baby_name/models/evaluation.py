@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.utils.translation import ngettext
 
 from baby_name.constants.name_choice import NameChoice
 from baby_name.models import Name
@@ -49,3 +50,18 @@ class EvaluationAdmin(admin.ModelAdmin):
     list_display = ('name', 'user', 'score', 'elo')
     list_filter = ('user', 'score', 'name__sex')
     search_fields = ["name__name"]
+    actions = ["evaluate_negatively"]
+
+    @admin.action(description="Voter Non")
+    def evaluate_negatively(self, request, queryset):
+        updated = queryset.update(score=NameChoice.NON)
+        self.message_user(
+            request,
+            ngettext(
+                "%d name was successfully vetoed :( .",
+                "%d names were successfully vetoed :( .",
+                updated,
+            )
+            % updated,
+            messages.SUCCESS,
+        )
