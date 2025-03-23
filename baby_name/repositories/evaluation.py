@@ -8,3 +8,10 @@ class EvaluationRepository:
         return Evaluation.objects.filter(
             score__in=[NameChoice.OUI.value, NameChoice.COUP_DE_COEUR.value]
         )
+
+    @staticmethod
+    def get_all_positive_vote_user(user):
+        return Evaluation.objects.filter(
+            user=user,
+            score__in=[NameChoice.OUI.value, NameChoice.COUP_DE_COEUR.value]
+        )
