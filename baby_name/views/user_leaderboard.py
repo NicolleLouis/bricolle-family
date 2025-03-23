@@ -9,20 +9,19 @@ def user_leaderboard(request):
     rankings_boys = {}
     rankings_girls = {}
 
-    for username in all_users:
-        user = User.objects.filter(username=username).first()
-        rankings_boys[username] = Evaluation.objects.filter(
+    for user in all_users:
+        rankings_boys[user] = Evaluation.objects.filter(
             user=user,
             name__sex=False,
             nb_duels__gte=3,
             elo__gte=1000,
         ).order_by('-elo')[:15]
 
-        rankings_girls[username] = Evaluation.objects.filter(
+        rankings_girls[user] = Evaluation.objects.filter(
             user=user,
             name__sex=True,
             nb_duels__gte=3,
-            elo__gte=1000,
+            elo__gte=1000, 
         ).order_by('-elo')[:15]
 
     context = {

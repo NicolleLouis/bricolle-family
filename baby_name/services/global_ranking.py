@@ -47,7 +47,7 @@ class GlobalRanking:
         return score
 
     def get_name_rank(self, name: Name, user: User):
-        return self.user_ranked_names[user].index(name)
+        return self.user_ranked_names[user].index(name) + 1
 
     def score_per_user(self, name: Name, user: User) -> int:
         rank = self.get_name_rank(name=name, user=user)
