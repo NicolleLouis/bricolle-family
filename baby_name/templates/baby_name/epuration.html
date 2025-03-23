@@ -1,0 +1,25 @@
+{% extends 'baby_name/base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <ul class="list-group">
+            <h2>Classement Garçons évincés</h2>
+            <ul>
+                {% for evaluation in epuration_boys %}
+                    <li>{{ evaluation.name.name }} — Elo: {{ evaluation.elo }}</li>
+                {% endfor %}
+            </ul>
+        </ul>
+    </div>
+    <div class="col-md-6">
+        <ul class="list-group">
+            <h2>Classement Filles évincées</h2>
+            {% for evaluation in epuration_girls %}
+                <ul>
+                    <li>{{ evaluation.name.name }} — Elo: {{ evaluation.elo }}</li>
+                </ul>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
