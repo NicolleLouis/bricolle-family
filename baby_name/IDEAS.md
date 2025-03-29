@@ -1,1 +1,0 @@
-- Add 2 elo scoring method and pick randomly. Either closest opponent or randomly

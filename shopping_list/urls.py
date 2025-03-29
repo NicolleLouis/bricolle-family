@@ -10,9 +10,10 @@ app_name = "shopping_list"
 
 urlpatterns = [
     path("", home, name="home"),
-    path("meal/", meal, name="meal"),
-    path("shopping_list", shopping_list, name="list"),
     path("cart/", cart, name="cart"),
     path("login/", Login.user_login, name="login"),
     path("logout/", Login.user_logout, name="logout"),
+    path("meal/", meal, name="meal"),
+    path("register/", Login.register, name="register"),
+    path("shopping_list", shopping_list, name="list"),
 ]
