@@ -1,0 +1,43 @@
+{% extends 'shopping_list/base.html' %}
+
+{% block title %}Add Meal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h2>Ajouter un repas 🍽️</h2>
+
+  <form method="post" action="{% url 'shopping_list:planned_course_add_api' %}">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label for="course-choice" class="form-label">Choisir un repas</label>
+      <input class="form-control" list="courses" id="course-choice" name="course_name">
+      <datalist id="courses">
+        {% for course in courses %}
+          <option data-value="{{ course.id }}" value="{{ course.name }}"></option>
+        {% endfor %}
+      </datalist>
+
+      <input type="hidden" name="course_id" id="course_id">
+    </div>
+
+    <button type="submit" class="btn btn-success">Ajouter</button>
+  </form>
+</div>
+
+<script>
+document.getElementById('course-choice').addEventListener('input', function(e) {
+  const input = e.target.value;
+  const list = document.getElementById('courses').options;
+
+  document.getElementById('course_id').value = ''; // reset
+
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].value === input) {
+      document.getElementById('course_id').value = list[i].dataset.value;
+      break;
+    }
+  }
+});
+</script>
+{% endblock %}
