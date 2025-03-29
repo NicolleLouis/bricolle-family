@@ -1,0 +1,13 @@
+{% extends 'shopping_list/base.html' %}
+
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+    <h1 class="display-4">👋 Bienvenue {{ request.user.username }} !</h1>
+    <p class="lead">Gérez facilement votre liste de courses familiale.</p>
+
+    <a href="{% url 'shopping_list:list' %}" class="btn btn-primary mt-3">Voir ma liste 🛒</a>
+</div>
+{% endblock %}
