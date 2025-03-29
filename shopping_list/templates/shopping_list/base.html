@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Shopping List{% endblock %}</title>
+
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+</head>
+
+<body>
+{% include 'shopping_list/header.html' %}
+<div class="container py-4">
+    {% block content %}
+    {% endblock %}
+</div>
+</body>
+</html>
