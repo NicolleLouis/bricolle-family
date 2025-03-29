@@ -1,11 +1,38 @@
+from enum import Enum
+
 import plotly.express as px
 from dataclasses import dataclass
 
 import unidecode
+from sklearn.manifold import MDS
+import matplotlib.pyplot as plt
 
 ## Inputs
 
 inputs = {
+    # 'bricolle': [
+    #     "Timothée",
+    #     "Achille",
+    #     "Arthur",
+    #     "Adrien",
+    #     "Oscar",
+    #     "Théophile",
+    #     "Ulysse",
+    #     "Alexandre",
+    #     "Hector",
+    #     "Erwan",
+    #
+    #     "Clémence",
+    #     "Juliette",
+    #     "Philippine",
+    #     "Charlotte",
+    #     "Agathe",
+    #     "Joséphine",
+    #     "Claire",
+    #     "Bérénice",
+    #     "Alice",
+    #     "Emma",
+    # ],
     'louis': [
         "Hector",
         "Timothée",
@@ -17,6 +44,7 @@ inputs = {
         "Florian",
         "Ulysse",
         "Antoine",
+
         "Clémence",
         "Claire",
         "Hortense",
@@ -39,6 +67,7 @@ inputs = {
         "Alexis",
         "Aurélien",
         "Gabriel",
+
         "Juliette",
         "Raphaëlle",
         "Alix",
@@ -58,12 +87,12 @@ inputs = {
         "léopoldine",
         "Pia",
         "Philippa",
-        "Philippine",
-        "Léopoldine",
-        "Diane",
         "Augustine",
         "Hortense",
         "Josephine",
+        "Philippine",
+        "Diane",
+
         "Brune",
         "Paul",
         "léopold",
@@ -93,6 +122,7 @@ inputs = {
         "Théodore",
         "Sergio",
         "Kevin",
+
         "Jeanne",
         "Hortense",
         "Olympe",
@@ -103,7 +133,6 @@ inputs = {
         "Agathe",
         "Diane",
         "Eleonore",
-        "Fatoumata",
         "Elena",
         "Penelope",
         "Celeste",
@@ -121,8 +150,8 @@ inputs = {
     ],
     'charles': [
         "Hélène",
-        "Fatoumata",
         "Léopoldine",
+
         "Alexandre",
         "Charles",
         "Paul",
@@ -142,7 +171,7 @@ inputs = {
         "Constance",
         "Léonie",
         "Marguerite",
-        "Fatoumata",
+
         "Enguerrand",
         "Paul-Emile",
         "Balthazar",
@@ -161,6 +190,19 @@ inputs = {
         "Charles",
         "Paul",
         "Raphaël",
+    ],
+    'éléonore': [
+        "Valentin",
+        "Oscar",
+        "Raphaël",
+        "Marius",
+        "Stanislas",
+
+        "Charlotte",
+        "Paloma",
+        "Paola",
+        "Bianca",
+        "Philippine",
     ]
 }
 
@@ -210,6 +252,13 @@ class NameOccurence:
 
     def number_of_singleton(self):
         return sum(1 for count in self.name_occurence.values() if count == 1)
+
+    def extract_singletons(self):
+        singleton_names = []
+        for name, value in self.name_occurence.items():
+            if value == 1:
+                singleton_names.append(name)
+        return singleton_names
 
 @dataclass
 class NameScore:
@@ -265,14 +314,85 @@ class DataCleaner:
         cleaned_str = unidecode.unidecode(cleaned_str)
         return cleaned_str
 
+class DistanceType(Enum):
+    LOUIS = "Louis"
+    JACCARD = "Jaccard"
+
+class GraphGenerator:
+    def __init__(self, data: dict, distance_type: str = DistanceType.LOUIS):
+        self.data = data
+        self.distance_type = distance_type
+        self.ordered_names = self.generate_ordered_names()
+        self.matrix = self.generate_matrix()
+
+    def generate_ordered_names(self):
+        return self.data.keys()
+
+    def generate_matrix(self):
+        matrix = []
+        for name_1 in self.ordered_names:
+            distance_array = []
+            for name_2 in self.ordered_names:
+                distance_array.append(self.get_distance(name_1, name_2))
+            matrix.append(distance_array)
+        return matrix
+
+    def get_distance(self, name_1: str, name_2: str):
+        if self.distance_type == DistanceType.LOUIS:
+            return self.louis_distance(name_1, name_2)
+        if self.distance_type == DistanceType.JACCARD:
+            return self.jaccard_distance(name_1, name_2)
+
+        raise NotImplementedError
+
+    def jaccard_distance(self, name_1: str, name_2: str):
+        names_1 = self.data[name_1]
+        names_2 = self.data[name_2]
+        set_1 = set(names_1)
+        set_2 = set(names_2)
+        intersection = len(set_1.intersection(set_2))
+        union = len(set_1.union(set_2))
+        if union == 0:
+            return 1
+        return 1 - intersection / union
+
+    def louis_distance(self, name_1: str, name_2: str) -> float | None:
+        names_1 = self.data[name_1]
+        names_2 = self.data[name_2]
+        total_names = names_1 + names_2
+        unique_names = list(set(total_names))
+        common_name_number = len(total_names) - len(unique_names)
+        minimum_sample_size = min(len(names_2), len(names_1))
+        if common_name_number == minimum_sample_size:
+            return 0
+        if common_name_number == 0:
+            return minimum_sample_size
+        return minimum_sample_size/2*common_name_number
+
+    def generate_coordinates(self):
+        mds = MDS(n_components=2, dissimilarity='precomputed', random_state=42)
+        return mds.fit_transform(self.matrix)
+
+    def graph(self):
+        coordinates = self.generate_coordinates()
+        plt.figure(figsize=(8, 6))
+        plt.scatter(coordinates[:, 0], coordinates[:, 1])
+
+        for name, (x, y) in zip(self.ordered_names, coordinates):
+            plt.text(x, y, name, fontsize=12, ha='right')
+
+        plt.title('Proximité des goûts')
+        plt.show()
+
 
 ## Main
 cleaned_data = DataCleaner.clean(inputs)
 
 name_occurence = NameOccurence(cleaned_data)
 print(f"Best name: {name_occurence.biggest_name()}")
-print(f"Nombre de singletons: {name_occurence.number_of_singleton()}")
-name_occurence.chart_occurence_repartition()
+# name_occurence.chart_occurence_repartition()
 
 human_score_generator = HumanScoreGenerator(data=cleaned_data, name_occurence=name_occurence)
-human_score_generator.pretty_print()
+
+graph_generator = GraphGenerator(cleaned_data, distance_type=DistanceType.JACCARD)
+graph_generator.graph()
