@@ -1,0 +1,53 @@
+{% extends 'shopping_list/base.html' %}
+
+{% block title %}Liste de souhait{% endblock %}
+
+{% block content %}
+    <div class="container py-4">
+        <h2>Envies de repas 🍽️</h2>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Repas</th>
+                <th>Quantitée</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody id="wishlistTable">
+            {% for meal in planned_courses %}
+                <tr id="meal-{{ meal.id }}">
+                    <td>{{ meal.course.name }}</td>
+                    <td>{{ meal.quantity }}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="removeMeal({{ meal.id }})">
+                            🗑️
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <a href="{% url 'shopping_list:planned_course_add_page' %}" class="btn btn-primary">➕ Ajouter un repas</a>
+    </div>
+
+    <script>
+        function removeMeal(mealId) {
+            fetch("{% url 'shopping_list:planned_course_delete' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({planned_course_id: mealId})
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        document.getElementById(`meal-${mealId}`).remove();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+        }
+    </script>
+{% endblock %}
