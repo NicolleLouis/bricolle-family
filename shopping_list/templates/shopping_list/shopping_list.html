@@ -17,7 +17,7 @@
             {% for planned_ingredient in shopping_list %}
                 <tr id="planned_ingredient-{{ planned_ingredient.id }}">
                     <td>{{ planned_ingredient.ingredient.name }}</td>
-                    <td>{{ planned_ingredient.quantity }}</td>
+                    <td>{{ planned_ingredient.quantity }} ({{ planned_ingredient.ingredient.unit }})</td>
                     <td>
                         <button class="btn btn-danger btn-sm" onclick="removeIngredient({{ planned_ingredient.id }})">
                             🗑️
