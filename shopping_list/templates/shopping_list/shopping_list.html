@@ -1,0 +1,53 @@
+{% extends 'shopping_list/base.html' %}
+
+{% block title %}Liste de souhait{% endblock %}
+
+{% block content %}
+    <div class="container py-4">
+        <h2>Liste de courses<i class="bi bi-bag"></i></h2>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Ingrédient</th>
+                <th>Quantitée</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody id="wishlistTable">
+            {% for planned_ingredient in shopping_list %}
+                <tr id="planned_ingredient-{{ planned_ingredient.id }}">
+                    <td>{{ planned_ingredient.ingredient.name }}</td>
+                    <td>{{ planned_ingredient.quantity }} ({{ planned_ingredient.ingredient.unit }})</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="removeIngredient({{ planned_ingredient.id }})">
+                            🗑️
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <a href="{% url 'shopping_list:shopping_list_add_page' %}" class="btn btn-primary">➕ Ajouter un ingrédient</a>
+    </div>
+
+    <script>
+        function removeIngredient(plannedIngredientId) {
+            fetch("{% url 'shopping_list:shopping_list_delete' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({planned_ingredient_id: plannedIngredientId})
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        document.getElementById(`planned_ingredient-${plannedIngredientId}`).remove();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+        }
+    </script>
+{% endblock %}

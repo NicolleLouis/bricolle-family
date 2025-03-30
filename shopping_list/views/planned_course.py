@@ -46,7 +46,7 @@ class PlannedCourseController:
             planned_course.quantity += 1
             planned_course.save()
 
-        return redirect('shopping_list:planned_courses')
+        return redirect('shopping_list:planned_course')
 
     @staticmethod
     def add_page(request):
