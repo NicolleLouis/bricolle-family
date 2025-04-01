@@ -30,9 +30,9 @@ DEBUG = config('DEBUG', default=True)
 ENV = config('ENV', default='local')
 
 ALLOWED_HOSTS = [
-    "bricolle_family.onrender.com",
     "127.0.0.1",
-    "localhost"
+    "localhost",
+    "51.178.41.140",
 ]
 
 # Application definition
