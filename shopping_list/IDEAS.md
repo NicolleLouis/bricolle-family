@@ -1,3 +1,4 @@
 - Add the notion link?
-- Link the Add meal from meal list action automatically add some items to the shopping list
-- Add a page to Add/See/Remove/Empty the shopping list
+- Empty cart
+- Scrapper to import recipe more easily? Or page to set them up
+- Split fond de maison from non fond de maison

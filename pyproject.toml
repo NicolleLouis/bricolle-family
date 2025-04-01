@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "bricolle-family"
+name = "bricolle_family"
 version = "0.1.0"
 description = ""
 authors = ["Louis Nicolle <louisxnicolle@gmail.com>"]
@@ -19,6 +19,7 @@ numpy = "^2.2.4"
 pandas = "^2.2.3"
 matplotlib = "^3.10.1"
 scikit-learn = "^1.6.1"
+python-decouple = "^3.8"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"

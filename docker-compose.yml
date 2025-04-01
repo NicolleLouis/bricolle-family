@@ -1,0 +1,27 @@
+services:
+  web:
+    build: .
+    command: gunicorn bricolle_family.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=production
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+      - SECRET_KEY=une_secret_key_pour_dev
+      - DEBUG=True
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+volumes:
+  postgres_data:
