@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import dj_database_url
 import os
 from pathlib import Path
+from decouple import config
 
 from django.conf.global_settings import STORAGES
 
@@ -22,13 +23,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-u^!m4#o8xfvg@p3mzf75z@5p@u&!^#2mv#iwba72!$f-hr@2+8'
+SECRET_KEY = config('SECRET_KEY', default = None)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True)
+ENV = config('ENV', default='local')
 
 ALLOWED_HOSTS = [
-    "bricolle-family.onrender.com",
+    "bricolle_family.onrender.com",
     "127.0.0.1",
     "localhost"
 ]
@@ -81,16 +83,22 @@ WSGI_APPLICATION = 'bricolle_family.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if ENV == 'production':
+    # En prod (Postgres via DATABASE_URL)
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=config('DATABASE_URL'),
+            conn_max_age=600
+        )
     }
-}
-
-if not os.getenv("DEBUG", "True") == "True":
-    DATABASE_URL = os.getenv('DATABASE_URL')
-    DATABASES['default'] = dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
+else:
+    # En local (SQLite)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
