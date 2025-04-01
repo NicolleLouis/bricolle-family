@@ -6,11 +6,8 @@ services:
       - .:/app
     ports:
       - "8000:8000"
-    environment:
-      - ENV=production
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
-      - SECRET_KEY=une_secret_key_pour_dev
-      - DEBUG=True
+    env_file:
+      - .env
     depends_on:
       - db
 
