@@ -33,6 +33,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
     "51.178.41.140",
+    "bricolle-family.fr"
 ]
 
 # Application definition
