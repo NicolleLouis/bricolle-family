@@ -1,11 +1,41 @@
 # Bricolle Family project
 
-Management is available with [Render](https://dashboard.render.com/)
+## Installation (via docker)
+
+1. Install [docker and docker compose](https://docs.docker.com/engine/install/)
+2. Run
+
+```shell
+./deploy.sh
+```
+
+3. App is now ready and running on your computer, then create your first user (And other if you want more user inside
+   your family)
+
+```shell
+docker compose exec web python manage.py createsuperuser
+```
+
+4. Lastly if you want to use the app name you'll have to import a name database. This one is the list of name given
+   at least 500 times in the last 10 years in Île-de-France. You can adapt the initial database used of course or add
+   other
+   ones.
+
+```shell
+docker compose exec web python manage.py import_csv
+```
+
+5. Open: localhost:8000 and enjoy
 
 ---
 
-Modules list
+## Modules list
 
 1. Baby name
 
 An app made with love by Zozette to help us pick the name of the baby.
+
+2. Shopping list
+
+An app to help you choose meal for the next week and then make the shopping list for you. It's shared with all your
+household, and you edit it during your shopping session.
