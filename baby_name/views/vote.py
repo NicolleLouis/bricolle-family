@@ -25,7 +25,7 @@ class Vote:
             )
             evaluation.score = score
             evaluation.save()
-        return redirect("baby_name:vote")
+        return redirect("baby_name:vote_form")
 
     @classmethod
     def form(cls, request):

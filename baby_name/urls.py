@@ -14,7 +14,7 @@ app_name = "baby_name"
 
 urlpatterns = [
     path("", home, name="home"),
-    path("vote/", Vote.form, name="vote"),
+    path("vote_form/", Vote.form, name="vote_form"),
     path("user_leaderboard/", user_leaderboard, name="user_leaderboard"),
     path("global_leaderboard/", global_leaderboard, name="global_leaderboard"),
     path("login/", Login.user_login, name="login"),
@@ -25,5 +25,4 @@ urlpatterns = [
     path("results/", results, name="results"),
     path("vote/", Vote.post, name="vote"),
     path("epuration/", user_epuration, name="epuration"),
-
 ]
