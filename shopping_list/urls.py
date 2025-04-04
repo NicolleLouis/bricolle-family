@@ -2,6 +2,7 @@ from django.urls import path
 
 from shopping_list.views.cart import cart
 from shopping_list.views.configuration import configuration
+from shopping_list.views.course import add_course
 from shopping_list.views.home import home
 from shopping_list.views.ingredient import add_ingredient
 from shopping_list.views.list import shopping_list
@@ -15,8 +16,9 @@ app_name = "shopping_list"
 urlpatterns = [
     path("", home, name="home"),
     path("cart/", cart, name="cart"),
-    path("ingredient/new", add_ingredient, name="add_ingredient"),
     path("configuration", configuration, name="configuration"),
+    path("course/new", add_course, name="add_course"),
+    path("ingredient/new", add_ingredient, name="add_ingredient"),
     path("login/", Login.user_login, name="login"),
     path("logout/", Login.user_logout, name="logout"),
     path("meal/", meal, name="meal"),

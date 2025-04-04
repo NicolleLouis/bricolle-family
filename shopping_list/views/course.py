@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect
 
-from shopping_list.forms.ingredient import IngredientForm
+from shopping_list.forms.course import CourseForm
 
 
-def add_ingredient(request):
+def add_course(request):
     if request.method == 'POST':
-        form = IngredientForm(request.POST)
+        form = CourseForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('shopping_list:shopping_list')
@@ -13,8 +13,8 @@ def add_ingredient(request):
             return render(
                 request,
                 "shopping_list/error.html",
-                {"message": "Ingredient already present in database"}
+                {"message": "Course already present in database"}
             )
     else:
-        form = IngredientForm()
-    return render(request, 'shopping_list/add_ingredient.html', {'form': form})
+        form = CourseForm()
+    return render(request, 'shopping_list/add_course.html', {'form': form})

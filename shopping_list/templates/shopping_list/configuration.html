@@ -7,7 +7,10 @@
     <h2 class="mb-4">Page de configuration</h2>
         <div class="list-group shadow-sm">
             <a href="{% url 'shopping_list:add_ingredient' %}" class="list-group-item list-group-item-action">
-                ➕ Ajouter un ingrédient
+                ➕ Ajouter un <strong>ingrédient</strong>
+            </a>
+        <a href="{% url 'shopping_list:add_course' %}" class="list-group-item list-group-item-action">
+                ➕ Ajouter un <strong>plat</strong>
             </a>
         </div>
 {% endblock %}

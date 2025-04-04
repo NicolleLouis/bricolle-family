@@ -1,0 +1,24 @@
+{% extends 'shopping_list/base.html' %}
+
+
+{% block title %}Add Ingredient{% endblock %}
+
+{% block content %}
+    <h2 class="mb-4">Ajouter un ingrédient</h2>
+    <form method="post" class="card p-4 shadow-sm">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.name.label_tag }}
+            {{ form.name }}
+        </div>
+        <div class="mb-3">
+            {{ form.unit.label_tag }}
+            {{ form.unit }}
+        </div>
+        <div class="form-check mb-3">
+            {{ form.is_pantry_staples }}
+            {{ form.is_pantry_staples.label_tag }}
+        </div>
+        <button type="submit" class="btn btn-primary">Ajouter</button>
+    </form>
+{% endblock %}
