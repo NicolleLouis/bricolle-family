@@ -9,4 +9,7 @@ docker compose build
 echo "🚀 Restarting app..."
 docker compose up -d
 
+echo "🐗 Running Migrations..."
+docker compose exec web python manage.py migrate
+
 echo "✅ Done!"
