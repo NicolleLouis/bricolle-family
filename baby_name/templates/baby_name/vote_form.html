@@ -2,7 +2,7 @@
 {% block content %}
 
 <div class="container d-flex justify-content-center align-items-center mt-2 mb-3">
-    <form method="post" action="{% url 'baby_name:interface' %}">
+    <form method="post" action="{% url 'baby_name:vote' %}">
         {% csrf_token %}
         <button type="submit" name="gender" value="all"
             class="btn btn-link filter-btn {% if gender_filter == 'all' %}selected{% endif %}">
