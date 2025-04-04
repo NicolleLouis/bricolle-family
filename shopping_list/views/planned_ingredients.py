@@ -1,6 +1,7 @@
 import json
 from decimal import Decimal
 
+from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
@@ -9,6 +10,7 @@ from shopping_list.models import ShoppingListItem, Ingredient
 
 class PlannedIngredientController:
     @staticmethod
+    @permission_required('shopping_list.shopping_list_access', raise_exception=True)
     def index(request):
         shopping_list = ShoppingListItem.objects.all()
 
@@ -19,6 +21,7 @@ class PlannedIngredientController:
         )
 
     @staticmethod
+    @permission_required('shopping_list.shopping_list_access', raise_exception=True)
     def delete(request):
         try:
             data = json.loads(request.body)
@@ -35,6 +38,7 @@ class PlannedIngredientController:
             return HttpResponseBadRequest("Invalid JSON.")
 
     @staticmethod
+    @permission_required('shopping_list.shopping_list_access', raise_exception=True)
     def add_api(request):
         ingredient_id = request.POST.get("ingredient_id")
         quantity = Decimal(request.POST.get("ingredient_quantity"))
@@ -54,6 +58,7 @@ class PlannedIngredientController:
         return redirect('shopping_list:shopping_list')
 
     @staticmethod
+    @permission_required('shopping_list.shopping_list_access', raise_exception=True)
     def add_page(request):
         ingredients = Ingredient.objects.all()
 
