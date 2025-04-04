@@ -40,6 +40,7 @@ ALLOWED_HOSTS = [
 
 INSTALLED_APPS = [
     'bootstrap5',
+    'core.apps.CoreConfig',
     'baby_name',
     'shopping_list.apps.ShoppingListConfig',
     'django.contrib.admin',

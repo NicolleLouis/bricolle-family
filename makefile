@@ -7,8 +7,8 @@ migrate:
 migrations:
 	poetry run python manage.py makemigrations
 
-console:
-	poetry run python manage.py console
-
 test:
 	poetry run pytest
+
+console:
+	poetry run python manage.py shell
