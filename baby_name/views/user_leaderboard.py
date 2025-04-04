@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from django.shortcuts import render
 
 from baby_name.models import Evaluation
@@ -14,15 +13,13 @@ def user_leaderboard(request):
         rankings_boys[user] = Evaluation.objects.filter(
             user=user,
             name__sex=False,
-            nb_duels__gte=3,
             elo__gte=1000,
         ).order_by('-elo')[:15]
 
         rankings_girls[user] = Evaluation.objects.filter(
             user=user,
             name__sex=True,
-            nb_duels__gte=3,
-            elo__gte=1000, 
+            elo__gte=1000,
         ).order_by('-elo')[:15]
 
     context = {
