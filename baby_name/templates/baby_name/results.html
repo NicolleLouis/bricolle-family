@@ -1,51 +1,83 @@
 {% extends 'baby_name/base.html' %}
 {% block content %}
-<div class="container d-flex justify-content-center">
-    <div class="col-md-4 ">
-        <h4 class="bg-secondary text-light py-2 rounded text-center">Ma liste de Prénoms </h4>
-        <h6 class="bg-secondary text-light py-2 rounded text-center">Mes Coups de Coeur </h6>
-        <div class="row">
-            <div class="col-md-6">
-                <ul class="list-group">
-                    {% for name in name_coup_de_coeur_list_boys %}
-                    <li class="list-group-item list-group-item-action">
-                        {{ name.name }}
-                    </li>
-                    {% endfor %}
-                </ul>
+    <div class="container d-flex justify-content-center">
+        <div class="col-md-4 ">
+            <h4 class="bg-secondary text-light py-2 rounded text-center">Ma liste de Prénoms </h4>
+            <h6 class="bg-secondary text-light py-2 rounded text-center">Mes Coups de Coeur </h6>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul class="list-group">
+                        {% for name in name_coup_de_coeur_list_boys %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ name.name }}</span>
+                                <button class="btn btn-outline-secondary btn-sm"
+                                        onclick="removeName({{ name.id }})" title="Supprimer">
+                                    🗑️
+                                </button>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="list-group">
+                        {% for name in name_coup_de_coeur_list_girls %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ name.name }}</span>
+                                <button class="btn btn-outline-secondary btn-sm"
+                                        onclick="removeName({{ name.id }})" title="Supprimer">
+                                    🗑️
+                                </button>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
-            <div class="col-md-6">
-                <ul class="list-group">
-                    {% for name in name_coup_de_coeur_list_girls %}
-                    <li class="list-group-item list-group-item-action">
-                        {{ name.name }}
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
 
-        <h6 class="bg-secondary text-light py-2 rounded text-center mt-2">Mes prénoms</h6>
-        <div class="row">
-            <div class="col-md-6">
-                <ul class="list-group">
-                    {% for name in name_yes_list_boys %}
-                    <li class="list-group-item list-group-item-action">
-                        {{ name.name }}
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class="col-md-6">
-                <ul class="list-group">
-                    {% for name in name_yes_list_girls %}
-                    <li class="list-group-item list-group-item-action">
-                        {{ name.name }}
-                    </li>
-                    {% endfor %}
-                </ul>
+            <h6 class="bg-secondary text-light py-2 rounded text-center mt-2">Mes prénoms</h6>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul class="list-group">
+                        {% for name in name_yes_list_boys %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ name.name }}</span>
+                                <button class="btn btn-outline-secondary btn-sm"
+                                        onclick="removeName({{ name.id }})" title="Supprimer">
+                                    🗑️
+                                </button>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="list-group">
+                        {% for name in name_yes_list_girls %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ name.name }}</span>
+                                <button class="btn btn-outline-secondary btn-sm"
+                                        onclick="removeName({{ name.id }})" title="Supprimer">
+                                    🗑️
+                                </button>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
-</div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        function removeName(nameId) {
+            fetch("{% url 'baby_name:evaluation_delete' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({name_id: nameId})
+            })
+            .then(() => location.reload());
+        }
+    </script>
 {% endblock %}
