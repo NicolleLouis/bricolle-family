@@ -31,7 +31,7 @@ def test_get_all_positives(db):
         score=NameChoice.COUP_DE_COEUR.value
     )
     expected_names = [name_2, name_3]
-    all_names_with_positive_vote = NameRepository.get_all_positives(sex=sex)
+    all_names_with_positive_vote = NameRepository.get_all_family_positive(sex=sex)
     assert len(expected_names) == len(all_names_with_positive_vote)
     for expected_name in expected_names:
         assert expected_name in all_names_with_positive_vote
@@ -155,7 +155,7 @@ def test_get_all_globally_evaluated_case_missing_evaluation(db):
         user=user_1,
         name=name
     )
-    result = NameRepository.get_all_globally_evaluated(sex)
+    result = NameRepository.get_all_positives_in_family(sex)
     assert len(result) == 0
 
 
@@ -169,6 +169,6 @@ def test_get_all_globally_evaluated_case_complete(db):
             user=user,
             score=NameChoice.OUI.value
         )
-    result = NameRepository.get_all_globally_evaluated(sex)
+    result = NameRepository.get_all_positives_in_family(sex)
     assert len(result) == 1
     assert result[0] == name

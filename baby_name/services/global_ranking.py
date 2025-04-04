@@ -4,13 +4,19 @@ from baby_name.constants.computation_system import ComputationSystem
 from baby_name.exceptions.global_ranking import GlobalRankingException
 from baby_name.models import Name, Evaluation
 from baby_name.repositories.name import NameRepository
+from core.repositories.user import UserRepository
 
 
 class GlobalRanking:
-    def __init__(self, sex: bool, computation_system: str = ComputationSystem.SQUARE):
+    def __init__(
+            self,
+            sex: bool,
+            user: User,
+            computation_system: str = ComputationSystem.SQUARE
+    ):
         self.computation_system = computation_system
-        self.users = User.objects.all()
-        self.rankable_names = NameRepository.get_all_globally_evaluated(sex=sex).prefetch_related('evaluations')
+        self.users = UserRepository.get_family_members(user)
+        self.rankable_names = NameRepository.get_all_positives_in_family(sex=sex, user=user).prefetch_related('evaluations')
         self.user_ranked_names = self.generate_user_ranked_names()
         self.ranked_names = {}
 

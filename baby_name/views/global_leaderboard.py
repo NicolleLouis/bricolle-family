@@ -15,6 +15,7 @@ def global_leaderboard(request):
         for system in scoring_system:
             ranking = GlobalRanking(
                 sex=sex,
+                user=request.user,
                 computation_system=system
             )
             ranking.generate_ranking()

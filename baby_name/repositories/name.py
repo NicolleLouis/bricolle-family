@@ -2,13 +2,14 @@ from django.contrib.auth.models import User
 from django.db.models import QuerySet
 
 from baby_name.models import Name, Evaluation
+from core.repositories.user import UserRepository
 
 
 class NameRepository:
     @classmethod
-    def get_all_globally_evaluated(cls, sex: bool):
-        users = User.objects.all()
-        names = cls.get_all_positives(sex)
+    def get_all_positives_in_family(cls, sex: bool, user: User):
+        users = UserRepository.get_family_members(user)
+        names = cls.get_all_family_positive(sex=sex, user=user)
         for user in users:
             evaluated_names = Evaluation.objects.filter(user=user).values('name')
             names = names.filter(id__in=evaluated_names)
@@ -16,7 +17,7 @@ class NameRepository:
 
     @classmethod
     def get_all_rankables_per_user(cls, sex: bool, user: User):
-        positive_names = cls.get_all_positives(sex=sex)
+        positive_names = cls.get_all_family_positive(sex=sex, user=user)
         linked_evaluations = Evaluation.objects.filter(
             user=user,
             name__in=positive_names
@@ -27,10 +28,10 @@ class NameRepository:
         )
 
     @staticmethod
-    def get_all_positives(sex: bool) -> QuerySet:
+    def get_all_family_positive(sex: bool, user: User) -> QuerySet:
         from baby_name.repositories.evaluation import EvaluationRepository
 
-        positive_votes = EvaluationRepository.get_all_positive_vote()
+        positive_votes = EvaluationRepository.get_all_family_positive_vote(user=user)
         ids = positive_votes.values_list('name_id', flat=True)
         return Name.objects.filter(
             sex=sex,
@@ -39,7 +40,7 @@ class NameRepository:
 
     @classmethod
     def get_priority_to_score(cls, sex: bool, user: User):
-        positive_names = cls.get_all_positives(sex=sex)
+        positive_names = cls.get_all_family_positive(sex=sex, user=user)
         all_ids = positive_names.values_list('id', flat=True)
         linked_evaluations = Evaluation.objects.filter(
             user=user,

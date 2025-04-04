@@ -9,5 +9,5 @@ def test_get_all_positive_vote(db):
             3,
             score=score[0]
         )
-    all_positive_votes = list(EvaluationRepository.get_all_positive_vote())
+    all_positive_votes = list(EvaluationRepository.get_all_family_positive_vote())
     assert len(all_positive_votes) == 6
