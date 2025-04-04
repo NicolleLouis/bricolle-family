@@ -19,14 +19,13 @@
         const elements = document.querySelectorAll(".name-text");
 
         elements.forEach(el => {
-            let fontSize = 80; // taille de départ en pixels (tu peux ajuster)
+            let fontSize = 80;
 
             el.style.fontSize = fontSize + "px";
 
-            // Réduire la taille tant que ça dépasse la largeur ou la hauteur du parent
             while (
                 (el.scrollWidth > el.offsetWidth || el.scrollHeight > el.offsetHeight) &&
-                fontSize > 20 // taille minimale
+                fontSize > 20
                 ) {
                 fontSize -= 1;
                 el.style.fontSize = fontSize + "px";
@@ -36,7 +35,6 @@
 </script>
 
 <body>
-<!-- Header -->
 
 <header>
     <nav class="navbar navbar-expand-lg navbar-light bg-light px-3">
@@ -51,26 +49,26 @@
                 <ul class="navbar-nav me-auto">
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'baby_name:index' %}">Accueil</a>
+                        <a class="nav-link" href="{% url 'baby_name:home' %}">Accueil</a>
                     </li>
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'baby_name:interface' %}">Vote</a>
+                            <a class="nav-link" href="{% url 'baby_name:vote' %}">🗳️ Vote</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'baby_name:results' %}">Vos prénoms</a>
+                            <a class="nav-link" href="{% url 'baby_name:results' %}">📋 Vos prénoms</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'baby_name:ranking' %}">Duels</a>
+                            <a class="nav-link" href="{% url 'baby_name:ranking' %}">⚔️ Duels</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'baby_name:user_leaderboard' %}">Classements par user</a>
+                            <a class="nav-link" href="{% url 'baby_name:user_leaderboard' %}">📊 Classements par user</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'baby_name:global_leaderboard' %}">Classements général</a>
+                            <a class="nav-link" href="{% url 'baby_name:global_leaderboard' %}">🏆 Classements général</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'baby_name:epuration' %}">La purge</a>
+                            <a class="nav-link" href="{% url 'baby_name:epuration' %}">🧹 La purge</a>
                         </li>
                     {% endif %}
                 </ul>

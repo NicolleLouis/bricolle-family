@@ -3,7 +3,7 @@ from django.urls import path
 from baby_name.views.epuration import user_epuration
 
 from .views.global_leaderboard import global_leaderboard
-from .views.index import index
+from .views.home import home
 from .views.user_leaderboard import user_leaderboard
 from .views.login import Login
 from .views.ranking import Ranking
@@ -13,8 +13,8 @@ from .views.vote import Vote
 app_name = "baby_name"
 
 urlpatterns = [
-    path("", index, name="index"),
-    path("interface/", Vote.form, name="interface"),
+    path("", home, name="home"),
+    path("vote/", Vote.form, name="vote"),
     path("user_leaderboard/", user_leaderboard, name="user_leaderboard"),
     path("global_leaderboard/", global_leaderboard, name="global_leaderboard"),
     path("login/", Login.user_login, name="login"),

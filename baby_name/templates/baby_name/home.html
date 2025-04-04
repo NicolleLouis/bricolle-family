@@ -1,0 +1,103 @@
+{% extends 'baby_name/base.html' %}
+{% block content %}
+    <div class="container py-5">
+        <h1 class="mb-4 text-center">Bienvenue sur le projet Prénoms {{ request.user.username }}👶</h1>
+
+        <p class="lead">Ce site vous aide à trouver un prénom qui plaît à toute la famille. Voici les différentes étapes
+            :</p>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">🗳️ <strong>Vote</strong></h5>
+                        <p class="card-text">La première page à consulter. Vous notez les prénoms en indiquant s’ils
+                            vous déplaisent, plaisent ou sont un coup de cœur.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">📋 <strong>Vos prénoms</strong></h5>
+                        <p class="card-text">Un résumé de vos prénoms préférés</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">⚔️ <strong>Duels</strong></h5>
+                        <p class="card-text">Le site vous propose deux prénoms que quelqu’un de votre famille aime.
+                            Choisissez celui que vous préférez.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">📊 <strong>Classements par utilisateur</strong></h5>
+                        <p class="card-text">Consultez votre propre classement des prénoms, basé sur vos votes et vos
+                            duels.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">🏆 <strong>Classement général</strong></h5>
+                        <p class="card-text">Découvrez le classement familial global des prénoms, selon plusieurs
+                            méthodes de calcul.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">🧹 <strong>La purge</strong></h5>
+                        <p class="card-text">Affiche les prénoms que vous aimez mais qui sont moins populaires auprès de
+                            la famille. Utile pour converger vers un consensus !</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-5">
+
+        <h2 class="mb-3">❓ Q&A</h2>
+
+        <ul class="list-group mb-4">
+            <li class="list-group-item">
+                <strong>Pourquoi aucun prénom n'apparaît dans le classement général ?</strong><br>
+                Parce que vous n’avez pas encore voté sur les prénoms aimés par le reste de votre famille. Allez sur
+                <strong>Vote</strong>, commencez par les prénoms filles, puis garçons.
+            </li>
+            <li class="list-group-item">
+                <strong>Il manque des prénoms ?</strong><br>
+                Envoyez-moi une liste de prénoms que vous aimez ou une source/base, je les ajouterai manuellement.
+            </li>
+        </ul>
+
+        <hr class="my-5">
+
+        <h2 class="mb-3">🚧 Fonctionnalités à venir</h2>
+
+        <ul class="list-group mb-4">
+            <li class="list-group-item">
+                🔁 <strong>Annuler un vote</strong><br>
+                Vous pourrez bientôt retirer un vote (oui / non / coup de cœur) sur un prénom depuis la page <em>Mes
+                prénoms</em>. Pratique pour affiner vos choix au fil du temps !
+            </li>
+            <li class="list-group-item">
+                💡 <strong>Envie de proposer une fonctionnalité ?</strong><br>
+                Si vous avez une idée pour améliorer le site, n’hésitez pas à l’envoyer à Louis ou Cécile (aka le couple
+                Bricolle 🛠️❤️).
+            </li>
+        </ul>
+
+        <p class="text-muted text-center">
+            Ce projet est en évolution constante. Vos retours sont précieux 🙌
+        </p>
+    </div>
+
+{% endblock %}
