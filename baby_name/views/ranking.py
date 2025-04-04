@@ -2,6 +2,7 @@ import random
 
 from django.shortcuts import get_object_or_404, render, redirect
 
+from baby_name.exceptions.name_duel import NameDuelException
 from baby_name.models import Name, Evaluation
 from baby_name.repositories.name import NameRepository
 from baby_name.services.name_duel import NameDuel
@@ -10,7 +11,14 @@ from baby_name.services.name_duel import NameDuel
 class Ranking:
     @staticmethod
     def form(request):
-        name_1, name_2 = NameDuel(request.user).get_names()
+        try:
+            name_1, name_2 = NameDuel(request.user).get_names()
+        except NameDuelException as exception:
+            return render(
+                request,
+                "baby_name/error.html",
+            {"message": "Moins de 2 prénoms ont été choisis, retournez en ajouter"}
+            )
 
         context = {
             "name_1": name_1,
