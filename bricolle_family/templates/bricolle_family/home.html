@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+</head>
+
+<body class="bg-light">
+
+<div class="container py-5">
+    <h1 class="mb-4">Bienvenue chez vous {{ request.user.username }}!</h1>
+    <div class="row">
+        {% for module in modules %}
+            <div class="col-md-4 mb-4">
+                <a href="{{ module.url }}" class="text-decoration-none">
+                    <div class="card module-card shadow-sm h-100 text-white"
+                         style="background-color: {{ module.color }}">
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <h5 class="card-title text-center mb-0">{{ module.name }}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+</body>
+</html>
