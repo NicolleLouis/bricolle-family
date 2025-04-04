@@ -3,6 +3,7 @@
 {% block title %}Liste de souhait{% endblock %}
 
 {% block content %}
+    <h2>À acheter</h2>
     <div class="container py-4">
         <h2>Liste de courses<i class="bi bi-bag"></i></h2>
         <table class="table table-striped">
@@ -15,15 +16,48 @@
             </thead>
             <tbody id="wishlistTable">
             {% for planned_ingredient in shopping_list %}
-                <tr id="planned_ingredient-{{ planned_ingredient.id }}">
-                    <td>{{ planned_ingredient.ingredient.name }}</td>
-                    <td>{{ planned_ingredient.quantity }} ({{ planned_ingredient.ingredient.unit }})</td>
-                    <td>
-                        <button class="btn btn-danger btn-sm" onclick="removeIngredient({{ planned_ingredient.id }})">
-                            🗑️
-                        </button>
-                    </td>
-                </tr>
+                {% if not planned_ingredient.is_pantry_staples %}
+                    <tr id="planned_ingredient-{{ planned_ingredient.id }}">
+                        <td>{{ planned_ingredient.ingredient.name }}</td>
+                        <td>{{ planned_ingredient.quantity }} ({{ planned_ingredient.ingredient.unit }})</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm"
+                                    onclick="removeIngredient({{ planned_ingredient.id }})">
+                                🗑️
+                            </button>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <hr class="my-4">
+
+        <h2>Fond de maison</h2>
+
+        <table class="table table-bordered table-sm text-muted">
+            <thead>
+            <tr>
+                <th>Ingrédient</th>
+                <th>Quantitée</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody id="wishlistTable">
+            {% for planned_ingredient in shopping_list %}
+                {% if planned_ingredient.is_pantry_staples %}
+                    <tr id="planned_ingredient-{{ planned_ingredient.id }}">
+                        <td>{{ planned_ingredient.ingredient.name }}</td>
+                        <td>{{ planned_ingredient.quantity }} ({{ planned_ingredient.ingredient.unit }})</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm"
+                                    onclick="removeIngredient({{ planned_ingredient.id }})">
+                                🗑️
+                            </button>
+                        </td>
+                    </tr>
+                {% endif %}
             {% endfor %}
             </tbody>
         </table>
