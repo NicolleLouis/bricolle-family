@@ -8,57 +8,71 @@
 
         <div class="row">
             <div class="col-md-6 mb-4">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">🗳️ <strong>Vote</strong></h5>
-                        <p class="card-text">La première page à consulter. Vous notez les prénoms en indiquant s’ils
-                            vous déplaisent, plaisent ou sont un coup de cœur.</p>
+                <a href="{% url 'baby_name:vote_form' %}" class="text-decoration-none text-reset">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">🗳️ <strong>Vote</strong></h5>
+                            <p class="card-text">La première page à consulter. Vous notez les prénoms en indiquant s’ils
+                                vous déplaisent, plaisent ou sont un coup de cœur.</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-md-6 mb-4">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">📋 <strong>Vos prénoms</strong></h5>
-                        <p class="card-text">Un résumé de vos prénoms préférés</p>
+                <a href="{% url 'baby_name:results' %}" class="text-decoration-none text-reset">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">📋 <strong>Vos prénoms</strong></h5>
+                            <p class="card-text">Un résumé de vos prénoms préférés</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-md-6 mb-4">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">⚔️ <strong>Duels</strong></h5>
-                        <p class="card-text">Le site vous propose deux prénoms que quelqu’un de votre famille aime.
-                            Choisissez celui que vous préférez.</p>
+                <a href="{% url 'baby_name:ranking' %}" class="text-decoration-none text-reset">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">⚔️ <strong>Duels</strong></h5>
+                            <p class="card-text">Le site vous propose deux prénoms que quelqu’un de votre famille aime.
+                                Choisissez celui que vous préférez.</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-md-6 mb-4">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">📊 <strong>Classements par utilisateur</strong></h5>
-                        <p class="card-text">Consultez votre propre classement des prénoms, basé sur vos votes et vos
-                            duels.</p>
+                <a href="{% url 'baby_name:user_leaderboard' %}" class="text-decoration-none text-reset">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">📊 <strong>Classements par utilisateur</strong></h5>
+                            <p class="card-text">Consultez votre propre classement des prénoms, basé sur vos votes et
+                                vos
+                                duels.</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-md-6 mb-4">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">🏆 <strong>Classement général</strong></h5>
-                        <p class="card-text">Découvrez le classement familial global des prénoms, selon plusieurs
-                            méthodes de calcul.</p>
+                <a href="{% url 'baby_name:global_leaderboard' %}" class="text-decoration-none text-reset">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">🏆 <strong>Classement général</strong></h5>
+                            <p class="card-text">Découvrez le classement familial global des prénoms, selon plusieurs
+                                méthodes de calcul.</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-md-6 mb-4">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">🧹 <strong>La purge</strong></h5>
-                        <p class="card-text">Affiche les prénoms que vous aimez mais qui sont moins populaires auprès de
-                            la famille. Utile pour converger vers un consensus !</p>
+                <a href="{% url 'baby_name:epuration' %}" class="text-decoration-none text-reset">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">🧹 <strong>La purge</strong></h5>
+                            <p class="card-text">Affiche les prénoms que vous aimez mais qui sont moins populaires
+                                auprès de
+                                la famille. Utile pour converger vers un consensus !</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
 
