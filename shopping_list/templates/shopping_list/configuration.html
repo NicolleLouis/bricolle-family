@@ -1,0 +1,13 @@
+{% extends 'shopping_list/base.html' %}
+
+
+{% block title %}Add Configuration{% endblock %}
+
+{% block content %}
+    <h2 class="mb-4">Page de configuration</h2>
+        <div class="list-group shadow-sm">
+            <a href="{% url 'shopping_list:add_ingredient' %}" class="list-group-item list-group-item-action">
+                ➕ Ajouter un ingrédient
+            </a>
+        </div>
+{% endblock %}

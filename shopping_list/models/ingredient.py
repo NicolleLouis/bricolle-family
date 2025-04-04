@@ -3,7 +3,7 @@ from django.db import models
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=32)
+    name = models.CharField(max_length=32, unique=True)
     is_pantry_staples = models.BooleanField()
     unit = models.CharField(max_length=20)
 

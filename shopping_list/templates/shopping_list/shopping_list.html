@@ -16,7 +16,7 @@
             </thead>
             <tbody id="wishlistTable">
             {% for planned_ingredient in shopping_list %}
-                {% if not planned_ingredient.is_pantry_staples %}
+                {% if not planned_ingredient.ingredient.is_pantry_staples %}
                     <tr id="planned_ingredient-{{ planned_ingredient.id }}">
                         <td>{{ planned_ingredient.ingredient.name }}</td>
                         <td>{{ planned_ingredient.quantity }} ({{ planned_ingredient.ingredient.unit }})</td>
@@ -46,7 +46,7 @@
             </thead>
             <tbody id="wishlistTable">
             {% for planned_ingredient in shopping_list %}
-                {% if planned_ingredient.is_pantry_staples %}
+                {% if planned_ingredient.ingredient.is_pantry_staples %}
                     <tr id="planned_ingredient-{{ planned_ingredient.id }}">
                         <td>{{ planned_ingredient.ingredient.name }}</td>
                         <td>{{ planned_ingredient.quantity }} ({{ planned_ingredient.ingredient.unit }})</td>
