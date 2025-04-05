@@ -6,4 +6,3 @@
 - Make an algo to suggest meals (Based on season + not eaten in a while + coup de coeur (meal with high score))
 - Add a tracking of meal taken: date, meal, score, and a comment to help the next cook. Per user
 - Pull up the page of meal stats
-- List of course + click to edit or delete

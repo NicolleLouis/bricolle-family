@@ -5,12 +5,15 @@
 
 {% block content %}
     <h2 class="mb-4">Page de configuration</h2>
-        <div class="list-group shadow-sm">
-            <a href="{% url 'shopping_list:add_ingredient' %}" class="list-group-item list-group-item-action">
-                ➕ Ajouter un <strong>ingrédient</strong>
-            </a>
+    <div class="list-group shadow-sm">
+        <a href="{% url 'shopping_list:add_ingredient' %}" class="list-group-item list-group-item-action">
+            ➕ Ajouter un <strong>ingrédient</strong>
+        </a>
         <a href="{% url 'shopping_list:add_course' %}" class="list-group-item list-group-item-action">
-                ➕ Ajouter un <strong>plat</strong>
-            </a>
-        </div>
+            ➕ Ajouter un <strong>plat</strong>
+        </a>
+    <a href="{% url 'shopping_list:course' %}" class="list-group-item list-group-item-action">
+            📋 Liste des <strong>plats</strong>
+        </a>
+    </div>
 {% endblock %}

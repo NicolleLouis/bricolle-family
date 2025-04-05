@@ -17,6 +17,7 @@ urlpatterns = [
     path("", home, name="home"),
     path("cart/", cart, name="cart"),
     path("configuration", configuration, name="configuration"),
+    path("course", CourseController.index, name="course"),
     path("course/new", CourseController.add_course, name="add_course"),
     path("course/<int:course_id>/edit", CourseController.edit_course, name="edit_course"),
     path("ingredient/new", add_ingredient, name="add_ingredient"),

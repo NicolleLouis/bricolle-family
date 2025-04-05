@@ -7,6 +7,12 @@ from shopping_list.models import Course
 
 class CourseController:
     @staticmethod
+    def index(request):
+        courses = Course.objects.all()
+
+        return render(request, 'shopping_list/index_course.html', {'courses': courses})
+
+    @staticmethod
     def add_course(request):
         if request.method == 'POST':
             form = CourseForm(request.POST)
