@@ -1,0 +1,25 @@
+{% extends 'baby_name/base.html' %}
+
+
+{% block title %}Add Name{% endblock %}
+
+{% block content %}
+    <h2 class="mb-4">Ajouter un prénom</h2>
+    <form method="post" class="card p-4 shadow-sm">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.name.label_tag }}
+            {{ form.name }}
+        </div>
+        <div class="mb-3">
+            {{ form.sex.label_tag }}
+            {{ form.sex }}
+        </div>
+        <hr class="my-4">
+        <div class="mb-3">
+            {{ form.tag.label_tag }}
+            {{ form.tag }}
+        </div>
+        <button type="submit" class="btn btn-primary">Ajouter</button>
+    </form>
+{% endblock %}

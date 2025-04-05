@@ -2,7 +2,7 @@
 - Empty cart
 - Scrapper to import recipe more easily? Or page to set them up
 - Reverse search, input an ingredient, we sent you the list of meal containing it
-- Add seasons inside ingredients to put seasonnal meal
+- Add seasons inside ingredients to put seasonal meal
 - Make an algo to suggest meals (Based on season + not eaten in a while + coup de coeur (meal with high score))
 - Add a tracking of meal taken: date, meal, score, and a comment to help the next cook. Per user
 - Pull up the page of meal stats

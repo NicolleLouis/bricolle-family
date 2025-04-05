@@ -8,9 +8,14 @@ class Name(models.Model):
     sex = models.BooleanField(
         help_text="True for a girl"
     )
+    source = models.CharField(max_length=50)
+    tag = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        unique_together = ('name', 'sex')
 
 
 class CustomSexFilter(admin.SimpleListFilter):
@@ -19,8 +24,8 @@ class CustomSexFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return [
-            ("1", _("Fille")),  # True -> "Fille"
-            ("0", _("Garçon")),  # False -> "Garçon"
+            ("1", _("Fille")),
+            ("0", _("Garçon")),
         ]
 
     def queryset(self, request, queryset):
@@ -34,7 +39,7 @@ class CustomSexFilter(admin.SimpleListFilter):
 @admin.register(Name)
 class NameAdmin(admin.ModelAdmin):
     list_display = ('name', 'print_sex')
-    list_filter = (CustomSexFilter,)
+    list_filter = (CustomSexFilter, 'source', 'tag')
     search_fields = ["name"]
     ordering = ('name',)
 

@@ -1,6 +1,7 @@
 from django.urls import path
 
 from baby_name.views.epuration import user_epuration
+from .views.add_name import add_name
 from .views.evaluation_delete import evaluation_delete
 
 from .views.global_leaderboard import global_leaderboard
@@ -20,6 +21,7 @@ urlpatterns = [
     path("global_leaderboard/", global_leaderboard, name="global_leaderboard"),
     path("login/", Login.user_login, name="login"),
     path("logout/", Login.user_logout, name="logout"),
+    path("name/new", add_name, name="add_name"),
     path("ranking/", Ranking.form, name="ranking"),
     path("ranking_vote/", Ranking.post, name="ranking_vote"),
     path("register/", Login.register, name="register"),
