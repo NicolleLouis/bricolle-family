@@ -16,30 +16,106 @@
 
         <hr>
         <h5>Ingrédients</h5>
-        {{ formset.management_form }}
+        <div id="formset-container">
+            {{ formset.management_form }}
 
-        {% for form in formset %}
-            {{ form.id }}
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    {{ form.ingredient.label_tag }} {{ form.ingredient }}
-                </div>
-                <div class="col-md-4">
-                    {{ form.quantity.label_tag }} {{ form.quantity }}
-                </div>
-                <div class="col-md-2 d-flex align-items-center">
-                    {% if form.instance.pk %}
-                        <div class="form-check mt-4">
-                            {{ form.DELETE }} {{ form.DELETE.label_tag }}
+            {% for form in formset %}
+                <div class="form-row mb-3">
+                    {{ form.id }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.ingredient.label_tag }} {{ form.ingredient }}
                         </div>
-                    {% endif %}
+                        <div class="col-md-4">
+                            {{ form.quantity.label_tag }} {{ form.quantity }}
+                        </div>
+                        <div class="col-md-2 d-flex align-items-center">
+                            {% if form.instance.pk %}
+                                <div class="form-check mt-4">
+                                    {{ form.DELETE }} {{ form.DELETE.label_tag }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div id="empty-form-template" class="d-none">
+            {{ formset.empty_form.id }}
+            <div class="form-row mb-3" data-form-index="__prefix__">
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ formset.empty_form.ingredient.label_tag }} {{ formset.empty_form.ingredient }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ formset.empty_form.quantity.label_tag }} {{ formset.empty_form.quantity }}
+                    </div>
+                    <div class="col-md-2 d-flex align-items-center">
+                        <div class="form-check mt-4">
+                            {{ formset.empty_form.DELETE }} {{ formset.empty_form.DELETE.label_tag }}
+                        </div>
+                    </div>
                 </div>
             </div>
-        {% endfor %}
+        </div>
 
         <div class="d-flex justify-content-end">
             <button type="submit" class="btn btn-primary me-2">Sauvegarder</button>
             <a href="{% url 'shopping_list:configuration' %}" class="btn btn-secondary">Annuler</a>
         </div>
     </form>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('formset-container');
+            const totalFormsInput = document.querySelector('[name$="TOTAL_FORMS"]');
+            const emptyFormTemplate = document.getElementById('empty-form-template').innerHTML;
+
+            function updateEventListeners() {
+                const rows = container.querySelectorAll('.form-row');
+                const lastRow = rows[rows.length - 1];
+
+                const ingredientSelect = lastRow.querySelector('select');
+                const quantityInput = lastRow.querySelector('input[name$="quantity"]');
+
+                [ingredientSelect, quantityInput].forEach(input => {
+                    input.addEventListener('change', () => {
+                        const ingredientName = ingredientSelect.value;
+                        const ingredientQuantity = quantityInput.value;
+
+                        if (ingredientName && ingredientQuantity) {
+                            addNewForm();
+                        }
+                    });
+                });
+
+
+                container.querySelectorAll('input[type="checkbox"][name$="DELETE"]').forEach(deleteCheckbox => {
+                    deleteCheckbox.addEventListener('change', () => {
+                        const row = deleteCheckbox.closest('.form-row');
+                        if (deleteCheckbox.checked) {
+                            row.classList.add('d-none');
+                        } else {
+                            row.classList.remove('d-none');
+                        }
+                    });
+                });
+            }
+
+            function addNewForm() {
+                const formIndex = parseInt(totalFormsInput.value);
+                const newFormHtml = emptyFormTemplate.replace(/__prefix__/g, formIndex);
+                const newFormElement = document.createElement('div');
+                newFormElement.innerHTML = newFormHtml;
+                container.appendChild(newFormElement);
+                totalFormsInput.value = formIndex + 1;
+                updateEventListeners();
+            }
+
+            updateEventListeners();
+        });
+    </script>
 {% endblock %}

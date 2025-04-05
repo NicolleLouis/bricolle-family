@@ -10,6 +10,9 @@ class CourseElement(models.Model):
     def __str__(self):
         return f"{self.ingredient.name}: {self.quantity}"
 
+    class Meta:
+        unique_together = ('course', 'ingredient')
+
 
 class CourseElementAdmin(admin.ModelAdmin):
     list_display = ('course', 'ingredient', 'quantity')
