@@ -9,38 +9,43 @@
         <form method="post" action="{% url 'shopping_list:shopping_list_add_api' %}">
             {% csrf_token %}
 
-            <div class="mb-3">
-                <label for="ingredient-choice" class="form-label">Choisir un Ingrédient</label>
-                <input class="form-control" list="ingredients" id="ingredient-choice" name="ingredient_name">
-                <datalist id="ingredients">
+            <div class="row mb-3">
+                <label for="ingredient-choice" class="form-label">Ingrédient:</label>
+                <select id="ingredient-choice" name="ingredient_id" class="form-select">
+                    <option value="">-------</option>
                     {% for ingredient in ingredients %}
-                        <option data-value="{{ ingredient.id }}" value="{{ ingredient.name }}"></option>
+                        <option value="{{ ingredient.id }}">
+                            {{ ingredient.name }} (par: {{ ingredient.unit }})
+                        </option>
                     {% endfor %}
-                </datalist>
+                </select>
+            </div>
 
-                <label for="ingredient-quantity"></label><input type="number" name="ingredient_quantity"
-                                                                id="ingredient-quantity">
-
-                <input type="hidden" name="ingredient_id" id="ingredient_id">
+        <div class="row mb-3">
+                <label for="ingredient-quantity">Quantitée:</label>
+                <input type="number" name="ingredient_quantity"
+                       id="ingredient-quantity">
             </div>
 
             <button type="submit" class="btn btn-success">Ajouter</button>
         </form>
     </div>
+{% endblock %}
 
+{% block scripts %}
     <script>
-        document.getElementById('ingredient-choice').addEventListener('input', function (e) {
-            const input = e.target.value;
-            const list = document.getElementById('ingredients').options;
-
-            document.getElementById('ingredient_id').value = ''; // reset
-
-            for (let i = 0; i < list.length; i++) {
-                if (list[i].value === input) {
-                    document.getElementById('ingredient_id').value = list[i].dataset.value;
-                    break;
-                }
-            }
+        new TomSelect("#ingredient-choice", {
+            create: false,
+            sortField: {
+                field: "text",
+                direction: "asc"
+            },
+            placeholder: "Choisir un ingrédient...",
         });
     </script>
+{% endblock %}
+
+{% block sources %}
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 {% endblock %}
