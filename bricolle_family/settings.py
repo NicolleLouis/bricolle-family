@@ -41,6 +41,7 @@ ALLOWED_HOSTS = [
 INSTALLED_APPS = [
     'bootstrap5',
     'core.apps.CoreConfig',
+    'habit_tracker',
     'baby_name',
     'shopping_list.apps.ShoppingListConfig',
     'django.contrib.admin',
