@@ -5,3 +5,7 @@
 - Add filters to the page: result, character, archetype
 - Add game version to the run?
 - Link archetype to Character?
+- Evolution with time
+- Character stats/Archetype stats
+- Archetype higher result
+- Archetype not played/most played

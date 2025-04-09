@@ -15,7 +15,7 @@ class BazaarRun(models.Model):
         default=Character.VANESSA
     )
     archetype = models.CharField(
-        max_length=11,
+        max_length=17,
         choices=Archetype.choices,
         null=True,
         blank=True,
