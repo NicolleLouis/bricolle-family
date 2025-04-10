@@ -1,0 +1,15 @@
+{% extends 'habit_tracker/base.html' %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h2>Supprimer la run</h2>
+        <p>Es-tu sûr de vouloir supprimer cette run: {{ object.get_character_display }} {{ object.get_result_display }}
+            enregistré à {{ object.created_at }}</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Confirmer</button>
+            <a href="{% url 'habit_tracker:bazaar' %}" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
+{% endblock %}
