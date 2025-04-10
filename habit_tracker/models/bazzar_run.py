@@ -28,6 +28,11 @@ class BazaarRun(models.Model):
         blank=True
     )
 
+    class Meta:
+        permissions = [
+            ("bazaar_access", "Can access bazaar pages")
+        ]
+
     def save(self, *args, **kwargs):
         self.set_victory_type()
         super().save(*args, **kwargs)

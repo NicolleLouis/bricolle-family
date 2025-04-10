@@ -1,4 +1,5 @@
 import django_filters
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import UpdateView, CreateView, DeleteView
 from django_filters.views import FilterView
@@ -13,28 +14,32 @@ class BazaarRunFilter(django_filters.FilterSet):
         fields = ['character', 'archetype', 'result']
 
 
-class BazaarRunListView(FilterView):
+class BazaarRunListView(PermissionRequiredMixin, FilterView):
     model = BazaarRun
     template_name = "habit_tracker/bazaar.html"
     context_object_name = 'runs'
     filterset_class = BazaarRunFilter
+    permission_required = 'habit_tracker.bazaar_access'
 
 
-class BazaarRunCreateView(CreateView):
+class BazaarRunCreateView(PermissionRequiredMixin, CreateView):
     model = BazaarRun
     form_class = BazaarRunForm
     template_name = 'habit_tracker/bazaar_form.html'
     success_url = reverse_lazy('habit_tracker:bazaar')
+    permission_required = 'habit_tracker.bazaar_access'
 
 
-class BazaarRunUpdateView(UpdateView):
+class BazaarRunUpdateView(PermissionRequiredMixin, UpdateView):
     model = BazaarRun
     form_class = BazaarRunForm
     template_name = 'habit_tracker/bazaar_form.html'
     success_url = reverse_lazy('habit_tracker:bazaar')
+    permission_required = 'habit_tracker.bazaar_access'
 
 
-class BazaarRunDeleteView(DeleteView):
+class BazaarRunDeleteView(PermissionRequiredMixin, DeleteView):
     model = BazaarRun
     template_name = 'habit_tracker/bazaar_form_delete.html'
     success_url = reverse_lazy('habit_tracker:bazaar')
+    permission_required = 'habit_tracker.bazaar_access'
