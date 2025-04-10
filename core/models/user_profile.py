@@ -7,7 +7,7 @@ from core.models.family import Family
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    family = models.ForeignKey(Family, on_delete=models.PROTECT, null=True)
+    family = models.ForeignKey(Family, on_delete=models.PROTECT, null=True, blank=True)
 
     def __str__(self):
         return f"{self.user.username}'s profile"
