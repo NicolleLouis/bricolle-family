@@ -13,13 +13,13 @@ def user_leaderboard(request):
         rankings_boys[user] = Evaluation.objects.filter(
             user=user,
             name__sex=False,
-            elo__gte=1000,
+            elo__gte=1001,
         ).order_by('-elo')[:15]
 
         rankings_girls[user] = Evaluation.objects.filter(
             user=user,
             name__sex=True,
-            elo__gte=1000,
+            elo__gte=1001,
         ).order_by('-elo')[:15]
 
     context = {

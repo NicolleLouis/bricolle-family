@@ -2,7 +2,7 @@ from django.urls import path
 
 from baby_name.views.epuration import user_epuration
 from .views.add_name import add_name
-from .views.evaluation_delete import evaluation_delete
+from .views.evaluation import EvaluationController
 
 from .views.global_leaderboard import global_leaderboard
 from .views.home import home
@@ -17,7 +17,8 @@ app_name = "baby_name"
 urlpatterns = [
     path("", home, name="home"),
     path("epuration/", user_epuration, name="epuration"),
-    path("evaluation_delete/", evaluation_delete, name="evaluation_delete"),
+    path("evaluation/delete", EvaluationController.delete, name="evaluation_delete"),
+    path("evaluation/update", EvaluationController.get_or_update, name="evaluation_update"),
     path("global_leaderboard/", global_leaderboard, name="global_leaderboard"),
     path("login/", Login.user_login, name="login"),
     path("logout/", Login.user_logout, name="logout"),

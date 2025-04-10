@@ -1,0 +1,20 @@
+{% extends 'baby_name/base.html' %}
+
+
+{% block title %}Set Specific score{% endblock %}
+
+{% block content %}
+    <h2 class="mb-4">Evaluer un Prénom</h2>
+    <form method="post" class="card p-4 shadow-sm">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.name.label_tag }}
+            {{ form.name }}
+        </div>
+        <div class="mb-3">
+            {{ form.score.label_tag }}
+            {{ form.score }}
+        </div>
+        <button type="submit" class="btn btn-primary">Sauvegarder</button>
+    </form>
+{% endblock %}
