@@ -1,8 +1,8 @@
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
-from habit_tracker.constants.bazaar.archetype import Archetype
 from habit_tracker.constants.bazaar.character import Character
 from habit_tracker.constants.bazaar.result import Result
 
@@ -14,9 +14,9 @@ class BazaarRun(models.Model):
         choices=Character.choices,
         default=Character.VANESSA
     )
-    archetype = models.CharField(
-        max_length=18,
-        choices=Archetype.choices,
+    archetype = models.ForeignKey(
+        'habit_tracker.BazaarArchetype',
+        on_delete=models.PROTECT,
         null=True,
         blank=True,
     )
@@ -35,10 +35,18 @@ class BazaarRun(models.Model):
 
     def save(self, *args, **kwargs):
         self.set_victory_type()
+        self.full_clean()
         super().save(*args, **kwargs)
 
+    def clean(self):
+        super().clean()
+        if self.archetype and self.archetype.character != self.character:
+            raise ValidationError(
+                {"archetype": "Archetype is not valid for this character"}
+            )
+
     def __str__(self):
-        return f"{self.character}: {self.win_number} wins ({self.archetype})"
+        return f"{self.character}: {self.win_number} wins ({self.archetype.name})"
 
     def set_victory_type(self):
         if self.win_number < 4:
@@ -55,7 +63,7 @@ class BazaarRun(models.Model):
 class BazaarRunAdmin(admin.ModelAdmin):
     list_display = ('character', 'archetype', 'result', 'formatted_created_at')
     list_filter = ('character', 'archetype', 'result')
-    search_fields = ["character", "archetype"]
+    search_fields = ["character", "archetype__name"]
     ordering = ('created_at',)
     readonly_fields = ('result', )
     ordering = ('-created_at', )

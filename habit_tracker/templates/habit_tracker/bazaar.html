@@ -43,7 +43,7 @@
             {% for run in runs %}
                 <tr>
                     <td>{{ run.get_character_display }}</td>
-                    <td>{{ run.get_archetype_display }}</td>
+                    <td>{{ run.archetype.name }}</td>
                     <td>{{ run.get_result_display }}</td>
                     <td>{{ run.created_at|date:"d M Y" }}</td>
                     <td>

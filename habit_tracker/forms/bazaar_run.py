@@ -1,6 +1,6 @@
 from django import forms
 
-from habit_tracker.models import BazaarRun
+from habit_tracker.models import BazaarRun, BazaarArchetype
 
 
 class BazaarRunForm(forms.ModelForm):
@@ -19,3 +19,7 @@ class BazaarRunForm(forms.ModelForm):
             'win_number': 'Nombre de victoire',
             'notes': 'Notes',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['archetype'].queryset = BazaarArchetype.objects.filter(is_meta_viable=True)
