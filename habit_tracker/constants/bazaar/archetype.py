@@ -11,3 +11,4 @@ class Archetype(models.TextChoices):
     SPIDER_MACE = "SPIDER_MACE", "Spider Mace"
     BOTTLED_EXPLOSION = "BOTTLED_EXPLOSION", "Bottled Explosion"
     ACID_VAT = "ACID_VAT", "Vat of Acid"
+    STAFF_OF_THE_MOOSE = "STAFF_OF_THE_MOOSE", "Staff of the Moose"
