@@ -5,6 +5,7 @@ from django.db import models
 
 from habit_tracker.constants.bazaar.character import Character
 from habit_tracker.constants.bazaar.result import Result
+from habit_tracker.models import BazaarSeason
 
 
 class BazaarRun(models.Model):
@@ -16,6 +17,12 @@ class BazaarRun(models.Model):
     )
     archetype = models.ForeignKey(
         'habit_tracker.BazaarArchetype',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+    season = models.ForeignKey(
+        'habit_tracker.BazaarSeason',
         on_delete=models.PROTECT,
         null=True,
         blank=True,
@@ -35,6 +42,7 @@ class BazaarRun(models.Model):
 
     def save(self, *args, **kwargs):
         self.set_victory_type()
+        self.set_season()
         self.full_clean()
         super().save(*args, **kwargs)
 
@@ -58,15 +66,31 @@ class BazaarRun(models.Model):
         else:
             self.result = Result.GOLD_WIN
 
+    def set_season(self):
+        if self.season is None:
+            newest_season = BazaarSeason.objects.order_by('-created_at').first()
+            self.season = newest_season
+
+    @property
+    def elo_change(self):
+        match self.result:
+            case Result.LOSS:
+                return -1
+            case Result.BRONZE_WIN:
+                return 0
+            case Result.SILVER_WIN:
+                return 1
+            case Result.GOLD_WIN:
+                return 2
+
 
 @admin.register(BazaarRun)
 class BazaarRunAdmin(admin.ModelAdmin):
     list_display = ('character', 'archetype', 'result', 'formatted_created_at')
     list_filter = ('character', 'archetype', 'result')
     search_fields = ["character", "archetype__name"]
-    ordering = ('created_at',)
-    readonly_fields = ('result', )
-    ordering = ('-created_at', )
+    readonly_fields = ('result',)
+    ordering = ('-created_at',)
 
     @admin.display(description='Created At')
     def formatted_created_at(self, obj):
