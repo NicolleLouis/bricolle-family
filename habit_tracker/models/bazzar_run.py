@@ -54,7 +54,10 @@ class BazaarRun(models.Model):
             )
 
     def __str__(self):
-        return f"{self.character}: {self.win_number} wins ({self.archetype.name})"
+        display = f"{self.character}: {self.win_number} wins"
+        if self.archetype is not None:
+            display += " ({self.archetype.name})"
+        return display
 
     def set_victory_type(self):
         if self.win_number < 4:

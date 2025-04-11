@@ -20,7 +20,7 @@ class BazaarRunListView(PermissionRequiredMixin, FilterView):
     context_object_name = 'runs'
     filterset_class = BazaarRunFilter
     permission_required = 'habit_tracker.bazaar_access'
-
+    ordering = ['-created_at']
 
 class BazaarRunCreateView(PermissionRequiredMixin, CreateView):
     model = BazaarRun
