@@ -41,7 +41,7 @@ class BazaarAggregateCharacterRunService:
             self.result.best_result = best_run.get_result_display()
 
     def compute_run_number(self):
-        self.result.run_this_season = len(self.runs)
+        self.result.run_number = len(self.runs)
 
     def compute_elo_change(self):
         elo_changes = [run.elo_change for run in self.runs]

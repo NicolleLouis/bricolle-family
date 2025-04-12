@@ -1,27 +1,24 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light px-3">
     <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'shopping_list:home' %}">Shopping List 🛒</a>
+        <a class="navbar-brand" href="{% url 'habit_tracker:home' %}">Habit Tracker</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'shopping_list:shopping_list' %}">Shopping List</a>
+                    <a class="nav-link" href="{% url 'habit_tracker:bazaar' %}">📋 Run History</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'shopping_list:planned_course' %}">Current Meals</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'shopping_list:configuration' %}">Configuration</a>
+                    <a class="nav-link" href="{% url 'habit_tracker:bazaar_character_stats' %}">🗿 Character stats</a>
                 </li>
             </ul>
             <div>
                 {% if user.is_authenticated %}
                     <span>Hey, {{ user.username }}!</span>
-                    <a class="btn btn-primary ms-3" href="{% url 'shopping_list:logout' %}">Logout</a>
+                    <a class="btn btn-primary ms-3" href="{% url 'habit_tracker:logout' %}">Logout</a>
                 {% else %}
-                    <a class="btn btn-primary" href="{% url 'shopping_list:login' %}">Login</a>
+                    <a class="btn btn-primary" href="{% url 'habit_tracker:login' %}">Login</a>
                 {% endif %}
             </div>
         </div>

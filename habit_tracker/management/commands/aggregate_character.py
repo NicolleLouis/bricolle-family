@@ -16,5 +16,5 @@ class Command(BaseCommand):
             self.stdout.write(f"  - Victoire moyenne : {result.average_victory_number}\n")
             self.stdout.write(f"  - Meilleur résultat : {result.best_result}\n")
             self.stdout.write(f"  - Changement d'ELO : {result.elo_change}\n")
-            self.stdout.write(f"  - Runs cette saison : {result.run_this_season}\n")
+            self.stdout.write(f"  - Runs cette saison : {result.run_number}\n")
         self.stdout.write("Statistiques calculées avec succès.\n")

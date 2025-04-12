@@ -9,4 +9,4 @@ class BazaarAggregateCharacterRunResult:
     average_victory_number: float = 0
     best_result: str = Result.LOSS.label
     elo_change: int = 0
-    run_this_season: int = 0
+    run_number: int = 0

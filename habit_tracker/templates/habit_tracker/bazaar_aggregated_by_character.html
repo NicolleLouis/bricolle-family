@@ -1,4 +1,4 @@
-{% extends 'habit_tracker/base.html' %}
+{% extends 'habit_tracker/base_bazaar.html' %}
 
 {% block content %}
     <div class="container mt-4">
@@ -16,7 +16,7 @@
             {% for character_info in aggregated_infos %}
                 <tr>
                     <td>{{ character_info.character }}</td>
-                    <td>{{ character_info.run_this_season }}</td>
+                    <td>{{ character_info.run_number }}</td>
                     <td>{{ character_info.average_victory_number }}</td>
                     <td>{{ character_info.elo_change }}</td>
                     <td>{{ character_info.best_result }}</td>

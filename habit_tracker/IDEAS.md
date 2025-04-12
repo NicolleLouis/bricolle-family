@@ -1,7 +1,6 @@
 ## Bazaar
 
-- New header for bazaar
-- Header for character stats
+- Stats overall vs stats this season
 - Page character to validate with characters not a gold win this season
 - Evolution with time
 - Archetype stats
