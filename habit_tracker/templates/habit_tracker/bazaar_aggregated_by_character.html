@@ -1,0 +1,28 @@
+{% extends 'habit_tracker/base.html' %}
+
+{% block content %}
+    <div class="container mt-4">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Character</th>
+                <th>Nombre de parties</th>
+                <th>Résultat moyen</th>
+                <th>Elo change</th>
+                <th>Meilleur Résultat</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for character_info in aggregated_infos %}
+                <tr>
+                    <td>{{ character_info.character }}</td>
+                    <td>{{ character_info.run_this_season }}</td>
+                    <td>{{ character_info.average_victory_number }}</td>
+                    <td>{{ character_info.elo_change }}</td>
+                    <td>{{ character_info.best_result }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

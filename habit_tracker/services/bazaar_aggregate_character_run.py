@@ -8,7 +8,7 @@ from habit_tracker.value_objects.bazaar_aggregate_character_run import BazaarAgg
 class BazaarAggregateCharacterRunService:
     def __init__(self, character: str):
         self.character = character
-        self.result = BazaarAggregateCharacterRunResult(character=character)
+        self.result = BazaarAggregateCharacterRunResult(character=Character(character).label)
         self.sanitize()
         self.runs = self.get_runs()
         self.compute()

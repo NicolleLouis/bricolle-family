@@ -1,6 +1,7 @@
 ## Bazaar
 
-- Page best character displaying aggregation
+- New header for bazaar
+- Header for character stats
 - Page character to validate with characters not a gold win this season
 - Evolution with time
 - Archetype stats
