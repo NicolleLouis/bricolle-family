@@ -2,6 +2,19 @@
 
 {% block content %}
     <div class="container mt-4">
+        <div class="d-flex justify-content-end mb-3">
+            <div class="btn-group mb-3" role="group" aria-label="Select time range">
+                <a href="?range=current_season"
+                   class="btn btn-outline-primary {% if request.GET.range == 'current_season' or not request.GET.range %}active{% endif %}">
+                    Current Season
+                </a>
+                <a href="?range=all_time"
+                   class="btn btn-outline-primary {% if request.GET.range == 'all_time' %}active{% endif %}">
+                    All Time
+                </a>
+            </div>
+        </div>
+
         <table class="table table-striped">
             <thead>
             <tr>

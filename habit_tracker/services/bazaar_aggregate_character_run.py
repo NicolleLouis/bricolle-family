@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db.models import Avg
 
 from habit_tracker.constants.bazaar.character import Character
@@ -6,11 +7,11 @@ from habit_tracker.value_objects.bazaar_aggregate_character_run import BazaarAgg
 
 
 class BazaarAggregateCharacterRunService:
-    def __init__(self, character: str):
+    def __init__(self, character: str, run_range=None):
         self.character = character
         self.result = BazaarAggregateCharacterRunResult(character=Character(character).label)
         self.sanitize()
-        self.runs = self.get_runs()
+        self.runs = self.get_runs(run_range)
         self.compute()
 
     def sanitize(self):
@@ -23,12 +24,17 @@ class BazaarAggregateCharacterRunService:
         self.compute_elo_change()
         self.compute_run_number()
 
-    def get_runs(self):
-        newest_season = BazaarSeason.objects.order_by('-created_at').first()
-        return BazaarRun.objects.filter(
-            character=self.character,
-            season=newest_season
-        )
+    def get_runs(self, run_range = None):
+        if run_range is None or run_range == 'current_season':
+            newest_season = BazaarSeason.objects.order_by('-created_at').first()
+            return BazaarRun.objects.filter(
+                character=self.character,
+                season=newest_season
+            )
+        elif run_range == 'all_time':
+            return BazaarRun.objects.filter(character=self.character)
+        else:
+            raise ValidationError(f'run_range {run_range} not implemented')
 
     def compute_average_victory_number(self):
         self.result.average_victory_number = self.runs.aggregate(
