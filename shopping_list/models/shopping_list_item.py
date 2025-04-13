@@ -15,6 +15,7 @@ class ShoppingListItem(models.Model):
         ]
 
 
+@admin.register(ShoppingListItem)
 class ShoppingListItemAdmin(admin.ModelAdmin):
     list_display = ('ingredient', 'quantity')
     list_filter = ('ingredient__name',)

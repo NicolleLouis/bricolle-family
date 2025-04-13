@@ -9,6 +9,7 @@ class Course(models.Model):
         return self.name
 
 
+@admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ['name']

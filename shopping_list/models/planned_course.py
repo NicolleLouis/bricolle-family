@@ -10,6 +10,7 @@ class PlannedCourse(models.Model):
         return f"{self.quantity} {self.course.name}"
 
 
+@admin.register(PlannedCourse)
 class PlannedCourseAdmin(admin.ModelAdmin):
     list_display = ('course', 'quantity')
     list_filter = ('course__name',)

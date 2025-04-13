@@ -14,6 +14,7 @@ class CourseElement(models.Model):
         unique_together = ('course', 'ingredient')
 
 
+@admin.register(CourseElement)
 class CourseElementAdmin(admin.ModelAdmin):
     list_display = ('course', 'ingredient', 'quantity')
     list_filter = ('course__name',)

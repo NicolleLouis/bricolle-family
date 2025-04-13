@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
-from shopping_list.models import Course, PlannedCourse
+from shopping_list.models import Course, PlannedCourse, CourseHistory
 
 
 class PlannedCourseController:
@@ -30,6 +30,10 @@ class PlannedCourseController:
 
             planned_course = get_object_or_404(PlannedCourse, id=planned_course_id)
             planned_course.delete()
+
+            CourseHistory.objects.create(
+                course=planned_course.course
+            )
 
             return JsonResponse({"status": "success", "message": "Course removed."})
 

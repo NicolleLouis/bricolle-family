@@ -19,6 +19,7 @@ class Ingredient(models.Model):
         return f"{self.name} (par: {self.unit})"
 
 
+@admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'is_pantry_staples')
     list_filter = ('is_pantry_staples', 'category',)
