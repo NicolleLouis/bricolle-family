@@ -37,10 +37,12 @@ class BazaarAggregateCharacterRunService:
             raise ValidationError(f'run_range {run_range} not implemented')
 
     def compute_average_victory_number(self):
-        self.result.average_victory_number = round(
-            self.runs.aggregate(average_victory_number=Avg('win_number'))['average_victory_number'],
-            2
-        )
+        average = self.runs.aggregate(
+            average_victory_number=Avg('win_number')
+        )['average_victory_number']
+        if average is not None:
+            average = round(average, 2)
+        self.result.average_victory_number = average
 
     def compute_best_result(self):
         best_run = self.runs.order_by('-win_number').first()
