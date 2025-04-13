@@ -24,7 +24,7 @@ class BazaarAggregateCharacterRunService:
         self.compute_elo_change()
         self.compute_run_number()
 
-    def get_runs(self, run_range = None):
+    def get_runs(self, run_range=None):
         if run_range is None or run_range == 'current_season':
             newest_season = BazaarSeason.objects.order_by('-created_at').first()
             return BazaarRun.objects.filter(
@@ -37,9 +37,10 @@ class BazaarAggregateCharacterRunService:
             raise ValidationError(f'run_range {run_range} not implemented')
 
     def compute_average_victory_number(self):
-        self.result.average_victory_number = self.runs.aggregate(
-            average_victory_number=Avg('win_number')
-        )['average_victory_number']
+        self.result.average_victory_number = round(
+            self.runs.aggregate(average_victory_number=Avg('win_number'))['average_victory_number'],
+            2
+        )
 
     def compute_best_result(self):
         best_run = self.runs.order_by('-win_number').first()
