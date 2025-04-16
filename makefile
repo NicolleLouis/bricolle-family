@@ -12,3 +12,6 @@ test:
 
 console:
 	poetry run python manage.py shell
+
+collectstatic:
+	poetry run python manage.py collectstatic

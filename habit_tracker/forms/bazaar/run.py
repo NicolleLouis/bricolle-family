@@ -3,7 +3,7 @@ from django import forms
 from habit_tracker.models import BazaarRun, BazaarArchetype
 
 
-class BazaarRunForm(forms.ModelForm):
+class RunForm(forms.ModelForm):
     class Meta:
         model = BazaarRun
         fields = ['character', 'archetype', 'win_number', 'notes']

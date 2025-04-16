@@ -6,7 +6,7 @@ from habit_tracker.models import BazaarSeason, BazaarRun
 from habit_tracker.value_objects.bazaar_aggregate_character_run import BazaarAggregateCharacterRunResult
 
 
-class BazaarAggregateCharacterRunService:
+class AggregateCharacterRunService:
     def __init__(self, character: str, run_range=None):
         self.character = character
         self.result = BazaarAggregateCharacterRunResult(character=Character(character).label)

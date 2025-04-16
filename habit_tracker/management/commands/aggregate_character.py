@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from habit_tracker.constants.bazaar.character import Character
-from habit_tracker.services.bazaar_aggregate_character_run import BazaarAggregateCharacterRunService
+from habit_tracker.services.bazaar.bazaar_aggregate_character_run import BazaarAggregateCharacterRunService
 
 
 class Command(BaseCommand):
