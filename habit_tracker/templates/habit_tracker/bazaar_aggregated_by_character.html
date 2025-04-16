@@ -37,5 +37,19 @@
             {% endfor %}
             </tbody>
         </table>
+
+        <hr class="my-5">
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                        <h5 class="card-title">Character Repartition</h5>
+                        <img src="data:image/png;base64,{{ chart }}" alt="Character Repartition"
+                             class="img-fluid"/>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}

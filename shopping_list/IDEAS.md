@@ -1,9 +1,9 @@
+- When closing the meal, open a form to enter rating + Notes
+- Page to see meal history
+- History for ingredient bought? 
 - Add the notion link?
-- Empty cart
-- Scrapper to import recipe more easily? Or page to set them up
+- Button reset cart
 - Reverse search, input an ingredient, we sent you the list of meal containing it
 - Add seasons inside ingredients to put seasonal meal
-- Meal stats (When taken, comment, mark)
 - Make an algo to suggest meals (Based on season + not eaten in a while + coup de coeur (meal with high score))
-- Add a tracking of meal taken: date, meal, score, and a comment to help the next cook. Per user
-- Pull up the page of meal stats
+- Meal stats page
