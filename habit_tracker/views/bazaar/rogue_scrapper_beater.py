@@ -17,11 +17,11 @@ class RogueScrapperBeaterView:
                 life = form.cleaned_data['life']
                 dps = form.cleaned_data['dps']
                 hps = form.cleaned_data['hps']
-                result = RogueScrapperBeater.compute(
+                result = RogueScrapperBeater(
                     player_life=life,
+                    player_hps=hps,
                     player_dps=dps,
-                    player_hps=hps
-                )
+                ).result
                 if result is None:
                     result = cls.EQUALITY_MESSAGE
         else:
