@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'habit_tracker',
     'baby_name',
+    'babyberon',
     'shopping_list.apps.ShoppingListConfig',
     'django.contrib.admin',
     'django.contrib.auth',
