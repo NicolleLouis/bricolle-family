@@ -1,0 +1,27 @@
+{% extends 'shopping_list/base.html' %}
+
+{% block title %}Liste de plats{% endblock %}
+
+{% block content %}
+    <div class="container py-4">
+        <h2>List des derniers repas</h2>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Score (sur 10)</th>
+                <th>Commentaire</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for course in courses %}
+                <tr>
+                    <td>{{ course.course.name }}</td>
+                    <td>{{ course.rating }}</td>
+                    <td>{{ course.notes }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
