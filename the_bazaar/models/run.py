@@ -34,11 +34,6 @@ class Run(models.Model):
         blank=True
     )
 
-    class Meta:
-        permissions = [
-            ("bazaar_access", "Can access bazaar pages")
-        ]
-
     def save(self, *args, **kwargs):
         self.set_victory_type()
         self.set_season()

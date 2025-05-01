@@ -1,6 +1,5 @@
 import json
 
-from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
@@ -9,7 +8,6 @@ from shopping_list.models import Course, PlannedCourse, CourseHistory
 
 class PlannedCourseController:
     @staticmethod
-    @permission_required('shopping_list.shopping_list_access', raise_exception=True)
     def index(request):
         planned_courses = PlannedCourse.objects.all()
 
@@ -20,7 +18,6 @@ class PlannedCourseController:
         )
 
     @staticmethod
-    @permission_required('shopping_list.shopping_list_access', raise_exception=True)
     def delete(request):
         try:
             data = json.loads(request.body)
@@ -41,7 +38,6 @@ class PlannedCourseController:
             return HttpResponseBadRequest("Invalid JSON.")
 
     @staticmethod
-    @permission_required('shopping_list.shopping_list_access', raise_exception=True)
     def add_api(request):
         course_id = request.POST.get("course_id")
         if not course_id:
@@ -57,7 +53,6 @@ class PlannedCourseController:
         return redirect('shopping_list:planned_course')
 
     @staticmethod
-    @permission_required('shopping_list.shopping_list_access', raise_exception=True)
     def add_page(request):
         courses = Course.objects.all()
 

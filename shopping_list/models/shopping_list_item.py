@@ -9,11 +9,6 @@ class ShoppingListItem(models.Model):
     def __str__(self):
         return f"{self.quantity} {self.ingredient.name}"
 
-    class Meta:
-        permissions = [
-            ("shopping_list_access", "Can access shopping list module")
-        ]
-
 
 @admin.register(ShoppingListItem)
 class ShoppingListItemAdmin(admin.ModelAdmin):

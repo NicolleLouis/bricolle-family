@@ -62,6 +62,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'bricolle_family.middleware.login_required_middleware.LoginRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'bricolle_family.urls'
@@ -148,3 +149,5 @@ STORAGES["staticfiles"] = {"BACKEND": 'whitenoise.storage.CompressedManifestStat
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = 'login'

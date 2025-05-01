@@ -19,7 +19,6 @@ class RunListView(PermissionRequiredMixin, FilterView):
     template_name = "the_bazaar/run_list.html"
     context_object_name = 'runs'
     filterset_class = RunFilter
-    permission_required = 'the_bazaar.bazaar_access'
     ordering = ['-created_at']
 
 class RunCreateView(PermissionRequiredMixin, CreateView):
@@ -27,7 +26,6 @@ class RunCreateView(PermissionRequiredMixin, CreateView):
     form_class = RunForm
     template_name = 'the_bazaar/run_form.html'
     success_url = reverse_lazy('the_bazaar:run_list')
-    permission_required = 'the_bazaar.bazaar_access'
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -40,7 +38,6 @@ class RunUpdateView(PermissionRequiredMixin, UpdateView):
     form_class = RunForm
     template_name = 'the_bazaar/run_form.html'
     success_url = reverse_lazy('the_bazaar:run_list')
-    permission_required = 'the_bazaar.bazaar_access'
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -52,4 +49,3 @@ class RunDeleteView(PermissionRequiredMixin, DeleteView):
     model = Run
     template_name = 'the_bazaar/run_form_delete.html'
     success_url = reverse_lazy('the_bazaar:run_list')
-    permission_required = 'the_bazaar.bazaar_access'
