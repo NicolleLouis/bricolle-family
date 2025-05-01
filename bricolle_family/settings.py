@@ -41,7 +41,7 @@ ALLOWED_HOSTS = [
 INSTALLED_APPS = [
     'bootstrap5',
     'core.apps.CoreConfig',
-    'habit_tracker',
+    'the_bazaar',
     'baby_name',
     'babyberon',
     'shopping_list.apps.ShoppingListConfig',

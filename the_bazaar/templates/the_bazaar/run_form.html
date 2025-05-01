@@ -1,0 +1,14 @@
+{% extends 'the_bazaar/base.html' %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h2>{{ view.object.pk|yesno:"Modifier une run,Add une run" }}</h2>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success">Enregistrer</button>
+            <a href="{% url 'the_bazaar:run_list' %}" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'the_bazaar/base.html' %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="d-flex justify-content-end mb-3">
+            <div class="btn-group mb-3" role="group" aria-label="Select time range">
+                <a href="?range=current_season"
+                   class="btn btn-outline-primary {% if request.GET.range == 'current_season' or not request.GET.range %}active{% endif %}">
+                    Current Season
+                </a>
+                <a href="?range=all_time"
+                   class="btn btn-outline-primary {% if request.GET.range == 'all_time' %}active{% endif %}">
+                    All Time
+                </a>
+            </div>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Character</th>
+                <th>Nombre de parties</th>
+                <th>Résultat moyen</th>
+                <th>Elo change</th>
+                <th>Meilleur Résultat</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for character_info in aggregated_infos %}
+                <tr>
+                    <td>{{ character_info.character }}</td>
+                    <td>{{ character_info.run_number }}</td>
+                    <td>{{ character_info.average_victory_number }}</td>
+                    <td>{{ character_info.elo_change }}</td>
+                    <td>{{ character_info.best_result }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <hr class="my-5">
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                        <h5 class="card-title">Character Repartition</h5>
+                        <img src="data:image/png;base64,{{ chart }}" alt="Character Repartition"
+                             class="img-fluid"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

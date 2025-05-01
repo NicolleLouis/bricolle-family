@@ -9,5 +9,5 @@ urlpatterns = [
     path("shopping_list/", include("shopping_list.urls")),
     path('admin/', admin.site.urls),
     path('babyberon/', include("babyberon.urls")),
-    path('habit_tracker/', include("habit_tracker.urls")),
+    path('the_bazaar/', include("the_bazaar.urls")),
 ]
