@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import include, path
 
-from baby_name.views.home import home
+from bricolle_family.views.home import home
 from bricolle_family.views.login import Login
 
 urlpatterns = [
