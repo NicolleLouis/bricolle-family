@@ -1,5 +1,7 @@
 ## Bazaar
 
+- Make into own app
+
 - Scout trooper beater
 - Add poison computation
 - Add regen computation?
@@ -11,3 +13,13 @@
 - Archetype achievement
 - Bazaar icon
 - Character icon on filter
+
+# New Module
+
+- Chess
+- Albion Online
+- Civ7? A bit doubtful
+- Idle Champion
+- Altered
+- Reading
+- Northguard?

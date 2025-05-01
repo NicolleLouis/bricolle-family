@@ -14,7 +14,7 @@ from shopping_list.views.planned_ingredients import PlannedIngredientController
 app_name = "shopping_list"
 
 urlpatterns = [
-    path("", home, name="home"),
+    path("", PlannedIngredientController.index, name="shopping_list"),
     path("cart/", cart, name="cart"),
     path("configuration", configuration, name="configuration"),
     path("course", CourseController.index, name="course"),
@@ -29,8 +29,6 @@ urlpatterns = [
     path("planned_course/delete", PlannedCourseController.delete, name="planned_course_delete"),
     path("planned_course/new", PlannedCourseController.add_page, name="planned_course_add_page"),
     path("register/", Login.register, name="register"),
-    path("shopping_list", shopping_list, name="list"),
-    path("shopping_list/", PlannedIngredientController.index, name="shopping_list"),
     path("shopping_list/add", PlannedIngredientController.add_api, name="shopping_list_add_api"),
     path("shopping_list/delete", PlannedIngredientController.delete, name="shopping_list_delete"),
     path("shopping_list/new", PlannedIngredientController.add_page, name="shopping_list_add_page"),

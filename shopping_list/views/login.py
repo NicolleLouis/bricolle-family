@@ -22,7 +22,7 @@ class Login:
             if form.is_valid():
                 user = form.get_user()
                 login(request, user)
-                return redirect("shopping_list:home")
+                return redirect("shopping_list:shopping_list")
         else:
             form = AuthenticationForm()
         return render(request, "shopping_list/login.html", {"form": form})
