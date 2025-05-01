@@ -14,14 +14,14 @@ class RunFilter(django_filters.FilterSet):
         fields = ['character', 'archetype', 'result']
 
 
-class RunListView(PermissionRequiredMixin, FilterView):
+class RunListView(FilterView):
     model = Run
     template_name = "the_bazaar/run_list.html"
     context_object_name = 'runs'
     filterset_class = RunFilter
     ordering = ['-created_at']
 
-class RunCreateView(PermissionRequiredMixin, CreateView):
+class RunCreateView(CreateView):
     model = Run
     form_class = RunForm
     template_name = 'the_bazaar/run_form.html'
@@ -33,7 +33,7 @@ class RunCreateView(PermissionRequiredMixin, CreateView):
         return form
 
 
-class RunUpdateView(PermissionRequiredMixin, UpdateView):
+class RunUpdateView(UpdateView):
     model = Run
     form_class = RunForm
     template_name = 'the_bazaar/run_form.html'
@@ -45,7 +45,7 @@ class RunUpdateView(PermissionRequiredMixin, UpdateView):
         return form
 
 
-class RunDeleteView(PermissionRequiredMixin, DeleteView):
+class RunDeleteView(DeleteView):
     model = Run
     template_name = 'the_bazaar/run_form_delete.html'
     success_url = reverse_lazy('the_bazaar:run_list')
