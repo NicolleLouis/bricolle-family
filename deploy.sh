@@ -13,6 +13,6 @@ echo "🐗 Running Migrations..."
 docker compose exec web python manage.py migrate
 
 echo "🦦 Collect Staticfiles..."
-docker compose exec web python manage.py collectstatic --noinput --clear
+docker compose exec web python manage.py collectstatic --noinput
 
 echo "✅ Done!"
