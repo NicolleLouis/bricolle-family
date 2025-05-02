@@ -5,7 +5,8 @@ services:
     command: gunicorn bricolle_family.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/app
-      - ./static:/app/staticfiles
+      - ./static:/app/static
+      - ./staticfiles:/app/staticfiles
       - ./media:/app/media
     expose:
       - "8000"
