@@ -33,6 +33,7 @@ services:
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./static:/app/staticfiles
+      - ./staticfiles:/app/staticfiles
       - ./media:/app/media
     depends_on:
       - web
