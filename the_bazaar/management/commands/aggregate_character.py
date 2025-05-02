@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from the_bazaar.constants.character import Character
-from the_bazaar.services.bazaar.bazaar_aggregate_character_run import BazaarAggregateCharacterRunService
+from the_bazaar.services.aggregate_character_run import AggregateCharacterRunService
 
 
 class Command(BaseCommand):
@@ -9,7 +9,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         self.stdout.write("Calcul des statistiques agrégées pour chaque personnage...\n")
         for character in Character.values:
-            service = BazaarAggregateCharacterRunService(character=character)
+            service = AggregateCharacterRunService(character=character)
             result = service.result
             self.stdout.write(f"Personnage : {result.character}\n")
             self.stdout.write(f"  - Nombre de run: {len(service.runs)}\n")

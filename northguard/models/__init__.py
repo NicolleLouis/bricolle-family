@@ -1,0 +1,1 @@
+from .clan import Clan

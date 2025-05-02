@@ -1,6 +1,8 @@
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from bricolle_family import settings
 from bricolle_family.views.home import home
 from bricolle_family.views.login import Login
 
@@ -15,3 +17,5 @@ urlpatterns = [
     path("shopping_list/", include("shopping_list.urls")),
     path("the_bazaar/", include("the_bazaar.urls")),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
