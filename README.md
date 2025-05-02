@@ -39,3 +39,8 @@ An app made with love by Zozette to help us pick the name of the baby.
 
 An app to help you choose meal for the next week and then make the shopping list for you. It's shared with all your
 household, and you edit it during your shopping session.
+
+---
+
+## Crontab
+0 2 * * * /home/ubuntu/bricolle-family/backup_db.sh >> /home/ubuntu/bricolle-family/backup.log 2>&1
