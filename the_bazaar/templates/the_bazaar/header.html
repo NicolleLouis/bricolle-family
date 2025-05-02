@@ -16,14 +16,6 @@
                     <a class="nav-link" href="{% url 'the_bazaar:rogue_scrapper_beater' %}">🦖 Monster Analysis</a>
                 </li>
             </ul>
-            <div>
-                {% if user.is_authenticated %}
-                    <span>Hey, {{ user.username }}!</span>
-                    <a class="btn btn-primary ms-3" href="{% url 'the_bazaar:logout' %}">Logout</a>
-                {% else %}
-                    <a class="btn btn-primary" href="{% url 'the_bazaar:login' %}">Login</a>
-                {% endif %}
-            </div>
         </div>
     </div>
 </nav>

@@ -1,5 +1,4 @@
 - When closing the meal, open a form to enter rating + Notes
-- Page to see meal history
 - History for ingredient bought? 
 - Add the notion link?
 - Button reset cart
