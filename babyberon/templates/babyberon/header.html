@@ -4,15 +4,5 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <div>
-                {% if user.is_authenticated %}
-                    <span>Hey, {{ user.username }}!</span>
-                    <a class="btn btn-primary ms-3" href="{% url 'babyberon:logout' %}">Logout</a>
-                {% else %}
-                    <a class="btn btn-primary" href="{% url 'babyberon:login' %}">Login</a>
-                {% endif %}
-            </div>
-        </div>
     </div>
 </nav>

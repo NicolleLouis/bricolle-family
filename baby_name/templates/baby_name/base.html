@@ -45,53 +45,42 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <div class="collapse navbar-collapse" id="navbarMenu">
-                <ul class="navbar-nav me-auto">
+            <ul class="navbar-nav me-auto">
 
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'baby_name:home' %}">Accueil</a>
+                </li>
+                {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'baby_name:home' %}">Accueil</a>
+                        <a class="nav-link" href="{% url 'baby_name:vote_form' %}">🗳️ Vote</a>
                     </li>
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'baby_name:vote_form' %}">🗳️ Vote</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'baby_name:results' %}">📋 Vos prénoms</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'baby_name:evaluation_update' %}">🔄 Changer Vote</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'baby_name:ranking' %}">⚔️ Duels</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'baby_name:user_leaderboard' %}">📊 Classements par user</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'baby_name:global_leaderboard' %}">🏆 Classements général</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'baby_name:add_name' %}">🆕 Nouveau nom</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'baby_name:epuration' %}">🧹 La purge</a>
-                        </li>
-                    {% endif %}
-                </ul>
-                <div>
-                    {% if user.is_authenticated %}
-                        <span>Bonjour, {{ user.username }}!</span>
-                        <a class="btn btn-primary ms-3" href="{% url 'baby_name:logout' %}">Se déconnecter</a>
-                    {% else %}
-                        <a class="btn btn-primary" href="{% url 'baby_name:login' %}">Se connecter</a>
-                    {% endif %}
-                </div>
-            </div>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'baby_name:results' %}">📋 Vos prénoms</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'baby_name:evaluation_update' %}">🔄 Changer Vote</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'baby_name:ranking' %}">⚔️ Duels</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'baby_name:user_leaderboard' %}">📊 Classements par user</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'baby_name:global_leaderboard' %}">🏆 Classements général</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'baby_name:add_name' %}">🆕 Nouveau nom</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'baby_name:epuration' %}">🧹 La purge</a>
+                    </li>
+                {% endif %}
+            </ul>
         </div>
     </nav>
 </header>
 
-<!-- Contenu -->
 <div class="container">
     {% block content %}
     {% endblock %}
