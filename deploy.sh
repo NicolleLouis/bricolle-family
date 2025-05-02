@@ -3,9 +3,6 @@
 echo "📦 Pulling latest changes from Git..."
 git pull origin main
 
-echo "🧹 Cleaning old containers..."
-docker compose down -v
-
 echo "🐳 Rebuilding containers..."
 docker compose build
 
