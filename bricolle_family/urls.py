@@ -18,4 +18,5 @@ urlpatterns = [
     path("the_bazaar/", include("the_bazaar.urls")),
 ]
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.ENV == 'local':
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
