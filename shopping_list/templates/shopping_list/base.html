@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Shopping List{% endblock %}</title>
 
     {% load bootstrap5 %}
@@ -15,7 +16,7 @@
 
 <body>
 {% include 'shopping_list/header.html' %}
-<div class="container py-4">
+<div class="container-fluid py-4">
     {% block content %}
     {% endblock %}
 
