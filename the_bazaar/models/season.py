@@ -7,7 +7,7 @@ class Season(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     number = models.IntegerField(unique=True)
     name = models.CharField(
-        max_length=12,
+        max_length=100,
         unique=True,
     )
     version = models.CharField(
