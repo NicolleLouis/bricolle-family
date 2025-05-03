@@ -10,21 +10,13 @@
             {% csrf_token %}
 
             <div class="row mb-3">
-                <label for="ingredient-choice" class="form-label">Ingrédient:</label>
-                <select id="ingredient-choice" name="ingredient_id" class="form-select">
-                    <option value="">-------</option>
-                    {% for ingredient in ingredients %}
-                        <option value="{{ ingredient.id }}">
-                            {{ ingredient.name }} (par: {{ ingredient.unit }})
-                        </option>
-                    {% endfor %}
-                </select>
+                <label for="{{ form.ingredient_id.id_for_label }}" class="form-label">{{ form.ingredient_id.label }}</label>
+                {{ form.ingredient_id }}
             </div>
 
-        <div class="row mb-3">
-                <label for="ingredient-quantity">Quantitée:</label>
-                <input type="number" name="ingredient_quantity"
-                       id="ingredient-quantity">
+            <div class="row mb-3">
+                <label for="{{ form.ingredient_quantity.id_for_label }}">{{ form.ingredient_quantity.label }}</label>
+                {{ form.ingredient_quantity }}
             </div>
 
             <button type="submit" class="btn btn-success">Ajouter</button>
@@ -34,7 +26,7 @@
 
 {% block scripts %}
     <script>
-        new TomSelect("#ingredient-choice", {
+        new TomSelect("#id_ingredient_id", {
             create: false,
             sortField: {
                 field: "text",

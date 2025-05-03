@@ -1,9 +1,9 @@
 import json
-from decimal import Decimal
 
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
+from shopping_list.forms.shopping_list_item import ShoppingListItemForm
 from shopping_list.models import ShoppingListItem, Ingredient
 
 
@@ -36,29 +36,22 @@ class PlannedIngredientController:
 
     @staticmethod
     def add_api(request):
-        ingredient_id = request.POST.get("ingredient_id")
-        quantity = Decimal(request.POST.get("ingredient_quantity"))
-        if not ingredient_id:
-            return JsonResponse({"status": "error", "message": "Missing ingredient_id."}, status=400)
+        if request.method == 'POST':
+            form = ShoppingListItemForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect('shopping_list:shopping_list')
+        else:
+            form = ShoppingListItemForm()
 
-        ingredient = get_object_or_404(Ingredient, id=ingredient_id)
-
-        planned_ingredient, created = ShoppingListItem.objects.get_or_create(
-            ingredient=ingredient,
-            defaults={'quantity': quantity}
-        )
-        if not created:
-            planned_ingredient.quantity += quantity
-            planned_ingredient.save()
-
-        return redirect('shopping_list:shopping_list')
+        return redirect('shopping_list:shopping_list_add')
 
     @staticmethod
     def add_page(request):
-        ingredients = Ingredient.objects.all()
+        form = ShoppingListItemForm()
 
         return render(
             request,
             "shopping_list/add_shopping_list.html",
-            {"ingredients": ingredients}
+            {"form": form}
         )
