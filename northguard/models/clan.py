@@ -13,6 +13,9 @@ class Clan(models.Model):
     )
     image = models.ImageField(upload_to='northguard/clan_images/', null=True, blank=True)
 
+    def __str__(self):
+        return self.get_name_display()
+
 
 @admin.register(Clan)
 class ClanAdmin(admin.ModelAdmin):

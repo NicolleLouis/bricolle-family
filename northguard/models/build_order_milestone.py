@@ -16,9 +16,11 @@ class BuildOrderMilestone(models.Model):
         max_length=10,
         choices=BuildOrderMilestoneType.choices,
         default=BuildOrderMilestoneType.BUILDING,
-        unique=True
     )
     image = models.ImageField(upload_to='northguard/milestone_image/', null=True, blank=True)
+
+    def __str__(self):
+        return self.get_name_display()
 
 
 @admin.register(BuildOrderMilestone)

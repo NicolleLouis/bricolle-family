@@ -20,6 +20,9 @@ class BuildOrder(models.Model):
         related_name="build_orders",
     )
 
+    def __str__(self):
+        return f"{self.name} ({self.clan.get_name_display()})"
+
 
 @admin.register(BuildOrder)
 class BuildOrderAdmin(admin.ModelAdmin):

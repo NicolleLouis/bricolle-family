@@ -1,0 +1,29 @@
+{% extends 'northguard/base.html' %}
+{% block content %}
+    {% if build_orders %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Clan</th>
+                    <th>Edit</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for build_order in build_orders %}
+                    <tr>
+                        <td>{{ build_order.name }}</td>
+                        <td>{{ build_order.clan.name }}</td>
+                        <td><a class="text-decoration-none text-reset"
+                               href="{% url 'northguard:build_order_edit' build_order.id %}">⚙️</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>Aucun build order enregistré pour le moment.</p>
+    {% endif %}
+
+{% endblock %}
