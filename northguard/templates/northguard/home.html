@@ -2,13 +2,16 @@
 {% block content %}
     <div class="container py-5">
         <h1 class="mb-4 text-center">Bienvenue sur le projet Northguard {{ request.user.username }}</h1>
-
-        {% for clan in clans %}
-            <div class="milestone text-center mx-2">
-                <img src="{{ clan.image.url }}" alt="{{ clan.name }}" class="img-thumbnail"
-                     style="height: 100px;">
-            </div>
-        {% endfor %}
+        <div class="row">
+            {% for clan in clans %}
+                <div class="col-md-6 mb-3">
+                    <div class="milestone text-center mx-2">
+                        <img src="{{ clan.image.url }}" alt="{{ clan.name }}" class="img-thumbnail"
+                             style="height: 100px;">
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 
 {% endblock %}
