@@ -21,3 +21,4 @@ class ClanName(models.TextChoices):
     STOAT = "STOAT", "Stoat"
     TURTLE = "TURTLE", "Turtle"
     WOLF = "WOLF", "Wolf"
+    KRAKEN = "KRAKEN", "Kraken"

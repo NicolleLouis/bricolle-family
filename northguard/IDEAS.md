@@ -1,0 +1,6 @@
+- DB Add all images
+- Create Game model
+- Page to display BO (Textual Way for now) -> Per clan, only Template for now
+- When clicking on clan display BO + game stats
+- Run History page
+- Clan stats
