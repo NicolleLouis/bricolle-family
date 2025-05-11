@@ -4,7 +4,7 @@
         <h1 class="mb-4 text-center">Bienvenue sur le projet Northguard {{ request.user.username }}</h1>
         <div class="row">
             {% for clan in clans %}
-                <div class="col-md-6 mb-3">
+                <div class="col-md-6 mb-2">
                     <div class="milestone text-center mx-2">
                         <img src="{{ clan.image.url }}" alt="{{ clan.name }}" class="img-thumbnail"
                              style="height: 100px;">
