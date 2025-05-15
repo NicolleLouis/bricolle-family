@@ -70,20 +70,18 @@
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    'X-CSRFToken': '{{ csrf_token }}
+                    'X-CSRFToken': '{{ csrf_token }}'
                 },
-                body: JSON.stringify({pl nned_ingredient_id
-        :
-            p
-            en
-        })
-        .
-            the()
-        )
-
-            if (data.s a
-            document.getElementById(`planned_ingredient-${plannedIngre
-
-
+                body: JSON.stringify({planned_ingredient_id: plannedIngredientId})
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        document.getElementById(`planned_ingredient-${plannedIngredientId}`).remove();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+        }
     </script>
 {% endblock %}

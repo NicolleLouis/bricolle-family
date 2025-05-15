@@ -1,9 +1,12 @@
 ## Bazaar
 
 - Scout trooper beater
+- Viper Beater
+- Boarior beater
+- Page to see more monster beater
 - Add poison computation
 - Add regen computation?
-- Add burn computation -> Tricky
+- Add burn computation → Tricky
 - Page character to validate with characters not a gold win this season
 - Evolution with time (chart)
 - Archetype stats
