@@ -1,0 +1,23 @@
+{% extends 'the_bazaar/base.html' %}
+{% block content %}
+    {% load static %}
+
+    <div class="container py-5">
+        <h1 class="mb-4">Pick a monster!</h1>
+        <div class="row">
+            {% for monster in monsters %}
+                <div class="col-md-4 mb-4 text-center">
+                    <a href="{% url 'the_bazaar:monster_beater' monster.name %}" class="text-decoration-none">
+                        <img
+                                src="{% static 'the_bazaar/images/' %}{{ monster.name }}.png"
+                                alt="{{ monster.display_name }}"
+                                class="img-fluid rounded shadow-sm mb-2"
+                                style="width:120px; height:120px;"
+                        >
+                        <div class="h5">{{ monster.display_name }}</div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

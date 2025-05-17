@@ -1,5 +1,6 @@
 from django.shortcuts import render
 
+from the_bazaar.constants.monster import VIPER, ROGUE_SCRAPPER
 from the_bazaar.forms.monster_beater import MonsterBeaterForm
 from the_bazaar.services.monster_beater import MonsterBeaterService
 from the_bazaar.services.monster_finder import MonsterFinderService
@@ -7,6 +8,20 @@ from the_bazaar.services.monster_finder import MonsterFinderService
 
 class MonsterBeaterView:
     EQUALITY_MESSAGE = "Outcome unclear, Sandstorm will decide"
+
+    @staticmethod
+    def home(request):
+        monsters = [
+            VIPER,
+            ROGUE_SCRAPPER,
+        ]
+        return render(
+            request,
+            'the_bazaar/monster_beater_home.html',
+            {
+                'monsters': monsters
+            }
+        )
 
     @classmethod
     def form(cls, request, monster_name=None):
@@ -34,8 +49,8 @@ class MonsterBeaterView:
                 if result is None:
                     result = cls.EQUALITY_MESSAGE
                 details = service.life_at_sandstorm()
-                time_to_kill= service.time_to_kill
-                time_to_death= service.time_to_death
+                time_to_kill = service.time_to_kill
+                time_to_death = service.time_to_death
         else:
             form = MonsterBeaterForm()
 

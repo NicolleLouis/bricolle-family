@@ -13,4 +13,5 @@ urlpatterns = [
     path('add/', RunCreateView.as_view(), name='run_create'),
     path('character_stats/', BazaarAggregate.by_character, name='character_stats'),
     path('monster_beater/<str:monster_name>/', MonsterBeaterView.form, name='monster_beater'),
+    path('monster_beater_home', MonsterBeaterView.home, name='monster_beater_home'),
 ]
