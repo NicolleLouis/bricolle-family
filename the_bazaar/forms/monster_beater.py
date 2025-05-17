@@ -1,6 +1,6 @@
 from django import forms
 
-class RogueScrapperBeaterForm(forms.Form):
+class MonsterBeaterForm(forms.Form):
     life = forms.IntegerField(
         required=True,
         label="Life",
@@ -16,6 +16,13 @@ class RogueScrapperBeaterForm(forms.Form):
     hps = forms.DecimalField(
         required=False,
         label="HPS",
+        min_value=0,
+        max_digits=10,
+        decimal_places=1,
+    )
+    pps = forms.DecimalField(
+        required=False,
+        label="Poison Per Second",
         min_value=0,
         max_digits=10,
         decimal_places=1,

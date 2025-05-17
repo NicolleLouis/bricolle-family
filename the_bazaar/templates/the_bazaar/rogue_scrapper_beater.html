@@ -2,6 +2,7 @@
 
 {% block content %}
     {% load static %}
+    {% load widget_tweaks %}
 
     <div class="container mt-4">
         <div class="text-center mb-5">
@@ -17,20 +18,37 @@
                     <div class="card-body">
                         <h5 class="card-title mb-4 text-center">Combat Simulation</h5>
 
-                        <form method="post">
+                        <form method="post" class="container py-4">
                             {% csrf_token %}
-                            <div class="mb-3">
-                                <label for="id_life" class="form-label">Life:</label>
-                                {{ form.life }}
+
+                            <div class="row mb-3 align-items-center">
+                                <label for="id_life" class="col-sm-4 col-form-label">Life :</label>
+                                <div class="col-sm-8">
+                                    {{ form.life|add_class:"form-control" }}
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="id_dps" class="form-label">DPS:</label>
-                                {{ form.dps }}
+
+                            <div class="row mb-3 align-items-center">
+                                <label for="id_dps" class="col-sm-4 col-form-label">DPS :</label>
+                                <div class="col-sm-8">
+                                    {{ form.dps|add_class:"form-control" }}
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="id_hps" class="form-label">HPS:</label>
-                                {{ form.hps }}
+
+                            <div class="row mb-3 align-items-center">
+                                <label for="id_hps" class="col-sm-4 col-form-label">HPS :</label>
+                                <div class="col-sm-8">
+                                    {{ form.hps|add_class:"form-control" }}
+                                </div>
                             </div>
+
+                            <div class="row mb-4 align-items-center">
+                                <label for="id_pps" class="col-sm-4 col-form-label">Poison per second :</label>
+                                <div class="col-sm-8">
+                                    {{ form.pps|add_class:"form-control" }}
+                                </div>
+                            </div>
+
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary">Soumettre</button>
                             </div>
@@ -46,7 +64,19 @@
                                 {% elif result is False %}
                                     Defeat !
                                 {% else %}
-                                    {{ result }}
+                                    <div class="card-body">
+                                        <p class="h5 mb-2">{{ result }}</p>
+
+                                        <p class="mb-1">
+                                            <span class="badge bg-success me-2">Player Life</span>
+                                            {{ details.0 }}
+                                        </p>
+
+                                        <p class="mb-0">
+                                            <span class="badge bg-danger me-2">Monster Life</span>
+                                            {{ details.1 }}
+                                        </p>
+                                    </div>
                                 {% endif %}
                             </div>
                         {% endif %}
