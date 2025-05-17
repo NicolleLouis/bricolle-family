@@ -10,7 +10,7 @@ ROGUE_SCRAPPER = Character(
 
 VIPER = Character(
     total_life=75,
-    dps=3.33,
+    dps=6.33,
     pps=0.33,
     name="viper",
     display_name="Viper"
