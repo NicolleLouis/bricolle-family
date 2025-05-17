@@ -1,8 +1,8 @@
 ## Bazaar
 
 - Scout trooper beater
-- Viper Beater
-- Boarior beater
+- Viper Beater (Add an Initial poison option for monster only)
+- Boarrior beater
 - Page to see more monster beater
 - Add poison computation
 - Add regen computation?

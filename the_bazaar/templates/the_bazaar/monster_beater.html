@@ -6,9 +6,9 @@
 
     <div class="container mt-4">
         <div class="text-center mb-5">
-            <img src="{% static 'the_bazaar/images/rogue_scrapper.png' %}" alt="Rogue Scrapper"
+            <img src="{% static 'the_bazaar/images/' %}{{ monster.name }}.png" alt="{{ monster.display_name }}"
                  class="img-fluid rounded shadow-sm" style="width: 120px; height: 120px;">
-            <h1 class="display-4 fw-bold">Rogue Scrapper Beater</h1>
+            <h1 class="display-4 fw-bold">{{ monster.display_name }} Beater</h1>
             <p class="text-muted">Can you survive the fight?</p>
         </div>
 
@@ -99,7 +99,7 @@
         </div>
 
         <div class="mt-4 text-center">
-            <img src="{% static 'the_bazaar/images/rogue_scrapper_board.png' %}"
+            <img src="{% static 'the_bazaar/images/' %}{{ monster.name }}_board.png"
                  alt="Rogue Scrapper Board"
                  class="img-fluid rounded shadow-sm"
                  style="transform: scale(0.8);">

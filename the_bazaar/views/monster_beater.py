@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 from the_bazaar.forms.monster_beater import MonsterBeaterForm
 from the_bazaar.services.monster_beater import MonsterBeaterService
+from the_bazaar.services.monster_finder import MonsterFinderService
 
 
 class MonsterBeaterView:
@@ -13,6 +14,7 @@ class MonsterBeaterView:
         details = None
         time_to_kill = None
         time_to_death = None
+        monster = MonsterFinderService.find_monster(monster_name)
 
         if request.method == 'POST':
             form = MonsterBeaterForm(request.POST)
@@ -46,5 +48,6 @@ class MonsterBeaterView:
                 'details': details,
                 'time_to_kill': time_to_kill,
                 'time_to_death': time_to_death,
+                'monster': monster,
             }
         )

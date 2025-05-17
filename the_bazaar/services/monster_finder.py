@@ -1,9 +1,10 @@
-from the_bazaar.constants.monster import ROGUE_SCRAPPER
+from the_bazaar.constants.monster import ROGUE_SCRAPPER, VIPER
 
 
 class MonsterFinderService:
     MONSTERS = [
         ROGUE_SCRAPPER,
+        VIPER,
     ]
 
     @classmethod
