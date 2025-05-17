@@ -7,3 +7,4 @@ class Character:
     dps: float = 0
     hps: float = 0
     pps: float = 0
+    name: str = None

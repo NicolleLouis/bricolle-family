@@ -78,6 +78,19 @@
                                         </p>
                                     </div>
                                 {% endif %}
+                                <hr class="my-4">
+
+                                <dl class="row">
+                                    {% if time_to_death is not none %}
+                                        <dt class="col-sm-6">Defeat time</dt>
+                                        <dd class="col-sm-6">{{ time_to_death }} (s)</dd>
+                                    {% endif %}
+
+                                    {% if time_to_kill is not none %}
+                                        <dt class="col-sm-6">Victory time</dt>
+                                        <dd class="col-sm-6">{{ time_to_kill }} (s)</dd>
+                                    {% endif %}
+                                </dl>
                             </div>
                         {% endif %}
                     </div>

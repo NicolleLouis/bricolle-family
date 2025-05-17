@@ -4,12 +4,15 @@ from the_bazaar.forms.monster_beater import MonsterBeaterForm
 from the_bazaar.services.monster_beater import MonsterBeaterService
 
 
-class RogueScrapperBeaterView:
+class MonsterBeaterView:
     EQUALITY_MESSAGE = "Outcome unclear, Sandstorm will decide"
 
     @classmethod
-    def form(cls, request):
+    def form(cls, request, monster_name=None):
         result = None
+        details = None
+        time_to_kill = None
+        time_to_death = None
 
         if request.method == 'POST':
             form = MonsterBeaterForm(request.POST)
@@ -23,16 +26,25 @@ class RogueScrapperBeaterView:
                     player_hps=hps,
                     player_dps=dps,
                     player_pps=pps,
+                    monster_name=monster_name,
                 )
                 result = service.result
                 if result is None:
                     result = cls.EQUALITY_MESSAGE
                 details = service.life_at_sandstorm()
+                time_to_kill= service.time_to_kill
+                time_to_death= service.time_to_death
         else:
             form = MonsterBeaterForm()
 
         return render(
             request,
-            'the_bazaar/rogue_scrapper_beater.html',
-            {'form': form, 'result': result, 'details': details}
+            'the_bazaar/monster_beater.html',
+            {
+                'form': form,
+                'result': result,
+                'details': details,
+                'time_to_kill': time_to_kill,
+                'time_to_death': time_to_death,
+            }
         )

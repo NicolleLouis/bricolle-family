@@ -1,14 +1,20 @@
-from the_bazaar.constants.monster import ROGUE_SCRAPPER
+from the_bazaar.services.monster_finder import MonsterFinderService
 from the_bazaar.value_objects.character import Character
 
 
 class MonsterBeaterService:
     SANDSTORM_TIME = 30
 
-    def __init__(self, player_life, player_dps=0, player_hps=0, player_pps=0):
+    def __init__(self, player_life, player_dps=0, player_hps=0, player_pps=0, monster_name=None):
         self.player = self.generate_player(player_life, player_dps, player_hps, player_pps)
-        self.opponent = ROGUE_SCRAPPER
+        self.opponent = self.generate_opponent(monster_name)
+        self.time_to_kill = self.compute_time_to_kill()
+        self.time_to_death = self.compute_time_to_death()
         self.result = self.compute()
+
+    @staticmethod
+    def generate_opponent(monster_name):
+        return MonsterFinderService.find_monster(monster_name)
 
     @staticmethod
     def generate_player(player_life, player_dps=0, player_hps=0, player_pps=0):
@@ -33,28 +39,25 @@ class MonsterBeaterService:
         )
 
     def compute(self):
-        time_to_death = self.compute_time_to_death()
-        time_to_kill = self.compute_time_to_kill()
-
-        if time_to_death is None:
-            if time_to_kill is None:
+        if self.time_to_death is None:
+            if self.time_to_kill is None:
                 return None
             else:
                 return True
         else:
-            if time_to_kill is None:
+            if self.time_to_kill is None:
                 return False
             else:
-                return time_to_kill < time_to_death
+                return self.time_to_kill < self.time_to_death
 
     def compute_time_to_kill(self):
-        return self.time_to_kill(self.player, self.opponent)
+        return self.time_to_defeat(self.player, self.opponent)
 
     def compute_time_to_death(self):
-        return self.time_to_kill(self.opponent, self.player)
+        return self.time_to_defeat(self.opponent, self.player)
 
     @classmethod
-    def time_to_kill(cls, character, opponent):
+    def time_to_defeat(cls, character, opponent):
         for time in range(60):
             damage = cls.damage_at_time(character, opponent, time)
             if damage >= opponent.total_life:
