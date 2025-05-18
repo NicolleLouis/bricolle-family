@@ -68,8 +68,9 @@ class MonsterBeaterService:
     def damage_at_time(character, opponent, time):
         poison_damage = character.pps * time ** 2 / 2
         regular_damage = character.dps * time
+        damage_augmentation = character.dps_speed ** 2 /2
         soaked_damage = opponent.hps * time
-        return poison_damage + regular_damage - soaked_damage
+        return poison_damage + damage_augmentation + regular_damage - soaked_damage
 
     def life_at_sandstorm(self):
         player_life = self.player.total_life - self.damage_at_time(self.opponent, self.player, self.SANDSTORM_TIME)

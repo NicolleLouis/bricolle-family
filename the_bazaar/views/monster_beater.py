@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-from the_bazaar.constants.monster import VIPER, ROGUE_SCRAPPER
+from the_bazaar.constants.monster import VIPER, ROGUE_SCRAPPER, BOARRIOR
 from the_bazaar.forms.monster_beater import MonsterBeaterForm
 from the_bazaar.services.monster_beater import MonsterBeaterService
 from the_bazaar.services.monster_finder import MonsterFinderService
@@ -14,6 +14,7 @@ class MonsterBeaterView:
         monsters = [
             VIPER,
             ROGUE_SCRAPPER,
+            BOARRIOR,
         ]
         return render(
             request,

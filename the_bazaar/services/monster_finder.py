@@ -1,8 +1,9 @@
-from the_bazaar.constants.monster import ROGUE_SCRAPPER, VIPER
+from the_bazaar.constants.monster import ROGUE_SCRAPPER, VIPER, BOARRIOR
 
 
 class MonsterFinderService:
     MONSTERS = [
+        BOARRIOR,
         ROGUE_SCRAPPER,
         VIPER,
     ]
