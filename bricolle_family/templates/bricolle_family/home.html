@@ -5,10 +5,12 @@
             border-radius: 1rem;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
+
         .module-card:hover {
             transform: scale(1.03);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
+
         body {
             background-color: #f8f9fa;
         }
@@ -29,6 +31,15 @@
                     </a>
                 </div>
             {% endfor %}
+        </div>
+
+        <hr class="my-4">
+
+        <div class="row">
+            <div class="col-md-12">
+                <p class="mb-1"><strong>Digicode extérieur :</strong> 0344</p>
+                <p class="mb-0"><strong>Digicode intérieur :</strong> 1347</p>
+            </div>
         </div>
     </div>
 {% endblock %}
