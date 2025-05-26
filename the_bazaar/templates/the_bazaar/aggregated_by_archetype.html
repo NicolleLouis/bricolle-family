@@ -1,0 +1,51 @@
+{% extends 'the_bazaar/base.html' %}
+
+{% block title %}Archetype Statistics{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1 class="mb-4">Archetype Statistics</h1>
+
+        <div class="d-flex justify-content-end mb-3">
+            <div class="btn-group mb-3" role="group" aria-label="Select time range">
+                <a href="?range=current_season"
+                   class="btn btn-outline-primary {% if current_range == 'current_season' or not current_range %}active{% endif %}">
+                    Current Season
+                </a>
+                <a href="?range=all_time"
+                   class="btn btn-outline-primary {% if current_range == 'all_time' %}active{% endif %}">
+                    All Time
+                </a>
+            </div>
+        </div>
+
+        <table class="table table-striped table-hover">
+            <thead class="thead-dark">
+            <tr>
+                <th>Archetype</th>
+                <th>Character</th>
+                <th>Number of Runs</th>
+                <th>Average Wins</th>
+                <th>Best Result</th>
+                <th>Elo Change</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for info in aggregated_infos %}
+                <tr class="{% if info.best_result == "Gold win" %}table-success{% elif info.best_result == "Silver win" %}table-info{% endif %}">
+                    <td>{{ info.archetype_name }}</td>
+                    <td>{{ info.character_name }}</td>
+                    <td>{{ info.run_number }}</td>
+                    <td>{{ info.average_victory_number|floatformat:2|default:"N/A" }}</td>
+                    <td>{{ info.best_result|default:"N/A" }}</td>
+                    <td>{{ info.elo_change }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No archetype data available for the selected period.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
