@@ -1,13 +1,12 @@
 from django.contrib import admin
 from django.db import models
-from django.utils import timezone # Import timezone for bought_date
 
-from shopping_list.models.ingredient import Ingredient # Ensure correct import path for Ingredient
+from shopping_list.models.ingredient import Ingredient
 
 class IngredientHistory(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete=models.PROTECT)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
-    bought_date = models.DateTimeField(default=timezone.now) # Use default=timezone.now for more flexibility if needed later, or auto_now_add=True if strictly creation time
+    bought_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.ingredient.name} - {self.quantity} on {self.bought_date.strftime('%Y-%m-%d')}"
