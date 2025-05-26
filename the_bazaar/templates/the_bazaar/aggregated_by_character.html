@@ -26,7 +26,7 @@
             </thead>
             <tbody>
             {% for character_info in aggregated_infos %}
-                <tr class="{% if character_info.best_result == "Gold win" %}table-success{% endif %}">
+                <tr class="{% if info.best_result == "Gold win" %}table-success{% elif info.best_result == "Silver win" %}table-info{% endif %}">
                     <td>{{ character_info.character }}</td>
                     <td>{{ character_info.run_number }}</td>
                     <td>{{ character_info.average_victory_number }}</td>

@@ -14,15 +14,10 @@ class BazaarAggregate:
 
         for archetype in archetypes:
             try:
-                # Ensure archetype.id is used as archetype_id as expected by the service
                 service = AggregateArchetypeRunService(archetype_id=archetype.id, run_range=range_param)
                 aggregated_infos.append(service.result)
             except Exception as e:
-                # Basic error handling: print to console and skip this archetype
-                # In a production environment, logging would be more appropriate
                 print(f"Error processing archetype {archetype.name} (ID: {archetype.id}): {e}")
-                # Optionally, you could append a placeholder or error object to aggregated_infos
-                # to make it visible in the template that some data is missing.
 
         context = {
             "aggregated_infos": aggregated_infos,

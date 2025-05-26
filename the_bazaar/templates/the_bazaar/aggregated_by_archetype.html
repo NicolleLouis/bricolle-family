@@ -27,7 +27,6 @@
                 <th>Number of Runs</th>
                 <th>Average Wins</th>
                 <th>Best Result</th>
-                <th>Elo Change</th>
             </tr>
             </thead>
             <tbody>
@@ -38,7 +37,6 @@
                     <td>{{ info.run_number }}</td>
                     <td>{{ info.average_victory_number|floatformat:2|default:"N/A" }}</td>
                     <td>{{ info.best_result|default:"N/A" }}</td>
-                    <td>{{ info.elo_change }}</td>
                 </tr>
             {% empty %}
                 <tr>
