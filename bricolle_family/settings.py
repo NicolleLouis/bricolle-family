@@ -7,7 +7,12 @@ from django.conf.global_settings import STORAGES
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Ensure a default SECRET_KEY is set for environments where it might not be (e.g., testing)
+# Try to load from environment, but if not found or is None, use a dummy key.
 SECRET_KEY = config('SECRET_KEY', default=None)
+if not SECRET_KEY:
+    SECRET_KEY = 'dummy_secret_key_for_testing_do_not_use_in_production'
+
 
 DEBUG = config('DEBUG', default=True)
 ENV = config('ENV', default='local')
