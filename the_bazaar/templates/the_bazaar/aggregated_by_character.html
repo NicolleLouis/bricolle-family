@@ -25,12 +25,12 @@
             </tr>
             </thead>
             <tbody>
-            {% for character_info in aggregated_infos %}
-                <tr class="{% if info.best_result == "Gold win" %}table-success{% elif info.best_result == "Silver win" %}table-info{% endif %}">
-                    <td>{{ character_info.character }}</td>
-                    <td>{{ character_info.run_number }}</td>
-                    <td>{{ character_info.average_victory_number }}</td>
-                    <td>{{ character_info.best_result }}</td>
+            {% for info in aggregated_infos %}
+                 <tr class="{% if info.best_result == "Gold win" %}table-success{% elif info.best_result == "Silver win" %}table-info{% endif %}">
+                    <td>{{ info.character }}</td>
+                    <td>{{ info.run_number }}</td>
+                    <td>{{ info.average_victory_number }}</td>
+                    <td>{{ info.best_result }}</td>
                 </tr>
             {% endfor %}
             </tbody>
