@@ -15,7 +15,7 @@ class BazaarAggregate:
 
         if range_param == 'all_time':
             archetypes = Archetype.objects.all().order_by('character', 'name')
-        else:  # Default to current_season
+        else:
             archetypes = Archetype.objects.filter(is_meta_viable=True).order_by('character', 'name')
         
         aggregated_infos = []
@@ -31,7 +31,7 @@ class BazaarAggregate:
 
         if orderby_param == 'run_number':
             aggregated_infos.sort(key=lambda x: x.run_number, reverse=True)
-        else:  # Default to archetype_name or if param is invalid
+        else:
             aggregated_infos.sort(key=lambda x: x.archetype_name)
 
         if filter_form.is_valid():
