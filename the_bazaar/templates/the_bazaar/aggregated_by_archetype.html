@@ -20,6 +20,10 @@
         </div>
 
         <form method="get" action="" class="mb-3">
+            {% if current_range %}
+                <input type="hidden" name="range" value="{{ current_range }}">
+            {% endif %}
+
             <div class="row g-3 align-items-end">
                 <div class="col-auto">
                     {{ filter_form.character.label_tag }}
