@@ -49,6 +49,7 @@ class AggregateArchetypeRunService:
             return
 
         self.compute_average_victory_number()
+        self.compute_win_number()
         self.compute_best_result()
         self.compute_elo_change()
 
@@ -61,6 +62,9 @@ class AggregateArchetypeRunService:
         else:
             average = 0.0
         self.result.average_victory_number = average
+
+    def compute_win_number(self):
+        self.result.win_number = self.runs.filter(win_number=10).count()
 
     def compute_best_result(self):
         best_run = self.runs.order_by('-win_number').first()

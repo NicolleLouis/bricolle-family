@@ -8,3 +8,4 @@ class AggregateArchetypeRunResult:
     average_victory_number: float = None
     best_result: str = None
     elo_change: int = 0
+    win_number: int = 0
