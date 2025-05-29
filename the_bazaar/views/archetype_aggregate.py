@@ -27,13 +27,6 @@ class BazaarAggregate:
             except Exception as e:
                 print(f"Error processing archetype {archetype.name} (ID: {archetype.id}): {e}")
 
-        orderby_param = request.GET.get('orderby', 'archetype_name')
-
-        if orderby_param == 'run_number':
-            aggregated_infos.sort(key=lambda x: x.run_number, reverse=True)
-        else:
-            aggregated_infos.sort(key=lambda x: x.archetype_name)
-
         if filter_form.is_valid():
             character_filter = filter_form.cleaned_data.get('character')
             best_result_filter = filter_form.cleaned_data.get('best_result')
@@ -49,11 +42,12 @@ class BazaarAggregate:
                     info for info in aggregated_infos if info.best_result == expected_best_result_label
                 ]
 
+        aggregated_infos.sort(key=lambda x: x.run_number, reverse=True)
+
         context = {
             "aggregated_infos": aggregated_infos,
             "range_options": ["current_season", "all_time"],
             "current_range": range_param,
-            "current_orderby": orderby_param,
             "filter_form": filter_form,
         }
         return render(
