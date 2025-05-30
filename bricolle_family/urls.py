@@ -9,6 +9,7 @@ from bricolle_family.views.login import Login
 urlpatterns = [
     path("", home, name="home"),
     path("admin/", admin.site.urls),
+    path("altered/", include("altered.urls")),
     path("baby_name/", include("baby_name.urls")),
     path("babyberon/", include("babyberon.urls")),
     path("login", Login.user_login, name="login"),
