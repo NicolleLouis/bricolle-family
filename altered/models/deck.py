@@ -14,7 +14,7 @@ class Deck(models.Model):
         choices=Faction.choices,
     )
     champion = models.ForeignKey(Champion, on_delete=models.PROTECT, related_name='decks')
-    altered_id = models.CharField(max_length=20)
+    altered_id = models.CharField(max_length=32)
 
     def __str__(self):
         return f"{self.name} ({self.champion})"
