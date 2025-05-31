@@ -16,7 +16,7 @@ class Deck(models.Model):
         return self.versions.order_by('-created_at').first()
 
     def __str__(self):
-        return f"{self.name} ({self.champion})"
+        return f"{self.name} ({self.champion.name})"
 
     @property
     def faction(self):
