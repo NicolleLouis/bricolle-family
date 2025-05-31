@@ -3,11 +3,15 @@ from django.contrib import admin
 from django.urls import include, path
 
 from bricolle_family import settings
-from bricolle_family.views.home import home
 from bricolle_family.views.login import Login
+from bricolle_family.views.summary import SummaryView
 
 urlpatterns = [
-    path("", home, name="home"),
+    path("", SummaryView.home, name="home"),
+    path("games", SummaryView.games, name="games"),
+    path("more", SummaryView.more, name="more"),
+
+
     path("admin/", admin.site.urls),
     path("altered/", include("altered.urls")),
     path("baby_name/", include("baby_name.urls")),

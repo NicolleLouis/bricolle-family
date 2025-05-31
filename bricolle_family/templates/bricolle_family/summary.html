@@ -20,7 +20,7 @@
         <h1 class="mb-4">Bienvenue chez vous {{ request.user.username }}!</h1>
         <div class="row">
             {% for module in modules %}
-                <div class="col-md-4 mb-4">
+                <div class="col-md-6 mb-4">
                     <a href="{{ module.url }}" class="text-decoration-none">
                         <div class="card module-card shadow-sm h-100 text-white"
                              style="background-color: {{ module.color }}">
