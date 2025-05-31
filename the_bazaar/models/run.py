@@ -37,7 +37,7 @@ class Run(models.Model):
     def save(self, *args, **kwargs):
         self.set_victory_type()
         self.set_season()
-        self.full_clean()
+        self.clean()
         super().save(*args, **kwargs)
 
     def clean(self):
@@ -80,6 +80,7 @@ class Run(models.Model):
                 return 1
             case Result.GOLD_WIN:
                 return 2
+        raise NotImplementedError
 
 
 @admin.register(Run)

@@ -11,7 +11,7 @@ class DeckVersion(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.deck} ({self.version_number})"
+        return f"{self.deck.name} (v{self.version_number})"
 
 
 @admin.register(DeckVersion)
