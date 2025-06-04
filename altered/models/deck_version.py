@@ -8,6 +8,7 @@ class DeckVersion(models.Model):
     version_number = models.IntegerField()
     deck = models.ForeignKey(Deck, on_delete=models.PROTECT, related_name='versions')
     content = models.TextField(null=True, blank=True)
+    change_cost = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -16,6 +17,6 @@ class DeckVersion(models.Model):
 
 @admin.register(DeckVersion)
 class DeckVersionAdmin(admin.ModelAdmin):
-    list_display = ('deck', 'version_number',)
+    list_display = ('deck', 'version_number', 'change_cost')
     list_filter = ('deck',)
     ordering = ('version_number',)
