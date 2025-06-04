@@ -19,8 +19,6 @@ class Command(BaseCommand):
 
         with open(csv_path, newline="", encoding="utf-8-sig") as csvfile:
             reader = csv.reader(csvfile)
-            # Skip header if present
-            header = next(reader, None)
             for row in reader:
                 if len(row) < 4:
                     self.stderr.write(f"Skipping invalid row: {row}")
