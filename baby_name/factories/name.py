@@ -7,5 +7,5 @@ class NameFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Name
 
-    name = factory.Faker('first_name')
+    name = factory.Sequence(lambda n: f"Name{n}")
     sex = factory.Faker('boolean')

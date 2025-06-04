@@ -24,6 +24,10 @@
                 {{ filter.form.result|add_class:"form-select form-select-sm" }}
             </div>
             <div class="col-auto">
+                <label for="id_greenheart_dungeon" class="form-label">Greenheart Dungeon</label>
+                {{ filter.form.greenheart_dungeon|add_class:"form-select form-select-sm" }}
+            </div>
+            <div class="col-auto">
                 <button class="btn btn-sm btn-primary" type="submit">Filtrer</button>
                 <a href="{% url 'the_bazaar:run_list' %}" class="btn btn-sm btn-primary">Reset</a>
             </div>
