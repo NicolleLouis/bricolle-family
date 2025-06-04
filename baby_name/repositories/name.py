@@ -7,11 +7,15 @@ from core.repositories.user import UserRepository
 
 class NameRepository:
     @classmethod
-    def get_all_positives_in_family(cls, sex: bool, user: User):
-        users = UserRepository.get_family_members(user)
-        names = cls.get_all_family_positive(sex=sex, user=user)
-        for user in users:
-            evaluated_names = Evaluation.objects.filter(user=user).values('name')
+    def get_all_positives_in_family(cls, sex: bool, user: User | None = None):
+        if user is None:
+            users = []
+            names = cls.get_all_family_positive(sex=sex, user=None)
+        else:
+            users = UserRepository.get_family_members(user)
+            names = cls.get_all_family_positive(sex=sex, user=user)
+        for member in users:
+            evaluated_names = Evaluation.objects.filter(user=member).values('name')
             names = names.filter(id__in=evaluated_names)
         return names
 
@@ -28,7 +32,7 @@ class NameRepository:
         )
 
     @staticmethod
-    def get_all_family_positive(sex: bool, user: User) -> QuerySet:
+    def get_all_family_positive(sex: bool, user: User | None = None) -> QuerySet:
         from baby_name.repositories.evaluation import EvaluationRepository
 
         positive_votes = EvaluationRepository.get_all_family_positive_vote(user=user)

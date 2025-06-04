@@ -7,7 +7,11 @@ from core.repositories.user import UserRepository
 
 class EvaluationRepository:
     @staticmethod
-    def get_all_family_positive_vote(user: User):
+    def get_all_family_positive_vote(user: User | None = None):
+        if user is None:
+            return Evaluation.objects.filter(
+                score__in=[NameChoice.OUI.value, NameChoice.COUP_DE_COEUR.value]
+            )
         family_members = UserRepository.get_family_members(user)
         return Evaluation.objects.filter(
             user__in=family_members,

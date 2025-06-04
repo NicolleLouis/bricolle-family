@@ -32,21 +32,26 @@
                 <th>Taille</th>
                 <th>Maîtrisé</th>
                 <th>Victoires</th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
             {% for obj in objects %}
-                <tr>
+                <tr class="{% if obj.was_mastered %}table-success{% endif %}">
                     <td>{{ obj.name }}</td>
                     <td>{{ obj.get_character_display }}</td>
                     <td>{{ obj.card_set }}</td>
                     <td>{{ obj.get_size_display }}</td>
                     <td>{% if obj.was_mastered %}✅{% else %}❌{% endif %}</td>
                     <td>{{ obj.victory_number }}</td>
+                    <td>
+                        <a href="{% url 'the_bazaar:object_add_victory' obj.id %}"
+                           class="btn btn-sm btn-outline-secondary">Add a victory</a>
+                    </td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="6">Aucun objet trouvé.</td>
+                    <td colspan="7">Aucun objet trouvé.</td>
                 </tr>
             {% endfor %}
             </tbody>
