@@ -10,7 +10,7 @@ from the_bazaar.models import Run, Archetype
 class RunFilter(django_filters.FilterSet):
     class Meta:
         model = Run
-        fields = ['character', 'archetype', 'result']
+        fields = ['character', 'archetype', 'result', 'greenheart_dungeon']
 
 
 class RunListView(FilterView):
