@@ -1,5 +1,6 @@
 ## Bazaar
 
+- Achievement feature (Beat the game with all items) → Items model and list + Way to see score and add new achievement
 - Scout trooper beater
 - Add regen computation?
 - Add burn computation → Tricky
