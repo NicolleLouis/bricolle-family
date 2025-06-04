@@ -28,8 +28,8 @@
             <tr>
                 <th>Nom</th>
                 <th>Character</th>
-                <th>Victoires</th>
                 <th>Maîtrisé</th>
+                <th>Victoires</th>
             </tr>
             </thead>
             <tbody>
@@ -37,8 +37,8 @@
                 <tr>
                     <td>{{ obj.name }}</td>
                     <td>{{ obj.get_character_display }}</td>
-                    <td>{{ obj.victory_number }}</td>
                     <td>{% if obj.was_mastered %}✅{% else %}❌{% endif %}</td>
+                    <td>{{ obj.victory_number }}</td>
                 </tr>
             {% empty %}
                 <tr>
