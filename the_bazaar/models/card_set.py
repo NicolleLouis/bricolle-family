@@ -6,7 +6,7 @@ from the_bazaar.constants.character import Character
 
 class CardSet(models.Model):
     name = models.CharField(max_length=32)
-    character = models.CharField(max_length=9, choices=Character.choices)
+    character = models.CharField(max_length=9, choices=Character.choices, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -18,4 +18,3 @@ class CardSetAdmin(admin.ModelAdmin):
     list_filter = ("character",)
     search_fields = ["name"]
     ordering = ("name",)
-
