@@ -1,5 +1,4 @@
 import django_filters
-from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import UpdateView, CreateView, DeleteView
 from django_filters.views import FilterView
