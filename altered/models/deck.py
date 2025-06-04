@@ -2,7 +2,6 @@ from django.contrib import admin, messages
 from django.db import models
 
 from altered.models import Champion
-from altered.services.altered_fetch_deck_data import AlteredFetchDeckDataService
 
 
 class Deck(models.Model):
@@ -33,6 +32,8 @@ class DeckAdmin(admin.ModelAdmin):
 
     @admin.action(description="Update version")
     def update_version(self, request, queryset):
+        from altered.services.altered_fetch_deck_data import AlteredFetchDeckDataService
+
         for deck in queryset:
             AlteredFetchDeckDataService(deck).handle()
         self.message_user(
