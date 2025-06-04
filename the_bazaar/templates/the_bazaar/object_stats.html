@@ -1,0 +1,33 @@
+{% extends 'the_bazaar/base.html' %}
+{% load form_filters %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h2>Object Statistics</h2>
+        <form method="get" class="row mb-3 g-2 align-items-end">
+            <div class="col-auto">
+                {{ form.character.label_tag }}
+                {{ form.character|add_class:"form-select" }}
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+        </form>
+        <table class="table table-striped w-auto">
+            <tbody>
+            <tr>
+                <th scope="row">Total Objects</th>
+                <td>{{ stats.total_objects }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Mastered Objects</th>
+                <td>{{ stats.mastered_objects }}</td>
+            </tr>
+            <tr>
+                <th scope="row">Mastery Ratio</th>
+                <td>{{ stats.mastered_ratio }}%</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
