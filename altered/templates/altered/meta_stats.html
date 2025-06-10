@@ -1,0 +1,44 @@
+{% extends 'altered/base.html' %}
+{% load form_filters %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Meta Statistics</h2>
+    <form method="get" class="row mb-3 g-2 align-items-end">
+        <div class="col-auto">
+            {{ form.duration.label_tag }}
+            {{ form.duration|add_class:"form-select" }}
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+    </form>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Champion</th>
+            <th>Faction</th>
+            <th>Matches</th>
+            <th>Wins</th>
+            <th>Win %</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for stat in stats %}
+            <tr>
+                <td>{{ stat.champion.name }}</td>
+                <td>{{ stat.champion.faction }}</td>
+                <td>{{ stat.match_number }}</td>
+                <td>{{ stat.win_number }}</td>
+                <td>{{ stat.win_ratio }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">No meta data available.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
