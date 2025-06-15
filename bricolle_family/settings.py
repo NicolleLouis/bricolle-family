@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'baby_name',
     'babyberon',
     'northguard',
+    'chess',
     'altered',
     'shopping_list.apps.ShoppingListConfig',
     'django.contrib.admin',
