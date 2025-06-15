@@ -17,6 +17,11 @@ urlpatterns = [
     path("configuration", configuration, name="configuration"),
     path("course", CourseController.index, name="course"),
     path("course/history", CourseHistoryController.index, name="course_history"),
+    path(
+        "course/history/<int:history_id>/edit",
+        CourseHistoryController.edit,
+        name="course_history_edit",
+    ),
     path("course/new", CourseController.add_course, name="add_course"),
     path("course/<int:course_id>/edit", CourseController.edit_course, name="edit_course"),
     path("ingredient/new", add_ingredient, name="add_ingredient"),
