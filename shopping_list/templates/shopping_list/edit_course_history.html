@@ -1,0 +1,23 @@
+{% extends 'shopping_list/base.html' %}
+
+{% block title %}Editer Historique{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2>Éditer "{{ history.course.name }}"</h2>
+
+    <form method="post" class="card p-4 shadow-sm">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.rating.label_tag }}
+            {{ form.rating }}
+        </div>
+        <div class="mb-3">
+            {{ form.notes.label_tag }}
+            {{ form.notes }}
+        </div>
+        <button type="submit" class="btn btn-primary">Sauvegarder</button>
+        <a href="{% url 'shopping_list:course_history' %}" class="btn btn-secondary">Annuler</a>
+    </form>
+</div>
+{% endblock %}
