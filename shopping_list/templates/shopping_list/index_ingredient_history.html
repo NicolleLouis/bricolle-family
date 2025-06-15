@@ -1,0 +1,39 @@
+{% extends 'shopping_list/base.html' %}
+
+{% block title %}Achats{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2>Articles achetés</h2>
+    <form method="get" class="row g-3 mb-3">
+        <div class="col-auto">
+            <select name="period" class="form-select">
+                <option value="all" {% if period == 'all' %}selected{% endif %}>Tout le temps</option>
+                <option value="6m" {% if period == '6m' %}selected{% endif %}>6 derniers mois</option>
+                <option value="1m" {% if period == '1m' %}selected{% endif %}>Dernier mois</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filtrer</button>
+        </div>
+    </form>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Ingrédient</th>
+            <th>Catégorie</th>
+            <th>Quantité achetée</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.ingredient__name }}</td>
+            <td>{{ item.ingredient__category }}</td>
+            <td>{{ item.total_quantity }} ({{ item.ingredient__unit }})</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
