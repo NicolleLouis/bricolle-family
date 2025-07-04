@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'northguard',
     'chess',
     'altered',
+    'battery_simulator',
     'shopping_list.apps.ShoppingListConfig',
     'django.contrib.admin',
     'django.contrib.auth',

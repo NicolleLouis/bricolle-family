@@ -16,6 +16,7 @@ urlpatterns = [
     path("altered/", include("altered.urls")),
     path("baby_name/", include("baby_name.urls")),
     path("babyberon/", include("babyberon.urls")),
+    path("battery_simulator/", include("battery_simulator.urls")),
     path("login", Login.user_login, name="login"),
     path("logout", Login.user_logout, name="logout"),
     path("northguard/", include("northguard.urls")),

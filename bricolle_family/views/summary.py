@@ -26,5 +26,6 @@ class SummaryView:
         modules = [
             {"name": "Admin", "url": "/admin/", "color": "#3498db"},
             {"name": "Baby Name", "url": "/baby_name/", "color": "#ff6b6b"},
+            {"name": "Battery Simulator", "url": "/battery_simulator/", "color": "#ffbe5c"},
         ]
         return render(request, "bricolle_family/summary.html", {"modules": modules})
