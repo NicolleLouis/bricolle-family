@@ -11,6 +11,8 @@ class Deck(models.Model):
     champion = models.ForeignKey(Champion, on_delete=models.PROTECT, related_name='decks')
     altered_id = models.CharField(max_length=32)
 
+    is_active = models.BooleanField(default=True)
+
     @property
     def latest_version(self):
         return self.versions.order_by('-created_at').first()
@@ -25,8 +27,8 @@ class Deck(models.Model):
 
 @admin.register(Deck)
 class DeckAdmin(admin.ModelAdmin):
-    list_display = ('name', 'champion',)
-    list_filter = ('champion',)
+    list_display = ('name', 'champion', 'is_active',)
+    list_filter = ('champion', 'is_active',)
     ordering = ('name',)
     actions = ["update_version"]
 
