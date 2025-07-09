@@ -18,4 +18,4 @@ class Login:
     @staticmethod
     def user_logout(request):
         logout(request)
-        return redirect("bricolle_family:login")
+        return redirect("login")
