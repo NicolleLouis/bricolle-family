@@ -1,0 +1,19 @@
+{% extends 'runeterra/base.html' %}
+
+{% block title %}Random Picker{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Random Champion Picker</h1>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Pick a Champion</button>
+    </form>
+
+    {% if champion %}
+        <div class="mt-4">
+            <h3>{{ champion.name }}</h3>
+            <p>Region: {{ champion.get_region_display }}</p>
+            <p>Star Level: {{ champion.star_level }}</p>
+        </div>
+    {% endif %}
+{% endblock %}

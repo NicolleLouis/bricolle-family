@@ -17,6 +17,7 @@ class SummaryView:
             {"name": "Altered", "url": "/altered/", "color": "#2C3E50"},
             {"name": "Chess", "url": "/chess/", "color": "#ee7a41"},
             {"name": "Northguard", "url": "/northguard/", "color": "#ffbe5c"},
+            {"name": "Runeterra", "url": "/runeterra/", "color": "#f7c032"},
             {"name": "The Bazaar", "url": "/the_bazaar/", "color": "#5DADE2"},
         ]
         return render(request, "bricolle_family/summary.html", {"modules": modules})

@@ -13,7 +13,6 @@ SECRET_KEY = config("SECRET_KEY", default=None)
 if not SECRET_KEY:
     SECRET_KEY = "dummy_secret_key_for_testing_do_not_use_in_production"
 
-
 DEBUG = config("DEBUG", default=True)
 ENV = config("ENV", default="local")
 
@@ -28,6 +27,7 @@ INSTALLED_APPS = [
     "northguard",
     "chess",
     "altered",
+    'runeterra',
     "battery_simulator",
     "shopping_list.apps.ShoppingListConfig",
     "django.contrib.admin",
@@ -102,7 +102,6 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
-
 
 LANGUAGE_CODE = "en-us"
 
