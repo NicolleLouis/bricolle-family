@@ -7,7 +7,10 @@ from runeterra.constants.region import Region
 
 class Champion(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    region = models.CharField(max_length=20, choices=Region.choices)
+    primary_region = models.CharField(max_length=20, choices=Region.choices)
+    secondary_region = models.CharField(
+        max_length=20, choices=Region.choices, blank=True, null=True
+    )
     star_level = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(6)])
     unlocked = models.BooleanField(default=False)
     lvl30 = models.BooleanField(default=False)
@@ -18,6 +21,13 @@ class Champion(models.Model):
 
 @admin.register(Champion)
 class ChampionAdmin(admin.ModelAdmin):
-    list_display = ("name", "region", "star_level", "unlocked", "lvl30")
-    list_filter = ("region", "unlocked", "lvl30")
+    list_display = (
+        "name",
+        "primary_region",
+        "secondary_region",
+        "star_level",
+        "unlocked",
+        "lvl30",
+    )
+    list_filter = ("primary_region", "secondary_region", "unlocked", "lvl30")
     search_fields = ("name",)
