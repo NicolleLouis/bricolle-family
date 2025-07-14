@@ -7,6 +7,6 @@ class Region(models.TextChoices):
     DEMACIA = "DEMACIA", "Demacia"
     NOXUS = "NOXUS", "Noxus"
     IONIA = "IONIA", "Ionia"
-    BUNDLE = "BUNDLE", "Bundle"
+    BANDLE = "BANDLE", "Bandle"
     PILTOVER_ZAUN = "PILTOVER_ZAUN", "Piltover & Zaun"
     BILGEWATER = "BILGEWATER", "Bilgewater"
