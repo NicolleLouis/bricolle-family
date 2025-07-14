@@ -4,64 +4,73 @@
 
 {% block content %}
     <h1 class="mb-4">Random Champion Picker</h1>
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-check mb-2">
-            <input
-                class="form-check-input"
-                type="checkbox"
-                name="only_unlocked"
-                id="onlyUnlocked"
-                {% if only_unlocked %}checked{% endif %}
-            >
-            <label class="form-check-label" for="onlyUnlocked">
-                Only unlocked
-            </label>
+    <div class="row">
+        <div class="col-md-4">
+            <form method="post" class="mb-4">
+                {% csrf_token %}
+                <div class="form-check mb-2">
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        name="only_unlocked"
+                        id="onlyUnlocked"
+                        {% if only_unlocked %}checked{% endif %}
+                    >
+                    <label class="form-check-label" for="onlyUnlocked">
+                        Only unlocked
+                    </label>
+                </div>
+                <div class="form-check mb-3">
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        name="only_lvl30"
+                        id="onlyLvl30"
+                        {% if only_lvl30 %}checked{% endif %}
+                    >
+                    <label class="form-check-label" for="onlyLvl30">
+                        Only level 30
+                    </label>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="region">Region</label>
+                    <select name="region" id="region" class="form-select">
+                        <option value="">All regions</option>
+                        {% for value, label in regions.choices %}
+                            <option value="{{ value }}" {% if selected_region == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="minStarLevel">Minimum star level</label>
+                    <input
+                        type="number"
+                        name="min_star_level"
+                        id="minStarLevel"
+                        class="form-control"
+                        min="0"
+                        max="6"
+                        value="{{ min_star_level }}"
+                    >
+                </div>
+                <button type="submit" class="btn btn-primary">Pick a Champion</button>
+            </form>
         </div>
-        <div class="form-check mb-3">
-            <input
-                class="form-check-input"
-                type="checkbox"
-                name="only_lvl30"
-                id="onlyLvl30"
-                {% if only_lvl30 %}checked{% endif %}
-            >
-            <label class="form-check-label" for="onlyLvl30">
-                Only level 30
-            </label>
-        </div>
-        <div class="mb-3">
-            <label class="form-label" for="region">Region</label>
-            <select name="region" id="region" class="form-select">
-                <option value="">All regions</option>
-                {% for value, label in regions.choices %}
-                    <option value="{{ value }}" {% if selected_region == value %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="mb-3">
-            <label class="form-label" for="minStarLevel">Minimum star level</label>
-            <input
-                type="number"
-                name="min_star_level"
-                id="minStarLevel"
-                class="form-control"
-                min="0"
-                max="6"
-                value="{{ min_star_level }}"
-            >
-        </div>
-        <button type="submit" class="btn btn-primary">Pick a Champion</button>
-    </form>
-
-    {% if champion %}
-        <div class="mt-4">
-            <h3>{{ champion.name }}</h3>
-            <p>Primary Region: {{ champion.get_primary_region_display }}</p>
-            {% if champion.secondary_region %}
-                <p>Secondary Region: {{ champion.get_secondary_region_display }}</p>
+        <div class="col-md-8">
+            {% if champion %}
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">{{ champion.name }}</h3>
+                        <p class="card-text">Primary Region: {{ champion.get_primary_region_display }}</p>
+                        {% if champion.secondary_region %}
+                            <p class="card-text">Secondary Region: {{ champion.get_secondary_region_display }}</p>
+                        {% endif %}
+                        <p class="card-text">Star Level: {{ champion.star_level }}</p>
+                    </div>
+                </div>
+            {% elif request.method == 'POST' %}
+                <p class="mt-4">No champion matches your criteria.</p>
             {% endif %}
-            <p>Star Level: {{ champion.star_level }}</p>
         </div>
-    {% endif %}
+    </div>
 {% endblock %}
