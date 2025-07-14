@@ -30,6 +30,27 @@
                 Only level 30
             </label>
         </div>
+        <div class="mb-3">
+            <label class="form-label" for="region">Region</label>
+            <select name="region" id="region" class="form-select">
+                <option value="">All regions</option>
+                {% for value, label in regions.choices %}
+                    <option value="{{ value }}" {% if selected_region == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="minStarLevel">Minimum star level</label>
+            <input
+                type="number"
+                name="min_star_level"
+                id="minStarLevel"
+                class="form-control"
+                min="0"
+                max="6"
+                value="{{ min_star_level }}"
+            >
+        </div>
         <button type="submit" class="btn btn-primary">Pick a Champion</button>
     </form>
 
