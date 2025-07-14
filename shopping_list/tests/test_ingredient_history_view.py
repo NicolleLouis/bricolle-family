@@ -12,7 +12,9 @@ from shopping_list.models.ingredient_history import IngredientHistory
 
 class IngredientHistoryViewTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username="tester", password="pass")
+        self.user = User.objects.create_user(
+            username="tester", password="pass", is_staff=True
+        )
         self.client = Client()
         self.client.login(username="tester", password="pass")
 
