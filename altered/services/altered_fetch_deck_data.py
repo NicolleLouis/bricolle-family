@@ -10,6 +10,8 @@ class AlteredFetchDeckDataService:
         self.deck = deck
 
     def handle(self):
+        if not self.deck.is_active:
+            return
         card_indexes = self.get_card_list()
         description = self.transform_cards_to_str(card_indexes)
         latest_version = self.deck_latest_version()
