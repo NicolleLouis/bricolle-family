@@ -1,48 +1,67 @@
 {% extends 'babyberon/base.html' %}
 
 {% block content %}
-<h2 class="mb-4">Contractions</h2>
+    <h2 class="mb-4">Contractions</h2>
 
-<div class="mb-3 text-center">
-    <button class="btn btn-success me-2" onclick="addContraction(1)">Petite</button>
-    <button class="btn btn-warning me-2" onclick="addContraction(2)">Moyenne</button>
-    <button class="btn btn-danger" onclick="addContraction(3)">Forte</button>
-</div>
+    <div class="mb-3 text-center">
+        <button class="btn btn-success me-2" onclick="addContraction(1)">Petite</button>
+        <button class="btn btn-warning me-2" onclick="addContraction(2)">Moyenne</button>
+        <button class="btn btn-danger" onclick="addContraction(3)">Forte</button>
+    </div>
 
-<div class="my-4 text-center">
-    {% if contraction_count >= 20 %}
-    <div class="p-3 rounded bg-success text-white fw-bold">Départ hôpital</div>
-    {% else %}
-    <div class="p-3 rounded bg-secondary text-white">Départ hôpital</div>
-    {% endif %}
-</div>
+    <hr class="my-5">
 
-<h3 class="mt-4">Dernières contractions (2h)</h3>
-<table class="table table-striped">
-    <thead><tr><th>Heure</th><th>Puissance</th></tr></thead>
-    <tbody>
-        {% for c in contractions %}
-        <tr class="{% if c.power == 1 %}table-success{% elif c.power == 2 %}table-warning{% else %}table-danger{% endif %}">
-            <td>{{ c.created_at|date:"H:i" }}</td>
-            <td>{% if c.power == 1 %}Petite{% elif c.power == 2 %}Moyenne{% else %}Forte{% endif %}</td>
+    <div class="my-4 text-center">
+        <div class="d-flex justify-content-center">
+            {% if last_hour_count >= 6 %}
+                <div class="p-3 rounded bg-warning text-white fw-bold me-2">Appelez Louis</div>
+            {% else %}
+                <div class="p-3 rounded bg-secondary text-white fw-bold me-2">Appelez Louis</div>
+            {% endif %}
+
+            {% if contraction_count >= 20 %}
+                <div class="p-3 rounded bg-danger text-white fw-bold me-2">Départ hôpital</div>
+            {% else %}
+                <div class="p-3 rounded bg-secondary text-white me-2">Départ hôpital</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <hr class="my-5">
+
+    <h3 class="mt-4">Dernières contractions (2h)</h3>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Heure</th>
+            <th>Puissance</th>
         </tr>
+        </thead>
+        <tbody>
+        {% for c in contractions %}
+            <tr class="{% if c.power == 1 %}table-success{% elif c.power == 2 %}table-warning{% else %}table-danger{% endif %}">
+                <td>{{ c.created_at|date:"H:i" }}</td>
+                <td>{% if c.power == 1 %}Petite{% elif c.power == 2 %}Moyenne{% else %}Forte{% endif %}</td>
+            </tr>
         {% empty %}
-        <tr><td colspan="2" class="text-center">Aucune contraction récente.</td></tr>
+            <tr>
+                <td colspan="2" class="text-center">Aucune contraction récente.</td>
+            </tr>
         {% endfor %}
-    </tbody>
-</table>
+        </tbody>
+    </table>
 {% endblock %}
 
 {% block scripts %}
-<script>
-function addContraction(power) {
-    fetch("{% url 'babyberon:api_add_contraction' 0 %}".replace(0, power), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}"
+    <script>
+        function addContraction(power) {
+            fetch("{% url 'babyberon:api_add_contraction' 0 %}".replace(0, power), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                }
+            }).then(() => location.reload());
         }
-    }).then(() => location.reload());
-}
-</script>
+    </script>
 {% endblock %}

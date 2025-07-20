@@ -13,12 +13,23 @@ class ContractionController:
     @staticmethod
     def page(request):
         since = timezone.now() - timedelta(hours=2)
-        contractions = Contraction.objects.filter(created_at__gte=since).order_by('-created_at')
+        contractions = (
+            Contraction.objects.filter(created_at__gte=since)
+            .order_by("-created_at")
+        )
         count = contractions.count()
+
+        last_hour = timezone.now() - timedelta(hours=1)
+        last_hour_count = contractions.filter(created_at__gte=last_hour).count()
+
         return render(
             request,
             "babyberon/contraction.html",
-            {"contractions": contractions, "contraction_count": count},
+            {
+                "contractions": contractions,
+                "contraction_count": count,
+                "last_hour_count": last_hour_count,
+            },
         )
 
     @staticmethod
