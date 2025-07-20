@@ -116,7 +116,7 @@ def region_stats(request):
         avg = (
             qs.annotate(
                 effective=F("star_level")
-                + Case(When(lvl30=True, then=1), default=0, output_field=IntegerField())
+                + Case(When(lvl30=True, then=2), default=0, output_field=IntegerField())
             )
             .aggregate(avg=Avg("effective"))
             .get("avg")
