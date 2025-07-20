@@ -9,6 +9,12 @@
             {{ form.faction.label_tag }}
             {{ form.faction|add_class:"form-select" }}
         </div>
+        <div class="col-auto d-flex align-items-center">
+            <div class="form-check">
+                {{ form.only_active }}
+                {{ form.only_active.label_tag }}
+            </div>
+        </div>
         <div class="col-auto">
             <button type="submit" class="btn btn-primary">Filter</button>
         </div>
