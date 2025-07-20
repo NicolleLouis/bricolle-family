@@ -1,7 +1,6 @@
 from django.urls import path
 
-from babyberon.views.home import home
-from babyberon.views.baby_bottle import BabyBottleController
+from battery_simulator.views.home import home
 
 app_name = "battery_simulator"
 
