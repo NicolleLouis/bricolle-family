@@ -55,7 +55,6 @@
         <th>Secondary Region</th>
         <th>Stars</th>
         <th>Level</th>
-        <th>Unlocked</th>
         <th></th>
     </tr>
     </thead>
@@ -75,7 +74,6 @@
         <td>{{ champion.get_secondary_region_display }}</td>
         <td>{{ champion.star_level }}</td>
         <td>{{ champion.champion_level }}</td>
-        <td>{{ champion.unlocked|yesno:'✓,✗' }}</td>
         <td>
             <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editChampionModal{{ champion.id }}">🖊️</button>
         </td>
