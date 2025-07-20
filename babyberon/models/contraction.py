@@ -4,7 +4,7 @@ from django.db import models
 
 class Contraction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
-    power = models.PositiveSmallIntegerField(choices=[(1, "Petite"), (2, "Moyenne"), (3, "Forte")])
+    power = models.PositiveSmallIntegerField(choices=[(1, "Small"), (2, "Medium"), (3, "Strong")])
 
 
 @admin.register(Contraction)
