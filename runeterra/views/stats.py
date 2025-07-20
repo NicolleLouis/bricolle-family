@@ -6,11 +6,16 @@ from runeterra.models import Champion
 
 
 def region_stats(request):
+    only_unlocked = request.GET.get("only_unlocked") is not None
     stats = []
     for value, label in Region.choices:
-        qs = Champion.objects.filter(Q(primary_region=value) | Q(secondary_region=value))
-        total = qs.count()
-        unlocked = qs.filter(unlocked=True).count()
+        base_qs = Champion.objects.filter(
+            Q(primary_region=value) | Q(secondary_region=value)
+        )
+        total = base_qs.count()
+        unlocked = base_qs.filter(unlocked=True).count()
+        qs = base_qs.filter(unlocked=True) if only_unlocked else base_qs
+
         constellation_mean = (
             qs.annotate(
                 effective=F("star_level")
@@ -37,4 +42,8 @@ def region_stats(request):
             }
         )
 
-    return render(request, "runeterra/region_stats.html", {"stats": stats})
+    return render(
+        request,
+        "runeterra/region_stats.html",
+        {"stats": stats, "only_unlocked": only_unlocked},
+    )

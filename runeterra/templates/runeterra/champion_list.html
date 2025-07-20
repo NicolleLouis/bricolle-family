@@ -61,7 +61,15 @@
     </thead>
     <tbody>
     {% for champion in champions %}
-    <tr>
+    <tr
+        {% if not champion.unlocked %}
+            class="table-danger"
+        {% elif champion.lvl30 %}
+            class="table-success"
+        {% else %}
+            class="table-warning"
+        {% endif %}
+    >
         <td>{{ champion.name }}</td>
         <td>{{ champion.get_primary_region_display }}</td>
         <td>{{ champion.get_secondary_region_display }}</td>
