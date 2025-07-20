@@ -34,6 +34,8 @@ def champion_list(request):
 
     if sort == "star_level":
         champions = champions.order_by("-star_level", "name")
+    elif sort == "level":
+        champions = champions.order_by("-champion_level", "name")
     else:
         champions = champions.order_by("name")
 

@@ -10,7 +10,10 @@
         <th>Région</th>
         <th>Champions</th>
         <th>Débloqués</th>
+        <th>Mean Constellation Level Adjusted</th>
         <th>Niveau moyen</th>
+        <th>Niveau minimum</th>
+        <th>Niveau maximum</th>
     </tr>
     </thead>
     <tbody>
@@ -19,7 +22,10 @@
         <td>{{ row.label }}</td>
         <td>{{ row.total }}</td>
         <td>{{ row.unlocked }}</td>
-        <td>{{ row.avg|floatformat:2 }}</td>
+        <td>{{ row.constellation_mean|floatformat:2 }}</td>
+        <td>{{ row.level_mean|floatformat:2 }}</td>
+        <td>{{ row.level_min }}</td>
+        <td>{{ row.level_max }}</td>
     </tr>
     {% endfor %}
     </tbody>
