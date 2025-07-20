@@ -1,8 +1,11 @@
 from django.db.models import Q
 from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, UpdateView
 
 from runeterra.models import Champion
 from runeterra.constants.region import Region
+from runeterra.forms.champion import ChampionForm
 
 
 def random_picker(request):
@@ -88,3 +91,17 @@ def champion_list(request):
             "regions": Region,
         },
     )
+
+
+class ChampionCreateView(CreateView):
+    model = Champion
+    form_class = ChampionForm
+    template_name = "runeterra/champion_form.html"
+    success_url = reverse_lazy("runeterra:champion_list")
+
+
+class ChampionUpdateView(UpdateView):
+    model = Champion
+    form_class = ChampionForm
+    template_name = "runeterra/champion_form.html"
+    success_url = reverse_lazy("runeterra:champion_list")
