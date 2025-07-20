@@ -10,11 +10,19 @@
 </div>
 
 <div class="my-4 text-center">
-    {% if contraction_count >= 20 %}
-    <div class="p-3 rounded bg-success text-white fw-bold">Départ hôpital</div>
-    {% else %}
-    <div class="p-3 rounded bg-secondary text-white">Départ hôpital</div>
-    {% endif %}
+    <div class="d-flex justify-content-center">
+        {% if contraction_count >= 20 %}
+        <div class="p-3 rounded bg-success text-white fw-bold me-2">Départ hôpital</div>
+        {% else %}
+        <div class="p-3 rounded bg-secondary text-white me-2">Départ hôpital</div>
+        {% endif %}
+
+        {% if last_hour_count >= 6 %}
+        <div class="p-3 rounded bg-secondary text-white fw-bold">Appelez Louis</div>
+        {% else %}
+        <div class="p-3 rounded bg-success text-white fw-bold">Appelez Louis</div>
+        {% endif %}
+    </div>
 </div>
 
 <h3 class="mt-4">Dernières contractions (2h)</h3>
