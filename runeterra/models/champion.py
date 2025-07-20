@@ -18,6 +18,12 @@ class Champion(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def effective_star_level(self):
+        if self.lvl30:
+            return self.star_level + 1
+        return self.star_level
+
 
 @admin.register(Champion)
 class ChampionAdmin(admin.ModelAdmin):
