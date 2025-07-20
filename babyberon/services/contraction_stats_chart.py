@@ -11,7 +11,7 @@ from babyberon.models import Contraction
 
 class ContractionStatsChartService:
     @staticmethod
-    def generate_div():
+    def generate():
         """Return an HTML div containing the contraction stats bar chart."""
         today = timezone.now().date()
         since = today - timedelta(days=6)
