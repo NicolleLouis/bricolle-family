@@ -23,7 +23,7 @@ class ContractionController:
 
     @staticmethod
     def stats(request):
-        chart_div = ContractionStatsChartService.generate_div()
+        chart_div = ContractionStatsChartService.generate()
         return render(
             request,
             "babyberon/contraction_stats.html",
