@@ -10,3 +10,10 @@ class DeckFilterForm(forms.Form):
         label='Faction',
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+
+    only_active = forms.BooleanField(
+        required=False,
+        label='Active deck only',
+        initial=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
