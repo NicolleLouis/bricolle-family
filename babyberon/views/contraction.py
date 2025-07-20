@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from babyberon.models import Contraction
+from babyberon.services.contraction_stats_chart import ContractionStatsChartService
 
 
 class ContractionController:
@@ -18,6 +19,15 @@ class ContractionController:
             request,
             "babyberon/contraction.html",
             {"contractions": contractions, "contraction_count": count},
+        )
+
+    @staticmethod
+    def stats(request):
+        chart_div = ContractionStatsChartService.generate_div()
+        return render(
+            request,
+            "babyberon/contraction_stats.html",
+            {"chart_div": chart_div},
         )
 
     @staticmethod
