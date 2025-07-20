@@ -11,4 +11,5 @@ class Region(models.TextChoices):
     PILTOVER_ZAUN = "PILTOVER_ZAUN", "Piltover & Zaun"
     RUNETERRA = "RUNETERRA", "Runeterra"
     SHADOW_ISLES = "SHADOW_ISLES", "Shadow Isles"
+    SHURIMA = "SHURIMA", "Shurima"
     TARGON = "TARGON", "Targon"
