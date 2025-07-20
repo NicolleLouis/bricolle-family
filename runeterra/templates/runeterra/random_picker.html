@@ -53,6 +53,30 @@
                         value="{{ min_star_level }}"
                     >
                 </div>
+                <div class="mb-3">
+                    <label class="form-label" for="minLevel">Min level</label>
+                    <input
+                        type="number"
+                        name="min_level"
+                        id="minLevel"
+                        class="form-control"
+                        min="0"
+                        max="60"
+                        value="{{ min_level }}"
+                    >
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="maxLevel">Max level</label>
+                    <input
+                        type="number"
+                        name="max_level"
+                        id="maxLevel"
+                        class="form-control"
+                        min="0"
+                        max="60"
+                        value="{{ max_level }}"
+                    >
+                </div>
                 <button type="submit" class="btn btn-primary">Pick a Champion</button>
             </form>
         </div>
@@ -66,6 +90,7 @@
                             <p class="card-text">Secondary Region: {{ champion.get_secondary_region_display }}</p>
                         {% endif %}
                         <p class="card-text">Star Level: {{ champion.star_level }}</p>
+                        <p class="card-text">Level: {{ champion.champion_level }}</p>
                     </div>
                 </div>
             {% elif request.method == 'POST' %}

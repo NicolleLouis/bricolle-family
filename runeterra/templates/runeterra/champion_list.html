@@ -38,6 +38,7 @@
         <select name="sort" id="sort" class="form-select">
             <option value="name" {% if request.GET.sort == 'name' %}selected{% endif %}>Alphabetical</option>
             <option value="star_level" {% if request.GET.sort == 'star_level' %}selected{% endif %}>Star level</option>
+            <option value="level" {% if request.GET.sort == 'level' %}selected{% endif %}>Level</option>
         </select>
     </div>
     <div class="col-md-1 d-flex align-items-end">
@@ -53,8 +54,8 @@
         <th>Primary Region</th>
         <th>Secondary Region</th>
         <th>Stars</th>
+        <th>Level</th>
         <th>Unlocked</th>
-        <th>Lvl30</th>
         <th></th>
     </tr>
     </thead>
@@ -65,8 +66,8 @@
         <td>{{ champion.get_primary_region_display }}</td>
         <td>{{ champion.get_secondary_region_display }}</td>
         <td>{{ champion.star_level }}</td>
+        <td>{{ champion.champion_level }}</td>
         <td>{{ champion.unlocked|yesno:'✓,✗' }}</td>
-        <td>{{ champion.lvl30|yesno:'✓,✗' }}</td>
         <td>
             <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editChampionModal{{ champion.id }}">🖊️</button>
         </td>
@@ -107,13 +108,13 @@
                             <label class="form-label" for="id_star_level_{{ champion.id }}">Star Level</label>
                             <input type="number" min="0" max="6" class="form-control" id="id_star_level_{{ champion.id }}" name="star_level" value="{{ champion.star_level }}">
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="id_champion_level_{{ champion.id }}">Level</label>
+                            <input type="number" min="0" max="60" class="form-control" id="id_champion_level_{{ champion.id }}" name="champion_level" value="{{ champion.champion_level }}">
+                        </div>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="id_unlocked_{{ champion.id }}" name="unlocked" {% if champion.unlocked %}checked{% endif %}>
                             <label class="form-check-label" for="id_unlocked_{{ champion.id }}">Unlocked</label>
-                        </div>
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="id_lvl30_{{ champion.id }}" name="lvl30" {% if champion.lvl30 %}checked{% endif %}>
-                            <label class="form-check-label" for="id_lvl30_{{ champion.id }}">Level 30</label>
                         </div>
                     </div>
                     <div class="modal-footer">
