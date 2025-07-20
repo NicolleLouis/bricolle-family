@@ -2,11 +2,13 @@ from django.db import models
 
 
 class Region(models.TextChoices):
-    TARGON = "TARGON", "Targon"
-    RUNETERRA = "RUNETERRA", "Runeterra"
-    DEMACIA = "DEMACIA", "Demacia"
-    NOXUS = "NOXUS", "Noxus"
-    IONIA = "IONIA", "Ionia"
     BANDLE = "BANDLE", "Bandle"
-    PILTOVER_ZAUN = "PILTOVER_ZAUN", "Piltover & Zaun"
     BILGEWATER = "BILGEWATER", "Bilgewater"
+    DEMACIA = "DEMACIA", "Demacia"
+    FRELJORD = "FRELJORD", "Freljord"
+    IONIA = "IONIA", "Ionia"
+    NOXUS = "NOXUS", "Noxus"
+    PILTOVER_ZAUN = "PILTOVER_ZAUN", "Piltover & Zaun"
+    RUNETERRA = "RUNETERRA", "Runeterra"
+    SHADOW_ISLES = "SHADOW_ISLES", "Shadow Isles"
+    TARGON = "TARGON", "Targon"
