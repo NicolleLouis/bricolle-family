@@ -11,9 +11,20 @@ class Champion(models.Model):
     secondary_region = models.CharField(
         max_length=20, choices=Region.choices, blank=True, null=True
     )
-    star_level = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(6)])
+    star_level = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(6)])
+    champion_level = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(60)])
     unlocked = models.BooleanField(default=False)
     lvl30 = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        self.set_lvl30()
+        super().save(*args, **kwargs)
+
+    def set_lvl30(self):
+        if self.champion_level >= 30:
+            self.lvl30 = True
+        else:
+            self.lvl30 = False
 
     def __str__(self):
         return self.name
