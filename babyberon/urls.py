@@ -10,5 +10,6 @@ urlpatterns = [
     path("", home, name="home"),
     path("baby-bottle/add/", BabyBottleController.add_baby_bottle, name="add_baby_bottle"),
     path("contractions/", ContractionController.page, name="contractions"),
+    path("contractions/stats/", ContractionController.stats, name="contractions_stats"),
     path("api/contraction/<int:power>/", ContractionController.add, name="api_add_contraction"),
 ]

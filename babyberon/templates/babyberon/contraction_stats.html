@@ -1,0 +1,49 @@
+{% extends 'babyberon/base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Statistiques des contractions</h2>
+<canvas id="contractionChart" width="600" height="300" class="mb-4"></canvas>
+<div class="mb-3">
+    <a href="{% url 'babyberon:contractions' %}" class="btn btn-primary">Ajouter une contraction</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const labels = {{ labels|safe }};
+const counts = {{ counts|safe }};
+
+function drawBarChart() {
+    const canvas = document.getElementById('contractionChart');
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const padding = 30;
+    const barWidth = (width - padding * 2) / labels.length;
+    const maxValue = Math.max(...counts, 1);
+    ctx.clearRect(0, 0, width, height);
+    ctx.strokeStyle = '#000';
+    ctx.beginPath();
+    ctx.moveTo(padding, padding);
+    ctx.lineTo(padding, height - padding);
+    ctx.lineTo(width - padding, height - padding);
+    ctx.stroke();
+
+    ctx.fillStyle = '#4e79a7';
+    for (let i = 0; i < labels.length; i++) {
+        const barHeight = counts[i] / maxValue * (height - padding * 2);
+        const x = padding + i * barWidth + 5;
+        const y = height - padding - barHeight;
+        ctx.fillRect(x, y, barWidth - 10, barHeight);
+        ctx.fillStyle = '#000';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(labels[i], x + (barWidth - 10) / 2, height - padding + 12);
+        ctx.fillText(counts[i], x + (barWidth - 10) / 2, y - 5);
+        ctx.fillStyle = '#4e79a7';
+    }
+}
+
+drawBarChart();
+</script>
+{% endblock %}
