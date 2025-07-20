@@ -1,0 +1,27 @@
+{% extends 'runeterra/base.html' %}
+
+{% block title %}Stats par région{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Stats par région</h1>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Région</th>
+        <th>Champions</th>
+        <th>Débloqués</th>
+        <th>Niveau moyen</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in stats %}
+    <tr>
+        <td>{{ row.label }}</td>
+        <td>{{ row.total }}</td>
+        <td>{{ row.unlocked }}</td>
+        <td>{{ row.avg|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
