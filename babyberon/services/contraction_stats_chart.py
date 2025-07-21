@@ -1,18 +1,18 @@
 from datetime import timedelta
 
 from django.db.models import Count
-from django.db.models.functions import TruncDate
+from django.db.models.functions import TruncDate, ExtractHour
 from django.utils import timezone
 import plotly.express as px
-import plotly.offline as opy
+from plotly.offline import plot
 
 from babyberon.models import Contraction
 
 
 class ContractionStatsChartService:
     @staticmethod
-    def generate():
-        """Return an HTML div containing the contraction stats bar chart."""
+    def generate_daily():
+        """Return an HTML div containing the daily contraction bar chart."""
         today = timezone.now().date()
         since = today - timedelta(days=6)
 
@@ -32,4 +32,24 @@ class ContractionStatsChartService:
         fig = px.bar(x=labels, y=counts, labels={"x": "Jour", "y": "Contractions"})
         fig.update_layout(margin=dict(l=20, r=20, t=20, b=20))
 
-        return opy.plot(fig, auto_open=False, output_type="div")
+        return plot(fig, auto_open=False, output_type="div")
+
+    @staticmethod
+    def generate_hourly():
+        """Return an HTML div containing the hourly contraction line chart."""
+        queryset = (
+            Contraction.objects.annotate(hour=ExtractHour("created_at"))
+            .values("hour")
+            .order_by("hour")
+            .annotate(count=Count("id"))
+        )
+        counts_by_hour = {item["hour"]: item["count"] for item in queryset}
+
+        hours = list(range(24))
+        labels = [f"{h:02d}h" for h in hours]
+        counts = [counts_by_hour.get(h, 0) for h in hours]
+
+        fig = px.line(x=labels, y=counts, labels={"x": "Heure", "y": "Contractions"})
+        fig.update_layout(margin=dict(l=20, r=20, t=20, b=20))
+
+        return plot(fig, auto_open=False, output_type="div")

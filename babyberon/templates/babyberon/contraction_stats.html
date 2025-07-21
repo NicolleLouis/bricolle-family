@@ -2,8 +2,13 @@
 
 {% block content %}
 <h2 class="mb-4">Statistiques des contractions</h2>
-<div class="mb-4">
-    {{ chart_div|safe }}
+<div class="mb-5">
+    <h3 class="mb-3">Par jour (7 derniers jours)</h3>
+    {{ daily_chart_div|safe }}
+</div>
+<div class="mb-5">
+    <h3 class="mb-3">Par heure</h3>
+    {{ hourly_chart_div|safe }}
 </div>
 <div class="mb-3">
     <a href="{% url 'babyberon:contractions' %}" class="btn btn-primary">Ajouter une contraction</a>
