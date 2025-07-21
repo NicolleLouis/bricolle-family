@@ -34,11 +34,15 @@ class ContractionController:
 
     @staticmethod
     def stats(request):
-        chart_div = ContractionStatsChartService.generate()
+        daily_chart_div = ContractionStatsChartService.generate_daily()
+        hourly_chart_div = ContractionStatsChartService.generate_hourly()
         return render(
             request,
             "babyberon/contraction_stats.html",
-            {"chart_div": chart_div},
+            {
+                "daily_chart_div": daily_chart_div,
+                "hourly_chart_div": hourly_chart_div,
+            },
         )
 
     @staticmethod
