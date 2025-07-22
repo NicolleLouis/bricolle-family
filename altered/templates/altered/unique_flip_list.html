@@ -1,0 +1,47 @@
+{% extends 'altered/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="mb-3">
+        <span class="badge {% if balance >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+            Balance: {{ balance }}
+        </span>
+    </div>
+
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+            <a class="nav-link {% if status == 'current' %}active{% endif %}" href="?status=current">En cours</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if status == 'sold' %}active{% endif %}" href="?status=sold">Vendus</a>
+        </li>
+    </ul>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Unique Id</th>
+            <th>Bought At</th>
+            <th>Bought Price</th>
+            <th>Sold At</th>
+            <th>Sold Price</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for flip in flips %}
+            <tr>
+                <td>{{ flip.unique_id }}</td>
+                <td>{{ flip.bought_at }}</td>
+                <td>{{ flip.bought_price }}</td>
+                <td>{{ flip.sold_at|default:"-" }}</td>
+                <td>{{ flip.sold_price|default:"-" }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">No data.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
