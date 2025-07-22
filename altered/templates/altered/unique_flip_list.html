@@ -1,11 +1,29 @@
 {% extends 'altered/base.html' %}
+{% load bootstrap5 %}
 
 {% block content %}
 <div class="container mt-4">
-    <div class="mb-3">
-        <span class="badge {% if balance >= 0 %}bg-success{% else %}bg-danger{% endif %}">
-            Balance: {{ balance }}
-        </span>
+    <div class="row mb-4 align-items-end">
+        <div class="col">
+            <span class="fs-4 badge {% if balance >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+                Balance: {{ balance }}
+            </span>
+        </div>
+        <div class="col-auto">
+            <form method="post" class="row g-2">
+                {% csrf_token %}
+                <input type="hidden" name="purchase" value="1">
+                <div class="col-auto">
+                    {{ purchase_form.unique_id }}
+                </div>
+                <div class="col-auto">
+                    {{ purchase_form.bought_price }}
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Acheter</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <ul class="nav nav-tabs mb-3">
@@ -25,6 +43,9 @@
             <th>Bought Price</th>
             <th>Sold At</th>
             <th>Sold Price</th>
+            {% if status == 'current' %}
+                <th></th>
+            {% endif %}
         </tr>
         </thead>
         <tbody>
@@ -35,10 +56,37 @@
                 <td>{{ flip.bought_price }}</td>
                 <td>{{ flip.sold_at|default:"-" }}</td>
                 <td>{{ flip.sold_price|default:"-" }}</td>
+                {% if status == 'current' %}
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#sellModal{{ flip.id }}">Vendre</button>
+                        <div class="modal fade" id="sellModal{{ flip.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Vendre {{ flip.unique_id }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="sell" value="1">
+                                        <input type="hidden" name="flip_id" value="{{ flip.id }}">
+                                        <div class="modal-body">
+                                            {{ sell_form.sold_price }}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-primary">Mark Sold</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                {% endif %}
             </tr>
         {% empty %}
             <tr>
-                <td colspan="5" class="text-center">No data.</td>
+                <td colspan="6" class="text-center">No data.</td>
             </tr>
         {% endfor %}
         </tbody>
