@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="mb-0">Champions</h1>
+    <h1 class="mb-0">Champions 🏆</h1>
     <a class="btn btn-primary" href="{% url 'runeterra:champion_create' %}">➕ Add Champion</a>
 </div>
 <form method="get" class="row g-3 mb-4">
@@ -53,7 +53,7 @@
         <th>Name</th>
         <th>Primary Region</th>
         <th>Secondary Region</th>
-        <th>Stars</th>
+        <th>Stars ⭐</th>
         <th>Level</th>
         <th></th>
     </tr>
@@ -72,65 +72,13 @@
         <td>{{ champion.name }}</td>
         <td>{{ champion.get_primary_region_display }}</td>
         <td>{{ champion.get_secondary_region_display }}</td>
-        <td>{{ champion.star_level }}</td>
+        <td>{{ champion.star_level }} ⭐</td>
         <td>{{ champion.champion_level }}</td>
         <td>
             <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editChampionModal{{ champion.id }}">🖊️</button>
         </td>
     </tr>
-    <!-- Edit Modal -->
-    <div class="modal fade" id="editChampionModal{{ champion.id }}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit {{ champion.name }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form method="post" action="{% url 'runeterra:champion_update' champion.id %}">
-                    {% csrf_token %}
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label" for="id_name_{{ champion.id }}">Name</label>
-                            <input type="text" class="form-control" id="id_name_{{ champion.id }}" name="name" value="{{ champion.name }}">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="id_primary_region_{{ champion.id }}">Primary Region</label>
-                            <select class="form-select" id="id_primary_region_{{ champion.id }}" name="primary_region">
-                                {% for value, label in regions.choices %}
-                                    <option value="{{ value }}" {% if champion.primary_region == value %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="id_secondary_region_{{ champion.id }}">Secondary Region</label>
-                            <select class="form-select" id="id_secondary_region_{{ champion.id }}" name="secondary_region">
-                                <option value=""></option>
-                                {% for value, label in regions.choices %}
-                                    <option value="{{ value }}" {% if champion.secondary_region == value %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="id_star_level_{{ champion.id }}">Star Level</label>
-                            <input type="number" min="0" max="6" class="form-control" id="id_star_level_{{ champion.id }}" name="star_level" value="{{ champion.star_level }}">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="id_champion_level_{{ champion.id }}">Level</label>
-                            <input type="number" min="0" max="60" class="form-control" id="id_champion_level_{{ champion.id }}" name="champion_level" value="{{ champion.champion_level }}">
-                        </div>
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="id_unlocked_{{ champion.id }}" name="unlocked" {% if champion.unlocked %}checked{% endif %}>
-                            <label class="form-check-label" for="id_unlocked_{{ champion.id }}">Unlocked</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    {% include 'runeterra/champion_edit_modal.html' %}
     {% endfor %}
     </tbody>
 </table>

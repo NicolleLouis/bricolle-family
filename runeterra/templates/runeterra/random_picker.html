@@ -3,7 +3,7 @@
 {% block title %}Random Picker{% endblock %}
 
 {% block content %}
-    <h1 class="mb-4">Random Champion Picker</h1>
+    <h1 class="mb-4">Random Champion Picker 🎲</h1>
     <div class="row">
         <div class="col-md-4">
             <form method="post" class="mb-4">
@@ -84,15 +84,19 @@
             {% if champion %}
                 <div class="card">
                     <div class="card-body">
-                        <h3 class="card-title">{{ champion.name }}</h3>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h3 class="card-title mb-0">{{ champion.name }}</h3>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editChampionModal{{ champion.id }}">🖊️</button>
+                        </div>
                         <p class="card-text">Primary Region: {{ champion.get_primary_region_display }}</p>
                         {% if champion.secondary_region %}
                             <p class="card-text">Secondary Region: {{ champion.get_secondary_region_display }}</p>
                         {% endif %}
-                        <p class="card-text">Star Level: {{ champion.star_level }}</p>
+                        <p class="card-text">Star Level: {{ champion.star_level }} ⭐</p>
                         <p class="card-text">Level: {{ champion.champion_level }}</p>
                     </div>
                 </div>
+                {% include 'runeterra/champion_edit_modal.html' %}
             {% elif request.method == 'POST' %}
                 <p class="mt-4">No champion matches your criteria.</p>
             {% endif %}
