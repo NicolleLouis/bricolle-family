@@ -3,6 +3,13 @@
 {% block content %}
 <div class="container mt-4">
     <h2>{{ flip.name }} ({{ flip.unique_id }})</h2>
+    <form method="post" class="mb-3">
+        {% csrf_token %}
+        <input type="hidden" name="toggle_in_use" value="1">
+        <button type="submit" class="btn btn-sm {% if flip.in_use %}btn-success{% else %}btn-outline-secondary{% endif %}">
+            {% if flip.in_use %}En cours{% else %}Inactive{% endif %}
+        </button>
+    </form>
     <div class="row mt-3">
         <div class="col-md-6 text-center">
             {% if flip.image_path %}

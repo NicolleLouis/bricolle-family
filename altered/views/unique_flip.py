@@ -1,4 +1,5 @@
 from django.db.models import Sum, F, DecimalField, ExpressionWrapper
+from django.db.models.functions import Coalesce
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
@@ -35,6 +36,11 @@ def unique_flip_list_view(request):
                 flip.sold_at = timezone.now()
                 flip.save()
                 return redirect(request.path + f'?status={status}')
+        elif 'toggle_in_use' in request.POST:
+            flip = get_object_or_404(UniqueFlip, id=request.POST.get('flip_id'))
+            flip.in_use = not flip.in_use
+            flip.save(update_fields=['in_use'])
+            return redirect(request.path + f'?status={status}')
     else:
         form = UniqueFlipPurchaseForm()
 
@@ -46,11 +52,11 @@ def unique_flip_list_view(request):
     if faction:
         flips = flips.filter(faction=faction)
 
-    balance = UniqueFlip.objects.aggregate(
+    balance = UniqueFlip.objects.filter(in_use=False).aggregate(
         balance=Sum(
             ExpressionWrapper(
-                F('sold_price') - F('bought_price'),
-                output_field=DecimalField(max_digits=10, decimal_places=2)
+                Coalesce(F('sold_price'), 0) - F('bought_price'),
+                output_field=DecimalField(max_digits=10, decimal_places=2),
             )
         )
     )['balance'] or 0
@@ -69,4 +75,8 @@ def unique_flip_list_view(request):
 
 def unique_flip_detail_view(request, flip_id: int):
     flip = get_object_or_404(UniqueFlip, id=flip_id)
+    if request.method == 'POST' and 'toggle_in_use' in request.POST:
+        flip.in_use = not flip.in_use
+        flip.save(update_fields=['in_use'])
+        return redirect('altered:unique_flip_detail', flip_id=flip_id)
     return render(request, 'altered/unique_flip_detail.html', {'flip': flip})
