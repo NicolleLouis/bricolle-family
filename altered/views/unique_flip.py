@@ -3,11 +3,19 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
 from altered.models import UniqueFlip
-from altered.forms import UniqueFlipPurchaseForm, UniqueFlipSellForm
+from altered.forms import (
+    UniqueFlipPurchaseForm,
+    UniqueFlipSellForm,
+    UniqueFlipFilterForm,
+)
 
 
 def unique_flip_list_view(request):
     status = request.GET.get('status', 'current')
+    filter_form = UniqueFlipFilterForm(request.GET)
+    faction = None
+    if filter_form.is_valid():
+        faction = filter_form.cleaned_data.get('faction') or None
 
     if request.method == 'POST':
         if 'purchase' in request.POST:
@@ -35,6 +43,8 @@ def unique_flip_list_view(request):
         flips = flips.filter(sold_at__isnull=False)
     else:
         flips = flips.filter(sold_at__isnull=True)
+    if faction:
+        flips = flips.filter(faction=faction)
 
     balance = UniqueFlip.objects.aggregate(
         balance=Sum(
@@ -48,8 +58,15 @@ def unique_flip_list_view(request):
     context = {
         'flips': flips,
         'status': status,
+        'selected_faction': faction,
         'balance': balance,
         'purchase_form': form,
         'sell_form': UniqueFlipSellForm(),
+        'filter_form': filter_form,
     }
     return render(request, 'altered/unique_flip_list.html', context)
+
+
+def unique_flip_detail_view(request, flip_id: int):
+    flip = get_object_or_404(UniqueFlip, id=flip_id)
+    return render(request, 'altered/unique_flip_detail.html', {'flip': flip})
