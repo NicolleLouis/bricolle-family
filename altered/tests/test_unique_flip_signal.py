@@ -10,10 +10,16 @@ class UniqueFlipSignalTests(TestCase):
     def test_fetch_data_after_create(self, mock_get):
         mock_response = mock_get.return_value
         mock_response.json.return_value = {
-            'card': {
-                'name': 'Test Name',
-                'imagePath': '/img/test.png'
-            }
+            'name': 'Test Name',
+            'imagePath': '/img/test.png',
+            'mainFaction': {'name': 'Axiom'},
+            'elements': {
+                'MAIN_COST': 1,
+                'RECALL_COST': 1,
+                'MOUNTAIN_POWER': 1,
+                'OCEAN_POWER': 1,
+                'FOREST_POWER': 1,
+            },
         }
         mock_response.raise_for_status.return_value = None
 

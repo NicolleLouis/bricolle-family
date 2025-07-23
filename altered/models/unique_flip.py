@@ -23,6 +23,7 @@ class UniqueFlip(models.Model):
     bought_price = models.DecimalField(max_digits=10, decimal_places=2)
     sold_at = models.DateTimeField(null=True, blank=True)
     sold_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    in_use = models.BooleanField(default=False)
 
     def __str__(self):
         return self.unique_id
@@ -35,6 +36,14 @@ class UniqueFlip(models.Model):
 
 @admin.register(UniqueFlip)
 class UniqueFlipAdmin(admin.ModelAdmin):
-    list_display = ('unique_id', 'name', 'bought_at', 'bought_price', 'sold_at', 'sold_price')
+    list_display = (
+        'unique_id',
+        'name',
+        'bought_at',
+        'bought_price',
+        'sold_at',
+        'sold_price',
+        'in_use',
+    )
     list_filter = ('sold_at',)
     ordering = ('-bought_at',)

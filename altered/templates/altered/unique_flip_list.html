@@ -71,6 +71,7 @@
             <th>Name</th>
             <th>Unique Id</th>
             <th>Détail</th>
+            <th>En cours d'utilisation</th>
             {% if status == 'sold' %}
                 <th>Balance</th>
                 <th>Prix achat</th>
@@ -88,6 +89,16 @@
                 <td>{{ flip.unique_id }}</td>
                 <td>
                     <a href="{% url 'altered:unique_flip_detail' flip.id %}" class="btn btn-sm btn-outline-primary">Voir détail</a>
+                </td>
+                <td>
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="toggle_in_use" value="1">
+                        <input type="hidden" name="flip_id" value="{{ flip.id }}">
+                        <button type="submit" class="btn btn-sm {% if flip.in_use %}btn-success{% else %}btn-outline-secondary{% endif %}">
+                            {% if flip.in_use %}En cours{% else %}Inactive{% endif %}
+                        </button>
+                    </form>
                 </td>
                 {% if status == 'sold' %}
                     <td>{{ flip.balance }}</td>
