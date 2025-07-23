@@ -1,0 +1,29 @@
+{% extends 'altered/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ flip.name }} ({{ flip.unique_id }})</h2>
+    <div class="row mt-3">
+        <div class="col-md-6 text-center">
+            {% if flip.image_path %}
+                <img src="{{ flip.image_path }}" class="img-fluid" alt="{{ flip.name }}">
+            {% else %}
+                <p>No image available.</p>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <h5>Costs</h5>
+            <ul class="list-unstyled">
+                <li>Main Cost: {{ flip.main_cost }}</li>
+                <li>Recall Cost: {{ flip.recall_cost }}</li>
+            </ul>
+            <h5>Powers</h5>
+            <ul class="list-unstyled">
+                <li>Mountain Power: {{ flip.mountain_power }}</li>
+                <li>Ocean Power: {{ flip.ocean_power }}</li>
+                <li>Forest Power: {{ flip.forest_power }}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

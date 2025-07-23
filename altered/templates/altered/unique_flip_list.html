@@ -1,5 +1,6 @@
 {% extends 'altered/base.html' %}
 {% load bootstrap5 %}
+{% load form_filters %}
 
 {% block content %}
 <div class="container mt-4">
@@ -46,18 +47,30 @@
 
     <ul class="nav nav-tabs mb-3">
         <li class="nav-item">
-            <a class="nav-link {% if status == 'current' %}active{% endif %}" href="?status=current">En cours</a>
+            <a class="nav-link {% if status == 'current' %}active{% endif %}" href="?status=current{% if selected_faction %}&faction={{ selected_faction }}{% endif %}">En cours</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link {% if status == 'sold' %}active{% endif %}" href="?status=sold">Vendus</a>
+            <a class="nav-link {% if status == 'sold' %}active{% endif %}" href="?status=sold{% if selected_faction %}&faction={{ selected_faction }}{% endif %}">Vendus</a>
         </li>
     </ul>
+
+    <form method="get" class="row mb-3 g-2 align-items-end">
+        <input type="hidden" name="status" value="{{ status }}">
+        <div class="col-auto">
+            {{ filter_form.faction.label_tag }}
+            {{ filter_form.faction|add_class:"form-select" }}
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filtrer</button>
+        </div>
+    </form>
 
     <table class="table table-striped">
         <thead>
         <tr>
             <th>Name</th>
             <th>Unique Id</th>
+            <th>Détail</th>
             {% if status == 'sold' %}
                 <th>Balance</th>
                 <th>Prix achat</th>
@@ -73,6 +86,9 @@
             <tr>
                 <td>{{ flip.name }}</td>
                 <td>{{ flip.unique_id }}</td>
+                <td>
+                    <a href="{% url 'altered:unique_flip_detail' flip.id %}" class="btn btn-sm btn-outline-primary">Voir détail</a>
+                </td>
                 {% if status == 'sold' %}
                     <td>{{ flip.balance }}</td>
                     <td>{{ flip.bought_price }}</td>
@@ -108,7 +124,7 @@
             </tr>
         {% empty %}
             <tr>
-                <td colspan="4" class="text-center">No data.</td>
+                <td colspan="6" class="text-center">No data.</td>
             </tr>
         {% endfor %}
         </tbody>

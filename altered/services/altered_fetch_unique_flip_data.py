@@ -23,11 +23,12 @@ class AlteredFetchUniqueFlipDataService:
 
     def handle(self):
         self.fetch_data()
-
         self.unique.faction = self.find_faction()
         self.unique.name = self.data["name"]
         self.unique.image_path = self.data["imagePath"]
-        self.unique.save(update_fields=["name", "image_path", "faction"])
+        update_fields = ["name", "image_path", "faction"]
+
+        self.unique.save(update_fields=update_fields)
 
         self.update_elements()
 
