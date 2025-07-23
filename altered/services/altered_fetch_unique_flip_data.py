@@ -20,35 +20,26 @@ class AlteredFetchUniqueFlipDataService:
             raise ValueError(f"Error while fetching unique flip data : {e}")
 
         self.data = response.json()
-        if 'card' in self.data:
-            self.data = self.data['card']
 
     def handle(self):
         self.fetch_data()
-        faction = self.find_faction()
-        if faction:
-            self.unique.faction = faction
+        self.unique.faction = self.find_faction()
         self.unique.name = self.data["name"]
         self.unique.image_path = self.data["imagePath"]
-        update_fields = ["name", "image_path"]
-        if faction:
-            update_fields.append("faction")
+        update_fields = ["name", "image_path", "faction"]
+
         self.unique.save(update_fields=update_fields)
 
         self.update_elements()
 
     def find_faction(self):
-        if "mainFaction" not in self.data:
-            return None
         raw_faction_name = self.data["mainFaction"]["name"]
         for faction in Faction:
             if raw_faction_name.lower() == faction.name.lower():
                 return faction
-        return None
+        raise ValueError("Faction Not found")
 
     def update_elements(self):
-        if "elements" not in self.data:
-            return
         raw_elements = self.data["elements"]
         self.unique.main_cost = raw_elements["MAIN_COST"]
         self.unique.recall_cost = raw_elements["RECALL_COST"]
