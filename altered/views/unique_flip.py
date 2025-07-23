@@ -52,7 +52,7 @@ def unique_flip_list_view(request):
     if faction:
         flips = flips.filter(faction=faction)
 
-    balance = UniqueFlip.objects.aggregate(
+    balance = UniqueFlip.objects.filter(in_use=False).aggregate(
         balance=Sum(
             ExpressionWrapper(
                 Coalesce(F('sold_price'), 0) - F('bought_price'),
