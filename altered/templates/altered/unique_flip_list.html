@@ -56,6 +56,7 @@
     <table class="table table-striped">
         <thead>
         <tr>
+            <th>Name</th>
             <th>Unique Id</th>
             {% if status == 'sold' %}
                 <th>Balance</th>
@@ -70,6 +71,7 @@
         <tbody>
         {% for flip in flips %}
             <tr>
+                <td>{{ flip.name }}</td>
                 <td>{{ flip.unique_id }}</td>
                 {% if status == 'sold' %}
                     <td>{{ flip.balance }}</td>
