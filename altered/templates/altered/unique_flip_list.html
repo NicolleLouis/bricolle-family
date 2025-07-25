@@ -65,6 +65,10 @@
                 {{ filter_form.faction.label_tag }}
                 {{ filter_form.faction|add_class:"form-select" }}
             </div>
+            <div class="col-auto form-check">
+                {{ filter_form.hide_zero }}
+                <label class="form-check-label" for="{{ filter_form.hide_zero.id_for_label }}">{{ filter_form.hide_zero.label }}</label>
+            </div>
             <div class="col-auto">
                 <button type="submit" class="btn btn-primary">Filtrer</button>
             </div>
@@ -77,8 +81,19 @@
                 <th>Unique Id</th>
                 <th>Détail</th>
                 {% if status == 'sold' %}
-                    <th>Balance</th>
-                    <th>Prix achat</th>
+                    <th>
+                        <a href="?status={{ status }}{% if selected_faction %}&faction={{ selected_faction }}{% endif %}{% if hide_zero %}&hide_zero=on{% endif %}&sort={% if sort == 'balance' %}-balance{% else %}balance{% endif %}">
+                            Balance
+                            {% if sort == 'balance' %}▲{% elif sort == '-balance' %}▼{% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?status={{ status }}{% if selected_faction %}&faction={{ selected_faction }}{% endif %}{% if hide_zero %}&hide_zero=on{% endif %}&sort={% if sort == 'bought_price' %}-bought_price{% else %}bought_price{% endif %}">
+                            Prix achat
+                            {% if sort == 'bought_price' %}▲{% elif sort == '-bought_price' %}▼{% endif %}
+                        </a>
+                    </th>
+                    <th>Balance %</th>
                     <th>Prix vente</th>
                 {% else %}
                     <th>En cours d'utilisation</th>
@@ -99,6 +114,7 @@
                     {% if status == 'sold' %}
                         <td>{{ flip.balance }}</td>
                         <td>{{ flip.bought_price }}</td>
+                        <td>{{ flip.balance_percentage|default_if_none:''|floatformat:2 }}{% if flip.balance_percentage is not None %}%{% endif %}</td>
                         <td>{{ flip.sold_price }}</td>
                     {% else %}
                         <td>
@@ -147,7 +163,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center">No data.</td>
+                    <td colspan="{% if status == 'sold' %}7{% else %}6{% endif %}" class="text-center">No data.</td>
                 </tr>
             {% endfor %}
             </tbody>
