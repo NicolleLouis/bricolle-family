@@ -22,4 +22,9 @@ class UniqueFlipFilterForm(forms.Form):
         label='Faction',
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+    hide_zero = forms.BooleanField(
+        required=False,
+        label='Hide 0 buy price',
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
 

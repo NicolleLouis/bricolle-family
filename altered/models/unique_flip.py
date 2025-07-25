@@ -33,6 +33,12 @@ class UniqueFlip(models.Model):
         sold = self.sold_price or 0
         return sold - self.bought_price
 
+    @property
+    def balance_percentage(self):
+        if self.bought_price == 0:
+            return None
+        return (self.balance / self.bought_price) * 100
+
 
 @admin.register(UniqueFlip)
 class UniqueFlipAdmin(admin.ModelAdmin):
