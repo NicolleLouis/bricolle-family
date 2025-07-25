@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.contrib import admin
 
@@ -31,7 +33,7 @@ class UniqueFlip(models.Model):
     @property
     def balance(self):
         sold = self.sold_price or 0
-        return sold - self.bought_price
+        return (sold * Decimal('0.95')) - self.bought_price
 
     @property
     def balance_percentage(self):

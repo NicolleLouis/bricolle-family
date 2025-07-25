@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db.models import Sum, F, DecimalField, ExpressionWrapper
 from django.db.models.functions import Coalesce
 from django.shortcuts import render, redirect, get_object_or_404
@@ -58,7 +60,7 @@ def unique_flip_list_view(request):
         flips = flips.exclude(bought_price=0)
 
     balance_expression = ExpressionWrapper(
-        Coalesce(F('sold_price'), 0) - F('bought_price'),
+        (Coalesce(F('sold_price'), 0) * Decimal('0.95')) - F('bought_price'),
         output_field=DecimalField(max_digits=10, decimal_places=2),
     )
 
@@ -78,7 +80,7 @@ def unique_flip_list_view(request):
     balance = balance_queryset.aggregate(
         balance=Sum(
             ExpressionWrapper(
-                Coalesce(F('sold_price'), 0) - F('bought_price'),
+                (Coalesce(F('sold_price'), 0) * Decimal('0.95')) - F('bought_price'),
                 output_field=DecimalField(max_digits=10, decimal_places=2),
             )
         )
