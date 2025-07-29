@@ -18,7 +18,7 @@ class CareerStatsService:
             champions = champions.filter(name__icontains=self.name)
         champions = champions.order_by('name')
         for champion in champions:
-            win_number = Game.objects.filter(opponent_champion=champion, is_win=True).count()
+            win_number = Game.objects.filter(deck__champion=champion, is_win=True).count()
             if self.missing_only and win_number > 0:
                 continue
             self.result.append(CareerChampionStats(champion=champion, win_number=win_number))
