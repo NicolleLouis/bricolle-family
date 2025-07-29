@@ -85,6 +85,7 @@ def unique_flip_list_view(request):
             )
         )
     )['balance'] or 0
+    balance = round(balance, 2)
 
     context = {
         'flips': flips,
