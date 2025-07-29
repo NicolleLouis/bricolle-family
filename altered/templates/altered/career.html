@@ -1,0 +1,50 @@
+{% extends 'altered/base.html' %}
+{% load form_filters %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Career</h2>
+    <form method="get" class="row mb-3 g-2 align-items-end">
+        <div class="col-auto">
+            {{ form.faction.label_tag }}
+            {{ form.faction|add_class:"form-select" }}
+        </div>
+        <div class="col-auto">
+            {{ form.name.label_tag }}
+            {{ form.name|add_class:"form-control" }}
+        </div>
+        <div class="col-auto d-flex align-items-center">
+            <div class="form-check">
+                {{ form.only_missing }}
+                {{ form.only_missing.label_tag }}
+            </div>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+    </form>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Champion</th>
+            <th>Faction</th>
+            <th>Wins</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for stat in stats %}
+            <tr {% if stat.win_number == 0 %}style="background-color: #f8d7da;"{% elif stat.win_number >= 25 %}style="background-color: gold;"{% elif stat.win_number >= 10 %}style="background-color: silver;"{% elif stat.win_number >= 5 %}style="background-color: #cd7f32;"{% endif %}>
+                <td>{{ stat.champion.name }}</td>
+                <td>{{ stat.champion.faction }}</td>
+                <td>{{ stat.win_number }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">No data available.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
