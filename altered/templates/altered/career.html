@@ -34,7 +34,7 @@
         </thead>
         <tbody>
         {% for stat in stats %}
-            <tr {% if stat.win_number == 0 %}style="background-color: #f8d7da;"{% elif stat.win_number >= 25 %}style="background-color: gold;"{% elif stat.win_number >= 10 %}style="background-color: silver;"{% elif stat.win_number >= 5 %}style="background-color: #cd7f32;"{% endif %}>
+            <tr {% if stat.win_number == 0 %}style="background-color: #f8d7da;"{% elif stat.win_number >= 25 %}style="background-color: gold;"{% elif stat.win_number >= 10 %}style="background-color: #2493c0;"{% elif stat.win_number >= 5 %}style="background-color: #cd7f32;"{% endif %}>
                 <td>{{ stat.champion.name }}</td>
                 <td>{{ stat.champion.faction }}</td>
                 <td>{{ stat.win_number }}</td>
