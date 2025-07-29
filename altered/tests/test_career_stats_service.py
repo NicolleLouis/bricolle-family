@@ -16,14 +16,14 @@ class CareerStatsServiceTests(TestCase):
 
     def test_compute_win_numbers(self):
         service = CareerStatsService()
-        beta_stat = next(s for s in service.result if s.champion == self.champ2)
-        self.assertEqual(beta_stat.win_number, 2)
         alpha_stat = next(s for s in service.result if s.champion == self.champ1)
-        self.assertEqual(alpha_stat.win_number, 0)
+        self.assertEqual(alpha_stat.win_number, 2)
+        beta_stat = next(s for s in service.result if s.champion == self.champ2)
+        self.assertEqual(beta_stat.win_number, 0)
 
     def test_missing_only_filter(self):
         service = CareerStatsService(missing_only=True)
         champs = [stat.champion for stat in service.result]
-        self.assertIn(self.champ1, champs)
+        self.assertIn(self.champ2, champs)
         self.assertIn(self.champ3, champs)
-        self.assertNotIn(self.champ2, champs)
+        self.assertNotIn(self.champ1, champs)
