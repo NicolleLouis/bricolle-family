@@ -1,45 +1,59 @@
 {% extends 'games_collection/base.html' %}
 
 {% block content %}
-<h1>Back to the Dawn</h1>
+<h1 class="mb-4 text-center">Back to the Dawn</h1>
 
-<section>
-  <h2>Code MailRoom</h2>
-  <p>2481</p>
-</section>
+<div class="row gy-4">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header bg-primary text-white">Code MailRoom</div>
+      <div class="card-body">
+        <p class="card-text display-6 text-center">2481</p>
+      </div>
+    </div>
+  </div>
 
-<section>
-  <h2>Accès Infirmerie</h2>
-  <ol>
-    <li>Get Beaten</li>
-    <li>Laxative</li>
-    <li>Maladie sur le dossier médicale</li>
-  </ol>
-</section>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header bg-success text-white">Accès Infirmerie</div>
+      <ol class="list-group list-group-numbered list-group-flush">
+        <li class="list-group-item">Get Beaten</li>
+        <li class="list-group-item">Laxative</li>
+        <li class="list-group-item">Maladie sur le dossier médicale</li>
+      </ol>
+    </div>
+  </div>
 
-<section>
-  <h2>Section à explorer</h2>
-  <ul>
-    <li>Toit matin</li>
-    <li>Derrière les toilettes</li>
-  </ul>
-</section>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header bg-warning text-dark">Section à explorer</div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">Toit matin</li>
+        <li class="list-group-item">Derrière les toilettes</li>
+      </ul>
+    </div>
+  </div>
 
-<section>
-  <h2>Objet à récupérer (mission)</h2>
-  <ul>
-    <li>Premium Liquor</li>
-    <li>Mushroom Powder</li>
-    <li>Stonegrass</li>
-  </ul>
-</section>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header bg-info text-dark">Objet à récupérer (mission)</div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">Premium Liquor</li>
+        <li class="list-group-item">Mushroom Powder</li>
+        <li class="list-group-item">Stonegrass</li>
+      </ul>
+    </div>
+  </div>
 
-<section>
-  <h2>Bond à faire</h2>
-  <ul>
-    <li>Giraffe</li>
-    <li>Koala</li>
-    <li>Hyena</li>
-  </ul>
-</section>
+  <div class="col-md-12">
+    <div class="card h-100">
+      <div class="card-header bg-secondary text-white">Bond à faire</div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">Giraffe</li>
+        <li class="list-group-item">Koala</li>
+        <li class="list-group-item">Hyena</li>
+      </ul>
+    </div>
+  </div>
+</div>
 {% endblock %}
