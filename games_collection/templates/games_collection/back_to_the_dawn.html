@@ -1,62 +1,65 @@
 {% extends 'games_collection/base.html' %}
 
 {% block content %}
-{% load static %}
+    {% load static %}
 
-<img src="{% static 'games_collection/images/back_to_the_dawn.jpg' %}" alt="{{ game_background }}"
-     class="img-fluid w-100 shadow-sm mb-4" style="height: 200px; object-fit: cover;">
+    <img src="{% static 'games_collection/images/back_to_the_dawn.jpg' %}" alt="{{ game_background }}"
+         class="img-fluid w-100 shadow-sm mb-4" style="height: 200px; object-fit: cover; object-position: 50% 17%;">
 
-<div class="row gy-4">
-  <div class="col-md-6">
-    <div class="card h-100">
-      <div class="card-header bg-primary text-white">Code MailRoom</div>
-      <div class="card-body">
-        <p class="card-text display-6 text-center">2481</p>
-      </div>
+    <div class="row gy-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">Code MailRoom</div>
+                <div class="card-body">
+                    <p class="card-text display-6 text-center">2481</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">Accès Infirmerie</div>
+                <ol class="list-group list-group-numbered list-group-flush">
+                    <li class="list-group-item">Get Beaten</li>
+                    <li class="list-group-item">Laxative</li>
+                    <li class="list-group-item">Maladie sur le dossier médicale</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">Section à explorer</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Toit matin</li>
+                    <li class="list-group-item">Derrière les toilettes</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-info text-dark">Objet à récupérer (mission)</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Premium Liquor</li>
+                    <li class="list-group-item">Mushroom Powder</li>
+                    <li class="list-group-item">Stonegrass</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card h-100">
+                <div class="card-header bg-secondary text-white">Bond à faire</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Giraffe</li>
+                    <li class="list-group-item">Koala</li>
+                    <li class="list-group-item">Hyena</li>
+                </ul>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div class="col-md-6">
-    <div class="card h-100">
-      <div class="card-header bg-success text-white">Accès Infirmerie</div>
-      <ol class="list-group list-group-numbered list-group-flush">
-        <li class="list-group-item">Get Beaten</li>
-        <li class="list-group-item">Laxative</li>
-        <li class="list-group-item">Maladie sur le dossier médicale</li>
-      </ol>
-    </div>
-  </div>
-
-  <div class="col-md-6">
-    <div class="card h-100">
-      <div class="card-header bg-warning text-dark">Section à explorer</div>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item">Toit matin</li>
-        <li class="list-group-item">Derrière les toilettes</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="col-md-6">
-    <div class="card h-100">
-      <div class="card-header bg-info text-dark">Objet à récupérer (mission)</div>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item">Premium Liquor</li>
-        <li class="list-group-item">Mushroom Powder</li>
-        <li class="list-group-item">Stonegrass</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="col-md-12">
-    <div class="card h-100">
-      <div class="card-header bg-secondary text-white">Bond à faire</div>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item">Giraffe</li>
-        <li class="list-group-item">Koala</li>
-        <li class="list-group-item">Hyena</li>
-      </ul>
-    </div>
-  </div>
-</div>
+    <img src="{% static 'games_collection/images/back_to_the_dawn.jpg' %}" alt="{{ game_background }}"
+         class="img-fluid w-100 shadow-sm mt-4" style="height: 380px; object-fit: cover; object-position: 50% 75%;">
 {% endblock %}
