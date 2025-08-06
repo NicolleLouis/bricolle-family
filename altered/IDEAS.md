@@ -1,3 +1,3 @@
-- Deck stats: win rate + game number + win number (Option all versions and only the latest version)
 - Deck page: win rate/game number/win number per faction opponent + per champion opponent
-- Meta-view: Number of opponents faced: forever and last 3 months and last month
+- Tournament tracking feature? Not so sure
+- Nuzlock challenge mode :) (Cf meta youtube dude)
