@@ -1,7 +1,10 @@
 {% extends 'games_collection/base.html' %}
 
 {% block content %}
-<h1 class="mb-4 text-center">Back to the Dawn</h1>
+{% load static %}
+
+<img src="{% static 'games_collection/images/back_to_the_dawn.jpg' %}" alt="{{ game_background }}"
+             class="img-fluid shadow-sm mb-4">
 
 <div class="row gy-4">
   <div class="col-md-6">
