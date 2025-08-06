@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "altered",
     'runeterra',
     "battery_simulator",
+    "games_collection",
     "shopping_list.apps.ShoppingListConfig",
     "django.contrib.admin",
     "django.contrib.auth",

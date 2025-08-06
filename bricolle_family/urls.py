@@ -22,6 +22,7 @@ urlpatterns = [
     path("logout", Login.user_logout, name="logout"),
     path("northguard/", include("northguard.urls")),
     path("chess/", include("chess.urls")),
+    path("games_collection/", include("games_collection.urls")),
     path("shopping_list/", include("shopping_list.urls")),
     path("the_bazaar/", include("the_bazaar.urls")),
 ]
