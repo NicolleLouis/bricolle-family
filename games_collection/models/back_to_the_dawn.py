@@ -1,3 +1,4 @@
+from django.contrib import admin
 from django.db import models
 
 
@@ -39,3 +40,25 @@ class BttdDesire(models.Model):
 
     def __str__(self) -> str:  # pragma: no cover - simple representation
         return f"{self.animal} {self.status} {self.object}"
+
+
+@admin.register(BttdObject)
+class BttdObjectAdmin(admin.ModelAdmin):
+    list_display = ("name", "base_price")
+    search_fields = ("name",)
+    ordering = ("name",)
+
+
+@admin.register(BttdAnimal)
+class BttdAnimalAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+    ordering = ("name",)
+
+
+@admin.register(BttdDesire)
+class BttdDesireAdmin(admin.ModelAdmin):
+    list_display = ("animal", "object", "status")
+    list_filter = ("status",)
+    search_fields = ("animal__name", "object__name")
+    ordering = ("animal__name", "status")
