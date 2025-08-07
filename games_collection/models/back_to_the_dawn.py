@@ -6,9 +6,9 @@ class BttdObject(models.Model):
     """An object available in Back to the Dawn."""
 
     name = models.CharField(max_length=100)
-    base_price = models.DecimalField(max_digits=10, decimal_places=2)
+    base_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
-    def __str__(self) -> str:  # pragma: no cover - simple representation
+    def __str__(self) -> str:
         return self.name
 
 
@@ -17,7 +17,7 @@ class BttdAnimal(models.Model):
 
     name = models.CharField(max_length=100)
 
-    def __str__(self) -> str:  # pragma: no cover - simple representation
+    def __str__(self) -> str:
         return self.name
 
 
@@ -38,7 +38,7 @@ class BttdDesire(models.Model):
     class Meta:
         unique_together = ("animal", "object")
 
-    def __str__(self) -> str:  # pragma: no cover - simple representation
+    def __str__(self) -> str:
         return f"{self.animal} {self.status} {self.object}"
 
 
