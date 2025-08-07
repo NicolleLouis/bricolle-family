@@ -9,6 +9,58 @@
     <div class="row gy-4">
         <div class="col-md-6">
             <div class="card h-100">
+                <div class="card-header bg-primary text-white">Recherche par animal</div>
+                <div class="card-body">
+                    <form method="get" class="mb-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="animal" placeholder="Animal" value="{{ animal_query }}">
+                            <button class="btn btn-primary" type="submit">Rechercher</button>
+                        </div>
+                    </form>
+                    {% if animal_results is not None %}
+                    <ul class="list-group list-group-flush">
+                        {% for desire in animal_results %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>{{ desire.object.name }}</span>
+                            <span class="badge bg-secondary">{{ desire.get_status_display }}</span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">Aucun résultat</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">Recherche par objet</div>
+                <div class="card-body">
+                    <form method="get" class="mb-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="object" placeholder="Objet" value="{{ object_query }}">
+                            <button class="btn btn-primary" type="submit">Rechercher</button>
+                        </div>
+                    </form>
+                    {% if object_results is not None %}
+                    <ul class="list-group list-group-flush">
+                        {% for desire in object_results %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>{{ desire.animal.name }}</span>
+                            <span class="badge bg-secondary">{{ desire.get_status_display }}</span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">Aucun résultat</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
                 <div class="card-header bg-primary text-white">Code MailRoom</div>
                 <div class="card-body">
                     <p class="card-text display-6 text-center">2481</p>
