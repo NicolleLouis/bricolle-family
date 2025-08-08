@@ -3,4 +3,5 @@ from .back_to_the_dawn import (
     BttdDesire,
     BttdObject,
     DesireStatus,
+    BttdPossession,
 )

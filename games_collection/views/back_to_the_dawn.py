@@ -1,8 +1,7 @@
 from django.db.models import Case, IntegerField, When
 from django.shortcuts import render
 
-from games_collection.models import BttdAnimal, BttdObject, BttdDesire, BttdPossession, DesireStatus
-
+from games_collection.models import BttdDesire, DesireStatus, BttdPossession
 
 PREFERENCE_ORDER = Case(
     When(status=DesireStatus.LOVE, then=0),
