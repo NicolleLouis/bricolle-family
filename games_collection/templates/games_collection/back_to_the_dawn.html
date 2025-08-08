@@ -3,6 +3,28 @@
 {% block content %}
     {% load static %}
 
+    <style>
+        .desire-love {
+            background-color: #ffb6c1;
+            color: #000;
+        }
+
+        .desire-like {
+            background-color: #90ee90;
+            color: #000;
+        }
+
+        .desire-neutral {
+            background-color: #d3d3d3;
+            color: #000;
+        }
+
+        .desire-dislike {
+            background-color: #ff9999;
+            color: #000;
+        }
+    </style>
+
     <img src="{% static 'games_collection/images/back_to_the_dawn.jpg' %}" alt="{{ game_background }}"
          class="img-fluid w-100 shadow-sm mb-4" style="height: 200px; object-fit: cover; object-position: 50% 17%;">
 
@@ -22,7 +44,7 @@
                         {% for desire in animal_results %}
                         <li class="list-group-item d-flex justify-content-between">
                             <span>{{ desire.object.name }}</span>
-                            <span class="badge bg-secondary">{{ desire.get_status_display }}</span>
+                            <span class="badge desire-{{ desire.status }}">{{ desire.get_status_display }}</span>
                         </li>
                         {% empty %}
                         <li class="list-group-item">Aucun résultat</li>
@@ -48,8 +70,31 @@
                         {% for desire in object_results %}
                         <li class="list-group-item d-flex justify-content-between">
                             <span>{{ desire.animal.name }}</span>
-                            <span class="badge bg-secondary">{{ desire.get_status_display }}</span>
+                            <span class="badge desire-{{ desire.status }}">{{ desire.get_status_display }}</span>
                         </li>
+                        {% empty %}
+                        <li class="list-group-item">Aucun résultat</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">Possessions par animal</div>
+                <div class="card-body">
+                    <form method="get" class="mb-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="possession_animal" placeholder="Animal" value="{{ possession_query }}">
+                            <button class="btn btn-primary" type="submit">Rechercher</button>
+                        </div>
+                    </form>
+                    {% if possession_results is not None %}
+                    <ul class="list-group list-group-flush">
+                        {% for possession in possession_results %}
+                        <li class="list-group-item">{{ possession.object.name }}</li>
                         {% empty %}
                         <li class="list-group-item">Aucun résultat</li>
                         {% endfor %}
