@@ -79,6 +79,6 @@ class BttdPossessionAdmin(admin.ModelAdmin):
 @admin.register(BttdDesire)
 class BttdDesireAdmin(admin.ModelAdmin):
     list_display = ("animal", "object", "status")
-    list_filter = ("status",)
+    list_filter = ("status", "object", "animal")
     search_fields = ("animal__name", "object__name")
     ordering = ("animal__name", "status")
