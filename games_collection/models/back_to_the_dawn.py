@@ -42,6 +42,19 @@ class BttdDesire(models.Model):
         return f"{self.animal} {self.status} {self.object}"
 
 
+class BttdPossession(models.Model):
+    """An object possessed by an animal."""
+
+    animal = models.ForeignKey(BttdAnimal, on_delete=models.CASCADE, related_name="possessions")
+    object = models.ForeignKey(BttdObject, on_delete=models.CASCADE, related_name="possessions")
+
+    class Meta:
+        unique_together = ("animal", "object")
+
+    def __str__(self) -> str:
+        return f"{self.animal} possesses {self.object}"
+
+
 @admin.register(BttdObject)
 class BttdObjectAdmin(admin.ModelAdmin):
     list_display = ("name", "base_price")
@@ -54,6 +67,13 @@ class BttdAnimalAdmin(admin.ModelAdmin):
     list_display = ("name",)
     search_fields = ("name",)
     ordering = ("name",)
+
+
+@admin.register(BttdPossession)
+class BttdPossessionAdmin(admin.ModelAdmin):
+    list_display = ("animal", "object")
+    search_fields = ("animal__name", "object__name")
+    ordering = ("animal__name", "object__name")
 
 
 @admin.register(BttdDesire)
