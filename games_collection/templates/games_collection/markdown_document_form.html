@@ -1,0 +1,21 @@
+{% extends 'games_collection/base.html' %}
+
+{% block content %}
+<h1 class="mb-4">{% if object %}Edit{% else %}New{% endif %} Document</h1>
+<form method="post" class="mb-3">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="id_title" class="form-label">Title</label>
+        {{ form.title }}
+    </div>
+    <div class="mb-3">
+        <label for="id_game" class="form-label">Game</label>
+        {{ form.game }}
+    </div>
+    <div class="mb-3">
+        <label for="id_content" class="form-label">Content</label>
+        {{ form.content }}
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+{% endblock %}
