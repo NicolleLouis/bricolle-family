@@ -1,0 +1,22 @@
+{% extends 'documents/base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<h1>{% if form.instance.pk %}Edit{% else %}New{% endif %} Document</h1>
+<form method="post" class="mt-4">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="id_title" class="form-label">Titre</label>
+        {{ form.title|add_class:'form-control' }}
+    </div>
+    <div class="mb-3">
+        <label for="id_directory" class="form-label">Catégorie</label>
+        {{ form.directory|add_class:'form-select' }}
+    </div>
+    <div class="mb-3">
+        <label for="id_content" class="form-label">Contenu</label>
+        {{ form.content|add_class:'form-control' }}
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+{% endblock %}
