@@ -1,1 +1,1 @@
-from .document import Document, Game
+from .document import Document

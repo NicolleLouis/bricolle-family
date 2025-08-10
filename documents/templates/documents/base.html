@@ -10,13 +10,9 @@
     {% bootstrap_javascript %}
 </head>
 <body>
-<header class="bg-dark text-white py-3 mb-4">
-    <div class="container">
-        <a href="{% url 'documents:document_list' %}" class="text-white text-decoration-none">
-            <h1 class="m-0">Documents</h1>
-        </a>
-    </div>
-</header>
+
+{% include 'documents/header.html' %}
+
 <div class="container py-4">
     {% block content %}{% endblock %}
     {% block scripts %}{% endblock %}

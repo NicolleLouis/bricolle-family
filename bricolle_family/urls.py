@@ -23,7 +23,7 @@ urlpatterns = [
     path("northguard/", include("northguard.urls")),
     path("chess/", include("chess.urls")),
     path("games_collection/", include("games_collection.urls")),
-    path("docs/", include("documents.urls")),
+    path("documents/", include("documents.urls")),
     path("shopping_list/", include("shopping_list.urls")),
     path("the_bazaar/", include("the_bazaar.urls")),
 ]

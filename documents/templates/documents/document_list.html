@@ -7,11 +7,11 @@
 </div>
 <form method="get" class="row g-3 mb-4">
     <div class="col-md-3">
-        <label class="form-label" for="game">Game</label>
-        <select name="game" id="game" class="form-select">
-            <option value="">All games</option>
-            {% for value, label in games.choices %}
-                <option value="{{ value }}" {% if request.GET.game == value %}selected{% endif %}>{{ label }}</option>
+        <label class="form-label" for="directory">Catégorie</label>
+        <select name="directory" id="directory" class="form-select">
+            <option value="">All categories</option>
+            {% for value, label in directories.choices %}
+                <option value="{{ value }}" {% if request.GET.directory == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
     </div>
@@ -28,7 +28,7 @@
     <thead>
         <tr>
             <th>Title</th>
-            <th>Game</th>
+            <th>Category</th>
             <th></th>
         </tr>
     </thead>
@@ -36,7 +36,7 @@
         {% for doc in documents %}
         <tr>
             <td><a href="{% url 'documents:document_detail' doc.pk %}">{{ doc.title }}</a></td>
-            <td>{{ doc.get_game_display }}</td>
+            <td>{{ doc.get_directory_display }}</td>
             <td>
                 <a href="{% url 'documents:document_edit' doc.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
             </td>

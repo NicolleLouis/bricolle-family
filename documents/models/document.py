@@ -1,17 +1,16 @@
 from django.contrib import admin
 from django.db import models
 
-
-class Game(models.TextChoices):
-    BACK_TO_THE_DAWN = "bttd", "Back to the Dawn"
+from documents.constants.directories import Directories
 
 
 class Document(models.Model):
+    id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
     content = models.TextField()
-    game = models.CharField(
-        max_length=50,
-        choices=Game.choices,
+    directory = models.CharField(
+        max_length=4,
+        choices=Directories.choices,
         null=True,
         blank=True,
     )
@@ -24,7 +23,7 @@ class Document(models.Model):
 
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
-    list_display = ("title", "game", "created_at", "updated_at")
-    list_filter = ("game",)
+    list_display = ("id", "title", "directory", "created_at", "updated_at")
+    list_filter = ("directory",)
     search_fields = ("title", "content")
     ordering = ("title",)
