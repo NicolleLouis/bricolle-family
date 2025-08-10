@@ -1,11 +1,11 @@
 from django import forms
 
-from games_collection.models import MarkdownDocument
+from documents.models import Document
 
 
-class MarkdownDocumentForm(forms.ModelForm):
+class DocumentForm(forms.ModelForm):
     class Meta:
-        model = MarkdownDocument
+        model = Document
         fields = ["title", "game", "content"]
         widgets = {
             "title": forms.TextInput(attrs={"class": "form-control"}),

@@ -1,9 +1,9 @@
-{% extends 'games_collection/base.html' %}
+{% extends 'documents/base.html' %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="mb-0">Documents</h1>
-    <a class="btn btn-primary" href="{% url 'games_collection:markdown_document_create' %}">➕ New Document</a>
+    <a class="btn btn-primary" href="{% url 'documents:document_create' %}">➕ New Document</a>
 </div>
 <form method="get" class="row g-3 mb-4">
     <div class="col-md-3">
@@ -35,10 +35,10 @@
     <tbody>
         {% for doc in documents %}
         <tr>
-            <td>{{ doc.title }}</td>
+            <td><a href="{% url 'documents:document_detail' doc.pk %}">{{ doc.title }}</a></td>
             <td>{{ doc.get_game_display }}</td>
             <td>
-                <a href="{% url 'games_collection:markdown_document_edit' doc.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                <a href="{% url 'documents:document_edit' doc.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
             </td>
         </tr>
         {% endfor %}
