@@ -6,7 +6,7 @@ from documents.constants.directories import Directories
 from documents.models import Document
 
 
-def civ7(request):
+def civilization_7(request):
     docs = (
         Document.objects.filter(directory=Directories.CIVILIZATION7)
         .order_by("-updated_at")
@@ -18,4 +18,4 @@ def civ7(request):
         }
         for doc in docs
     ]
-    return render(request, "games_collection/civ7.html", {"documents": documents})
+    return render(request, "games_collection/civilization_7.html", {"documents": documents})

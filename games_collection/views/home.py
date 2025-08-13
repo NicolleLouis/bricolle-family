@@ -10,7 +10,7 @@ def home(request):
         },
         {
             "name": "Civ7",
-            "url": reverse("games_collection:civ7"),
+            "url": reverse("games_collection:civilization_7"),
             "color": "#2C3E50",
         },
     ]
