@@ -2,7 +2,6 @@ from django.core.exceptions import ValidationError
 import plotly.express as px
 from collections import Counter
 
-from core.services.charts.figure_to_image import FigureToImage
 from the_bazaar.models import Run, Season
 
 
@@ -11,7 +10,7 @@ class CharacterRunRepartitionService:
     def generate(cls, run_range=None):
         runs = cls.get_runs(run_range)
         fig = cls.generate_figure(runs)
-        return FigureToImage.generate_chart_image(fig)
+        return fig.to_html(full_html=False, include_plotlyjs='cdn')
 
     @staticmethod
     def get_runs(run_range=None):
