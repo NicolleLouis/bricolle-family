@@ -1,0 +1,11 @@
+{% extends 'games_collection/base.html' %}
+
+{% block content %}
+    {% for doc in documents %}
+        <h2>{{ doc.title }}</h2>
+        <div class="mt-2">{{ doc.content }}</div>
+        {% if not forloop.last %}<hr>{% endif %}
+    {% empty %}
+        <p>No documents available.</p>
+    {% endfor %}
+{% endblock %}

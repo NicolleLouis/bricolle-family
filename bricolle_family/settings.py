@@ -24,8 +24,6 @@ INSTALLED_APPS = [
     "the_bazaar",
     "baby_name",
     "babyberon",
-    "northguard",
-    "chess",
     "altered",
     'runeterra',
     "battery_simulator",
