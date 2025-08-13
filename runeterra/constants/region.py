@@ -12,4 +12,5 @@ class Region(models.TextChoices):
     RUNETERRA = "RUNETERRA", "Runeterra"
     SHADOW_ISLES = "SHADOW_ISLES", "Shadow Isles"
     SHURIMA = "SHURIMA", "Shurima"
+    SPIRIT_BLOSSOM = "SPIRIT_BLOSSOM", "Spirit Blossom"
     TARGON = "TARGON", "Targon"
