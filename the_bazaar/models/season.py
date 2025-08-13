@@ -10,15 +10,6 @@ class Season(models.Model):
         max_length=100,
         unique=True,
     )
-    version = models.CharField(
-        max_length=20,
-        validators=[
-            RegexValidator(
-                regex=r'^\d+\.\d+\.\d+$',
-                message="Version must be of format X.Y.Z (typically, 1.0.0)."
-            )
-        ]
-    )
 
 
     def __str__(self):
