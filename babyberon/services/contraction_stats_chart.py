@@ -4,7 +4,6 @@ from django.db.models import Count
 from django.db.models.functions import TruncDate, ExtractHour
 from django.utils import timezone
 import plotly.express as px
-from plotly.offline import plot
 
 from babyberon.models import Contraction
 
@@ -32,7 +31,7 @@ class ContractionStatsChartService:
         fig = px.bar(x=labels, y=counts, labels={"x": "Jour", "y": "Contractions"})
         fig.update_layout(margin=dict(l=20, r=20, t=20, b=20))
 
-        return plot(fig, auto_open=False, output_type="div")
+        return fig.to_html(full_html=False, include_plotlyjs='cdn')
 
     @staticmethod
     def generate_hourly():
@@ -52,4 +51,4 @@ class ContractionStatsChartService:
         fig = px.line(x=labels, y=counts, labels={"x": "Heure", "y": "Contractions"})
         fig.update_layout(margin=dict(l=20, r=20, t=20, b=20))
 
-        return plot(fig, auto_open=False, output_type="div")
+        return fig.to_html(full_html=False, include_plotlyjs='cdn')

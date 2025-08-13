@@ -18,8 +18,6 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi --no-root	
 
-RUN poetry run pip install kaleido
-
 COPY . .
 
 EXPOSE 8000
