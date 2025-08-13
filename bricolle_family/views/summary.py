@@ -15,8 +15,6 @@ class SummaryView:
     def games(request):
         modules = [
             {"name": "Altered", "url": "/altered/", "color": "#2C3E50"},
-            {"name": "Chess", "url": "/chess/", "color": "#ee7a41"},
-            {"name": "Northguard", "url": "/northguard/", "color": "#ffbe5c"},
             {"name": "Runeterra", "url": "/runeterra/", "color": "#4A7F4C"},
             {"name": "Games Collection", "url": "/games_collection/", "color": "#8e44ad"},
             {"name": "The Bazaar", "url": "/the_bazaar/", "color": "#5DADE2"},

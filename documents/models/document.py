@@ -9,7 +9,7 @@ class Document(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
     directory = models.CharField(
-        max_length=4,
+        max_length=14,
         choices=Directories.choices,
         null=True,
         blank=True,
