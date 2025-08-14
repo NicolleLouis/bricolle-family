@@ -40,7 +40,6 @@
                 <tr class="{% if obj.was_mastered %}table-success{% endif %}">
                     <td>{{ obj.name }}</td>
                     <td>{{ obj.get_character_display }}</td>
-                    <td>{{ obj.card_set }}</td>
                     <td>{{ obj.get_size_display }}</td>
                     <td>{% if obj.was_mastered %}✅{% else %}❌{% endif %}</td>
                     <td>{{ obj.victory_number }}</td>
