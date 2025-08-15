@@ -53,7 +53,36 @@
     </div>
 
     <script id="empty-form-template" type="text/template">
-        {{ fight_formset.empty_form.as_p|safe }}
+        <div class="fight-form border rounded p-2 mb-2">
+            {{ fight_formset.empty_form.id }}
+            <div class="row g-2 align-items-end">
+                <div class="col-md-1">
+                    {{ fight_formset.empty_form.day_number.label_tag }}
+                    {{ fight_formset.empty_form.day_number }}
+                </div>
+                <div class="col-md-2">
+                    {{ fight_formset.empty_form.opponent_character.label_tag }}
+                    {{ fight_formset.empty_form.opponent_character }}
+                </div>
+                <div class="col-md-2">
+                    {{ fight_formset.empty_form.opponent_archetype.label_tag }}
+                    {{ fight_formset.empty_form.opponent_archetype }}
+                </div>
+                <div class="col-md-1">
+                    {{ fight_formset.empty_form.is_victory.label_tag }}
+                    {{ fight_formset.empty_form.is_victory }}
+                </div>
+                <div class="col-md-5">
+                    {{ fight_formset.empty_form.comment.label_tag }}
+                    {{ fight_formset.empty_form.comment }}
+                </div>
+                <div class="col-md-1">
+                    {% if fight_formset.can_delete %}
+                        {{ fight_formset.empty_form.DELETE }} <span>Delete</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </script>
     <script>
         const archetypesByCharacter = {{ archetypes_by_character|safe }};
@@ -102,20 +131,21 @@
             });
 
             document.getElementById('add-fight').addEventListener('click', function(){
-                const totalForms = document.getElementById('id_fight_set-TOTAL_FORMS');
+                const totalForms = document.querySelector('input[name$="-TOTAL_FORMS"]');
                 const formIdx = parseInt(totalForms.value, 10);
                 const template = document.getElementById('empty-form-template').innerHTML.replace(/__prefix__/g, formIdx);
-                const div = document.createElement('div');
-                div.classList.add('fight-form','border','rounded','p-2','mb-2');
-                div.innerHTML = template;
-                document.getElementById('fights').appendChild(div);
+                const container = document.getElementById('fights');
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = template;
+                const form = wrapper.firstElementChild;
+                container.appendChild(form);
                 totalForms.value = formIdx + 1;
-                const dayInput = div.querySelector('input[name$="day_number"]');
+                const dayInput = form.querySelector('input[name$="day_number"]');
                 if(dayInput){
                     dayInput.value = nextDayNumber;
                     nextDayNumber += 1;
                 }
-                initFightForm(div);
+                initFightForm(form);
             });
         });
     </script>
