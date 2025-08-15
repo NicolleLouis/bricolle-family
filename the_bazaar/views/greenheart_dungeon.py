@@ -7,9 +7,10 @@ from the_bazaar.models import Run
 class GreenheartDungeonView:
     @staticmethod
     def stats(request):
-        total_runs = Run.objects.count()
-        runs_with = Run.objects.filter(greenheart_dungeon=True)
-        runs_without = Run.objects.filter(greenheart_dungeon=False)
+        runs_post_dungeon_patch = Run.objects.filter(season__number__gte=3)
+        total_runs = runs_post_dungeon_patch.count()
+        runs_with = runs_post_dungeon_patch.filter(greenheart_dungeon=True)
+        runs_without = runs_post_dungeon_patch.filter(greenheart_dungeon=False)
 
         if total_runs:
             ratio = runs_with.count() / total_runs * 100
