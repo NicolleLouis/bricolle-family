@@ -7,7 +7,7 @@ from the_bazaar.constants.character import Character
 class Archetype(models.Model):
     name = models.CharField(max_length=18)
     character = models.CharField(
-        max_length=9,
+        max_length=10,
         choices=Character.choices,
         default=Character.VANESSA
     )
