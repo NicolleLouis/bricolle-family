@@ -10,6 +10,10 @@
                 {{ form.character|add_class:"form-select" }}
             </div>
             <div class="col-auto">
+                {{ form.victory_type.label_tag }}
+                {{ form.victory_type|add_class:"form-select" }}
+            </div>
+            <div class="col-auto">
                 <button type="submit" class="btn btn-primary">Filter</button>
             </div>
         </form>
@@ -20,12 +24,12 @@
                 <td>{{ stats.total_objects }}</td>
             </tr>
             <tr>
-                <th scope="row">Mastered Objects</th>
-                <td>{{ stats.mastered_objects }}</td>
+                <th scope="row">Winning Objects</th>
+                <td>{{ stats.winning_objects }}</td>
             </tr>
             <tr>
-                <th scope="row">Mastery Ratio</th>
-                <td>{{ stats.mastered_ratio }}%</td>
+                <th scope="row">Win Ratio</th>
+                <td>{{ stats.winning_ratio }}%</td>
             </tr>
             </tbody>
         </table>

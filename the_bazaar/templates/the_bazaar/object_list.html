@@ -14,8 +14,8 @@
                 {{ filter.form.character|add_class:"form-select form-select-sm" }}
             </div>
             <div class="col-auto">
-                <label for="id_was_mastered" class="form-label">Maîtrisé</label>
-                {{ filter.form.was_mastered|add_class:"form-select form-select-sm" }}
+                <label for="id_best_win" class="form-label">Best Win</label>
+                {{ filter.form.best_win|add_class:"form-select form-select-sm" }}
             </div>
             <div class="col-auto">
                 <button class="btn btn-sm btn-primary" type="submit">Filtrer</button>
@@ -29,22 +29,47 @@
                 <th>Nom</th>
                 <th>Character</th>
                 <th>Taille</th>
-                <th>Maîtrisé</th>
-                <th>Victoires</th>
+                <th>Bronze</th>
+                <th>Silver</th>
+                <th>Gold</th>
                 <th></th>
             </tr>
             </thead>
             <tbody>
             {% for obj in objects %}
-                <tr class="{% if obj.was_mastered %}table-success{% endif %}">
+                <tr class="{% if obj.best_win == 'GOLD_WIN' %}table-success{% elif obj.best_win == 'SILVER_WIN' %}table-info{% elif obj.best_win == 'BRONZE_WIN' %}table-warning{% endif %}">
                     <td>{{ obj.name }}</td>
                     <td>{{ obj.get_character_display }}</td>
                     <td>{{ obj.get_size_display }}</td>
-                    <td>{% if obj.was_mastered %}✅{% else %}❌{% endif %}</td>
-                    <td>{{ obj.victory_number }}</td>
+                    <td>{{ obj.bronze_win_number }}</td>
+                    <td>{{ obj.silver_win_number }}</td>
+                    <td>{{ obj.gold_win_number }}</td>
                     <td>
-                        <a href="{% url 'the_bazaar:object_add_victory' obj.id %}"
-                           class="btn btn-sm btn-outline-secondary">Add a victory</a>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addVictoryModal{{ obj.id }}">Add a victory</button>
+                        <div class="modal fade" id="addVictoryModal{{ obj.id }}" tabindex="-1" aria-labelledby="addVictoryLabel{{ obj.id }}" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <form method="post" action="{% url 'the_bazaar:object_add_victory' obj.id %}">
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="addVictoryLabel{{ obj.id }}">Add a victory</h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                  <label for="victoryType{{ obj.id }}" class="form-label">Victory type</label>
+                                  <select class="form-select" id="victoryType{{ obj.id }}" name="victory_type">
+                                    <option value="BRONZE_WIN">Bronze</option>
+                                    <option value="SILVER_WIN">Silver</option>
+                                    <option value="GOLD_WIN" selected>Gold</option>
+                                  </select>
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="submit" class="btn btn-primary">Save</button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
                     </td>
                 </tr>
             {% empty %}

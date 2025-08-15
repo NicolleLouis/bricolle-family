@@ -6,12 +6,22 @@ from django.shortcuts import get_object_or_404, redirect
 
 from the_bazaar.forms.object import ObjectForm
 from the_bazaar.models import Object
+from the_bazaar.constants.result import Result
 
 
 class ObjectFilter(django_filters.FilterSet):
+    best_win = django_filters.ChoiceFilter(
+        choices=[
+            (Result.GOLD_WIN, 'Gold'),
+            (Result.SILVER_WIN, 'Silver'),
+            (Result.BRONZE_WIN, 'Bronze'),
+        ],
+        empty_label='Any',
+    )
+
     class Meta:
         model = Object
-        fields = ['character', 'was_mastered']
+        fields = ['character', 'best_win']
 
 
 class ObjectListView(FilterView):
@@ -31,8 +41,21 @@ class ObjectCreateView(CreateView):
 
 def add_victory(request, pk):
     obj = get_object_or_404(Object, pk=pk)
-    obj.victory_number += 1
-    if not obj.was_mastered:
-        obj.was_mastered = True
-    obj.save()
+    if request.method == 'POST':
+        victory_type = request.POST.get('victory_type')
+        if victory_type == Result.BRONZE_WIN:
+            obj.bronze_win_number += 1
+        elif victory_type == Result.SILVER_WIN:
+            obj.silver_win_number += 1
+        elif victory_type == Result.GOLD_WIN:
+            obj.gold_win_number += 1
+        if obj.gold_win_number > 0:
+            obj.best_win = Result.GOLD_WIN
+        elif obj.silver_win_number > 0:
+            obj.best_win = Result.SILVER_WIN
+        elif obj.bronze_win_number > 0:
+            obj.best_win = Result.BRONZE_WIN
+        else:
+            obj.best_win = None
+        obj.save()
     return redirect(request.META.get('HTTP_REFERER', reverse('the_bazaar:object_list')))

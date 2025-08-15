@@ -3,6 +3,7 @@ from django.db import models
 
 from the_bazaar.constants.character import Character
 from the_bazaar.constants.item_size import ItemSize
+from the_bazaar.constants.result import Result
 
 
 class Object(models.Model):
@@ -13,8 +14,15 @@ class Object(models.Model):
         choices=ItemSize.choices,
         default=ItemSize.SMALL,
     )
-    was_mastered = models.BooleanField(default=False)
-    victory_number = models.IntegerField(default=0)
+    best_win = models.CharField(
+        max_length=10,
+        choices=Result.choices,
+        null=True,
+        blank=True,
+    )
+    bronze_win_number = models.IntegerField(default=0)
+    silver_win_number = models.IntegerField(default=0)
+    gold_win_number = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -26,8 +34,10 @@ class ObjectAdmin(admin.ModelAdmin):
         'name',
         'character',
         'size',
-        'victory_number',
-        'was_mastered',
+        'gold_win_number',
+        'silver_win_number',
+        'bronze_win_number',
+        'best_win',
     )
-    list_filter = ('character', 'size', 'was_mastered')
+    list_filter = ('character', 'size', 'best_win')
     ordering = ('name',)
