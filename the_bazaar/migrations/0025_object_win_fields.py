@@ -16,7 +16,7 @@ def set_best_win(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('the_bazaar', '0023_alter_archetype_character'),
+        ('the_bazaar', '0024_fight'),
     ]
 
     operations = [
