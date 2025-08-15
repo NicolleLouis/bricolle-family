@@ -22,6 +22,7 @@ class Fight(models.Model):
         blank=True,
     )
     comment = models.TextField(blank=True)
+    is_victory = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('run', 'day_number')
@@ -33,6 +34,6 @@ class Fight(models.Model):
 
 @admin.register(Fight)
 class FightAdmin(admin.ModelAdmin):
-    list_display = ('run', 'day_number', 'opponent_character', 'opponent_archetype')
-    list_filter = ('opponent_character', 'opponent_archetype')
+    list_display = ('run', 'day_number', 'opponent_character', 'opponent_archetype', 'is_victory')
+    list_filter = ('opponent_character', 'opponent_archetype', 'is_victory')
     search_fields = ('run__id',)

@@ -14,25 +14,29 @@
                     <div class="fight-form border rounded p-2 mb-2">
                         {{ fight_form.id }}
                         <div class="row g-2 align-items-end">
-                            <div class="col-md-2">
+                            <div class="col-md-1">
                                 {{ fight_form.day_number.label_tag }}
                                 {{ fight_form.day_number }}
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 {{ fight_form.opponent_character.label_tag }}
                                 {{ fight_form.opponent_character }}
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 {{ fight_form.opponent_archetype.label_tag }}
                                 {{ fight_form.opponent_archetype }}
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-1">
+                                {{ fight_form.is_victory.label_tag }}
+                                {{ fight_form.is_victory }}
+                            </div>
+                            <div class="col-md-5">
                                 {{ fight_form.comment.label_tag }}
                                 {{ fight_form.comment }}
                             </div>
                             <div class="col-md-1">
                                 {% if fight_formset.can_delete %}
-                                    {{ fight_form.DELETE }} <span>Suppr</span>
+                                    {{ fight_form.DELETE }} <span>Delete</span>
                                 {% endif %}
                             </div>
                         </div>
