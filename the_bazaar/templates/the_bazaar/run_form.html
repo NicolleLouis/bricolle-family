@@ -7,8 +7,116 @@
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit" class="btn btn-success">Enregistrer</button>
-            <a href="{% url 'the_bazaar:run_list' %}" class="btn btn-secondary">Annuler</a>
+
+            {{ fight_formset.management_form }}
+            <div id="fights">
+                {% for fight_form in fight_formset.forms %}
+                    <div class="fight-form border rounded p-2 mb-2">
+                        {{ fight_form.id }}
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-1">
+                                {{ fight_form.day_number.label_tag }}
+                                {{ fight_form.day_number }}
+                            </div>
+                            <div class="col-md-2">
+                                {{ fight_form.opponent_character.label_tag }}
+                                {{ fight_form.opponent_character }}
+                            </div>
+                            <div class="col-md-2">
+                                {{ fight_form.opponent_archetype.label_tag }}
+                                {{ fight_form.opponent_archetype }}
+                            </div>
+                            <div class="col-md-1">
+                                {{ fight_form.is_victory.label_tag }}
+                                {{ fight_form.is_victory }}
+                            </div>
+                            <div class="col-md-5">
+                                {{ fight_form.comment.label_tag }}
+                                {{ fight_form.comment }}
+                            </div>
+                            <div class="col-md-1">
+                                {% if fight_formset.can_delete %}
+                                    {{ fight_form.DELETE }} <span>Delete</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="button" id="add-fight" class="btn btn-secondary mb-3">Ajouter un fight</button>
+
+            <div>
+                <button type="submit" class="btn btn-success">Enregistrer</button>
+                <a href="{% url 'the_bazaar:run_list' %}" class="btn btn-secondary">Annuler</a>
+            </div>
         </form>
     </div>
+
+    <script id="empty-form-template" type="text/template">
+        {{ fight_formset.empty_form.as_p|safe }}
+    </script>
+    <script>
+        const archetypesByCharacter = {{ archetypes_by_character|safe }};
+        let nextDayNumber = {{ max_day_number|default:0 }} + 1;
+
+        function filterArchetypes(charSelect, archSelect){
+            const char = charSelect.value;
+            const options = archetypesByCharacter[char] || [];
+            const current = archSelect.value;
+            archSelect.innerHTML = '<option value="">---------</option>';
+            options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt.id;
+                option.textContent = opt.name;
+                if(opt.id.toString() === current){
+                    option.selected = true;
+                }
+                archSelect.appendChild(option);
+            });
+        }
+
+        function initFightForm(form){
+            const charSelect = form.querySelector('select[name$="opponent_character"]');
+            const archSelect = form.querySelector('select[name$="opponent_archetype"]');
+            if(charSelect){
+                charSelect.addEventListener('change', () => filterArchetypes(charSelect, archSelect));
+                filterArchetypes(charSelect, archSelect);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+            const runChar = document.getElementById('id_character');
+            const runArch = document.getElementById('id_archetype');
+            if(runChar){
+                runChar.addEventListener('change', () => filterArchetypes(runChar, runArch));
+                filterArchetypes(runChar, runArch);
+            }
+
+            document.querySelectorAll('.fight-form').forEach(form => {
+                const dayInput = form.querySelector('input[name$="day_number"]');
+                if(dayInput && !dayInput.value){
+                    dayInput.value = nextDayNumber;
+                    nextDayNumber += 1;
+                }
+                initFightForm(form);
+            });
+
+            document.getElementById('add-fight').addEventListener('click', function(){
+                const totalForms = document.getElementById('id_fight_set-TOTAL_FORMS');
+                const formIdx = parseInt(totalForms.value, 10);
+                const template = document.getElementById('empty-form-template').innerHTML.replace(/__prefix__/g, formIdx);
+                const div = document.createElement('div');
+                div.classList.add('fight-form','border','rounded','p-2','mb-2');
+                div.innerHTML = template;
+                document.getElementById('fights').appendChild(div);
+                totalForms.value = formIdx + 1;
+                const dayInput = div.querySelector('input[name$="day_number"]');
+                if(dayInput){
+                    dayInput.value = nextDayNumber;
+                    nextDayNumber += 1;
+                }
+                initFightForm(div);
+            });
+        });
+    </script>
 {% endblock %}
