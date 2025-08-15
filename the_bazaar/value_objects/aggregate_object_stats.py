@@ -5,5 +5,5 @@ import dataclasses
 class AggregateObjectStatsResult:
     character: str
     total_objects: int = 0
-    mastered_objects: int = 0
-    mastered_ratio: float = 0.0
+    winning_objects: int = 0
+    winning_ratio: float = 0.0

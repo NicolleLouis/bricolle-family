@@ -10,21 +10,24 @@ class ObjectForm(forms.ModelForm):
             'name',
             'character',
             'size',
-            'victory_number',
-            'was_mastered',
+            'bronze_win_number',
+            'silver_win_number',
+            'gold_win_number',
         ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'character': forms.Select(attrs={'class': 'form-select'}),
             'size': forms.Select(attrs={'class': 'form-select'}),
-            'victory_number': forms.NumberInput(attrs={'class': 'form-control'}),
-            'was_mastered': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'bronze_win_number': forms.NumberInput(attrs={'class': 'form-control'}),
+            'silver_win_number': forms.NumberInput(attrs={'class': 'form-control'}),
+            'gold_win_number': forms.NumberInput(attrs={'class': 'form-control'}),
         }
         labels = {
             'name': 'Nom',
             'character': 'Personnage',
             'size': 'Taille',
-            'victory_number': 'Nombre de victoires',
-            'was_mastered': 'Maîtrisé',
+            'bronze_win_number': 'Bronze wins',
+            'silver_win_number': 'Silver wins',
+            'gold_win_number': 'Gold wins',
         }
 
