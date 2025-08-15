@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('the_bazaar', '0024_fight'),
+        ('the_bazaar', '0025_object_win_fields'),
     ]
 
     operations = [
