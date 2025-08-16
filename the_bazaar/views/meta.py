@@ -7,13 +7,13 @@ from the_bazaar.services.fight_character_timeseries import FightCharacterTimeser
 class MetaView:
     @staticmethod
     def stats(request):
-        pie_chart = FightCharacterRepartitionService.generate()
-        line_chart = FightCharacterTimeseriesService.generate()
+        character_total_repartition = FightCharacterRepartitionService.generate()
+        daily_repartition = FightCharacterTimeseriesService.generate()
         return render(
             request,
             'the_bazaar/meta.html',
             {
-                'pie_chart': pie_chart,
-                'line_chart': line_chart,
+                'character_total_repartition': character_total_repartition,
+                'daily_repartition': daily_repartition,
             }
         )
