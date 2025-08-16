@@ -27,7 +27,7 @@ class RunListView(FilterView):
     filterset_class = RunFilter
     ordering = ['-created_at']
 
-FightFormSet = inlineformset_factory(Run, Fight, form=FightForm, extra=1, can_delete=True)
+FightFormSet = inlineformset_factory(Run, Fight, form=FightForm, extra=0, can_delete=True)
 
 class RunCreateView(CreateView):
     model = Run
