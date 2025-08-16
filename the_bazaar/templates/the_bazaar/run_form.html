@@ -9,10 +9,16 @@
             {{ form.as_p }}
 
             {{ fight_formset.management_form }}
+            {% if fight_formset.non_form_errors %}
+                <div class="alert alert-danger">{{ fight_formset.non_form_errors }}</div>
+            {% endif %}
             <div id="fights">
                 {% for fight_form in fight_formset.forms %}
                     <div class="fight-form border rounded p-2 mb-2">
                         {{ fight_form.id }}
+                        {% if fight_form.errors %}
+                            <div class="alert alert-danger">{{ fight_form.errors }}</div>
+                        {% endif %}
                         <div class="row g-2 align-items-end">
                             <div class="col-md-1">
                                 {{ fight_form.day_number.label_tag }}
