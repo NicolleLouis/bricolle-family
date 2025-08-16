@@ -66,7 +66,14 @@ class RunCreateView(CreateView):
             fight_formset.save()
             return HttpResponseRedirect(self.get_success_url())
         else:
-            return self.form_invalid(form)
+            return self.render_to_response(
+                self.get_context_data(form=form, fight_formset=fight_formset)
+            )
+
+    def form_invalid(self, form):
+        context = self.get_context_data(form=form)
+        context['fight_formset'].is_valid()
+        return self.render_to_response(context)
 
 
 class RunUpdateView(UpdateView):
@@ -107,7 +114,14 @@ class RunUpdateView(UpdateView):
             fight_formset.save()
             return HttpResponseRedirect(self.get_success_url())
         else:
-            return self.form_invalid(form)
+            return self.render_to_response(
+                self.get_context_data(form=form, fight_formset=fight_formset)
+            )
+
+    def form_invalid(self, form):
+        context = self.get_context_data(form=form)
+        context['fight_formset'].is_valid()
+        return self.render_to_response(context)
 
 
 class RunDeleteView(DeleteView):
