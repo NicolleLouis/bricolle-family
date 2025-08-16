@@ -7,6 +7,7 @@ from the_bazaar.views.run_list import RunCreateView, RunUpdateView, RunDeleteVie
 from the_bazaar.views.object_list import ObjectListView, ObjectCreateView, add_victory
 from the_bazaar.views.object_stats import ObjectStatsView
 from the_bazaar.views.greenheart_dungeon import GreenheartDungeonView
+from the_bazaar.views.meta import MetaView
 
 app_name = 'the_bazaar'
 
@@ -24,5 +25,6 @@ urlpatterns = [
     path('object/<int:pk>/add_victory/', add_victory, name='object_add_victory'),
     path('object_stats/', ObjectStatsView.stats, name='object_stats'),
     path('greenheart_dungeon/', GreenheartDungeonView.stats, name='greenheart_dungeon'),
+    path('meta/', MetaView.stats, name='meta'),
 ]
 
