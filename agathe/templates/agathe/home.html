@@ -25,4 +25,16 @@
             <p>Aucun changement de couche enregistré.</p>
         {% endif %}
     </div>
+    <div class="card p-4 shadow-sm mt-4" style="background-color: {% if vitamin_today %}lightgreen{% else %}lightcoral{% endif %};">
+        <h5>Vitamine</h5>
+        {% if vitamin_today %}
+            <p>Vitamine prise aujourd'hui.</p>
+        {% else %}
+            <p>Aucune vitamine enregistrée aujourd'hui.</p>
+        {% endif %}
+        <form method="post" action="{% url 'agathe:vitamin_intake' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Prendre maintenant</button>
+        </form>
+    </div>
 {% endblock %}
