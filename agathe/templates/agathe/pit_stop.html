@@ -1,0 +1,48 @@
+{% extends 'agathe/base.html' %}
+
+{% block content %}
+    <h2 class="mb-4">Pit Stop</h2>
+    <form method="post" class="card p-4 shadow-sm mb-5">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.start_date.label_tag }}
+            {{ form.start_date }}
+        </div>
+        <div class="mb-3">
+            {{ form.end_date.label_tag }}
+            {{ form.end_date }}
+        </div>
+        <div class="mb-3">
+            {{ form.side.label_tag }}
+            {{ form.side }}
+        </div>
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+    </form>
+    <div class="mt-5">
+        <h2 class="mb-4">Derniers pit stops</h2>
+        {% if pit_stops %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Début</th>
+                        <th>Fin</th>
+                        <th>Côté</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pit_stops %}
+                    <tr>
+                        <td>{{ p.start_date|date:"d/m/Y H:i" }}</td>
+                        <td>{% if p.end_date %}{{ p.end_date|date:"d/m/Y H:i" }}{% endif %}</td>
+                        <td>{{ p.get_side_display }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>Aucun pit stop enregistré pour le moment.</p>
+        {% endif %}
+    </div>
+{% endblock %}

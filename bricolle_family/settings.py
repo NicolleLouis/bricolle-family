@@ -23,7 +23,7 @@ INSTALLED_APPS = [
     "core.apps.CoreConfig",
     "the_bazaar",
     "baby_name",
-    "babyberon",
+    "agathe",
     "altered",
     'runeterra',
     "battery_simulator",
