@@ -1,0 +1,10 @@
+{% extends 'agathe/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <h1>{{ title }}</h1>
+    <a class="btn btn-secondary btn-sm" href="{% url 'documents:document_edit' document.pk %}">Edit</a>
+    <div class="mt-4">{{ content_html }}</div>
+{% endblock %}
+
