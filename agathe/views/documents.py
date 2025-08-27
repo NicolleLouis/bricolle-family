@@ -11,7 +11,7 @@ class DocumentController:
     def _render_document(request, title: str):
         document, _ = Document.objects.get_or_create(
             title=title,
-            directory=Directories.AGATHER,
+            directory=Directories.AGATHE,
             defaults={"content": ""},
         )
         content_html = mark_safe(markdown.markdown(document.content))
@@ -29,3 +29,6 @@ class DocumentController:
     def next_evolution_milestone(request):
         return DocumentController._render_document(request, "Next évolution milestone")
 
+    @staticmethod
+    def website_ideas(request):
+        return DocumentController._render_document(request, "Website Ideas")
