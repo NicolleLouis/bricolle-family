@@ -4,7 +4,7 @@ class SummaryView:
     @staticmethod
     def home(request):
         modules = [
-            {"name": "Babyberon", "url": "/babyberon/", "color": "#e09cff"},
+            {"name": "Agathe", "url": "/pit_stop/", "color": "#e09cff"},
             {"name": "Shopping List", "url": "/shopping_list/", "color": "#58d68d"},
             {"name": "Games", "url": "/games", "color": "#ffbe5c"},
             {"name": "More...", "url": "/more", "color": "#3498db"},
