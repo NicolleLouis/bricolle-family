@@ -15,7 +15,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("altered/", include("altered.urls")),
     path("baby_name/", include("baby_name.urls")),
-    path("", include("agathe.urls")),
+    path("agathe/", include("agathe.urls")),
     path("battery_simulator/", include("battery_simulator.urls")),
     path("runeterra/", include("runeterra.urls")),
     path("login", Login.user_login, name="login"),
