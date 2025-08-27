@@ -7,4 +7,4 @@ class Directories(models.TextChoices):
     ALTERED = "altered", "Altered"
     RUNETERRA = "runeterra", "Runeterra"
     BAZAAR = "bazaar", "The Bazaar"
-    AGATHER = "agather", "Agather"
+    AGATHE = "agathe", "Agathe"

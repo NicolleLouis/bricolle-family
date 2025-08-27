@@ -18,4 +18,9 @@ urlpatterns = [
         DocumentController.next_evolution_milestone,
         name="next_evolution_milestone",
     ),
+    path(
+        "website_ideas/",
+        DocumentController.website_ideas,
+        name="website_ideas",
+    ),
 ]
