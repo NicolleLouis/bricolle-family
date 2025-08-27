@@ -1,13 +1,14 @@
 {% extends 'agathe/base.html' %}
 
 {% block content %}
-    <h2 class="mb-4">Accueil</h2>
-    <div class="card p-4 shadow-sm mb-4">
+    {% load feeding_colors %}
+    <h2 class="mb-4" >Accueil</h2>
+    <div class="card p-4 shadow-sm mb-4" style="background-color: {{ last_pit_stop.start_date|feeding_color }};">
         <h5>Dernier pit stop</h5>
         {% if last_pit_stop %}
             <ul>
                 <li>{{ last_pit_stop.start_date|date:"H:i" }}</li>
-                <li>Sein {{ last_pit_stop.get_side_display }}</li>
+                <li>Sein <strong>{{ last_pit_stop.get_side_display }}</strong></li>
             </ul>
         {% else %}
             <p>Aucun pit stop enregistré.</p>
