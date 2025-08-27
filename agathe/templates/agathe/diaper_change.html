@@ -1,0 +1,42 @@
+{% extends 'agathe/base.html' %}
+
+{% block content %}
+    <h2 class="mb-4">Changement de couche</h2>
+    <form method="post" class="card p-4 shadow-sm mb-5">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.urine }} {{ form.urine.label_tag }}
+        </div>
+        <div class="mb-3">
+            {{ form.pooh }} {{ form.pooh.label_tag }}
+        </div>
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+    </form>
+    <div class="mt-5">
+        <h2 class="mb-4">Derniers changements</h2>
+        {% if changes %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Urine</th>
+                        <th>Caca</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in changes %}
+                    <tr>
+                        <td>{{ c.date|date:"H:i" }}</td>
+                        <td>{{ c.urine|yesno:"Oui,Non" }}</td>
+                        <td>{{ c.pooh|yesno:"Oui,Non" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>Aucun changement de couche enregistré pour le moment.</p>
+        {% endif %}
+    </div>
+{% endblock %}
