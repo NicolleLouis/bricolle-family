@@ -26,8 +26,8 @@
                 <tbody>
                     {% for p in pit_stops %}
                     <tr>
-                        <td>{{ p.start_date|date:"d/m/Y H:i" }}</td>
-                        <td>{% if p.end_date %}{{ p.end_date|date:"d/m/Y H:i" }}{% endif %}</td>
+                        <td>{{ p.start_date|date:"H:i" }}</td>
+                        <td>{% if p.end_date %}{{ p.end_date|date:"H:i" }}{% endif %}</td>
                         <td>{{ p.get_side_display }}</td>
                         <td>
                             {% if not p.end_date %}

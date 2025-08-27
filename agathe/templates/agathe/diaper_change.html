@@ -27,7 +27,7 @@
                 <tbody>
                     {% for c in changes %}
                     <tr>
-                        <td>{{ c.date|date:"d/m/Y H:i" }}</td>
+                        <td>{{ c.date|date:"H:i" }}</td>
                         <td>{{ c.urine|yesno:"Oui,Non" }}</td>
                         <td>{{ c.pooh|yesno:"Oui,Non" }}</td>
                     </tr>

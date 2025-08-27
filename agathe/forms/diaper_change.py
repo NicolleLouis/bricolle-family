@@ -7,3 +7,4 @@ class DiaperChangeForm(forms.ModelForm):
     class Meta:
         model = DiaperChange
         fields = ["urine", "pooh"]
+        labels = {"pooh": "Caca"}
