@@ -1,3 +1,3 @@
 class AgatheConstant:
-    BIRTHDATE = "23/08/2025"
+    BIRTHDATE = "2025-08-23"
     FOOD_INTERVAL = 4

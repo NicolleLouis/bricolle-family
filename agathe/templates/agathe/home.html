@@ -37,4 +37,17 @@
             <button type="submit" class="btn btn-primary">Prendre maintenant</button>
         </form>
     </div>
+    <div class="card p-4 shadow-sm mt-4" style="background-color: {% if bath_recent %}lightgreen{% else %}lightcoral{% endif %};">
+        <h5>Dernier bain</h5>
+        {% if last_bath %}
+            <p>{{ last_bath.date|date:"d/m/Y" }}</p>
+        {% else %}
+            <p>Aucun bain enregistré.</p>
+        {% endif %}
+        <form method="post" action="{% url 'agathe:bath' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Enregistrer maintenant</button>
+        </form>
+    </div>
+    <p>Agathe a {{ age_months }} mois et {{ age_days }} jours.</p>
 {% endblock %}
