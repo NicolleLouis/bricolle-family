@@ -3,7 +3,6 @@
 {% block content %}
     {% load feeding_colors %}
     <h2 class="mb-4" >Accueil</h2>
-    <p>Agathe a {{ age_months }} mois et {{ age_days }} jours.</p>
     <div class="card p-4 shadow-sm mb-4" style="background-color: {{ last_pit_stop.start_date|feeding_color }};">
         <h5>Dernier pit stop</h5>
         {% if last_pit_stop %}
@@ -50,4 +49,5 @@
             <button type="submit" class="btn btn-primary">Enregistrer maintenant</button>
         </form>
     </div>
+    <p>Agathe a {{ age_months }} mois et {{ age_days }} jours.</p>
 {% endblock %}
