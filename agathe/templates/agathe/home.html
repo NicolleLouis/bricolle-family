@@ -20,6 +20,13 @@
                         <button type="submit" class="btn btn-secondary">Finir actuel</button>
                     </form>
                 </div>
+                {% else %}
+                <div>
+                    <form method="post" action="{% url 'agathe:pit_stop_start' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">Nouveau pit stop</button>
+                    </form>
+                </div>
                 {% endif %}
             </div>
         {% else %}

@@ -40,3 +40,14 @@ class PitStopController:
                 pit_stop.end_date = timezone.now()
                 pit_stop.save()
         return redirect("agathe:home")
+
+    @staticmethod
+    def start(request):
+        if request.method == "POST":
+            last = PitStop.objects.order_by("-start_date").first()
+            if last and last.side == PitStop.Side.LEFT:
+                side = PitStop.Side.RIGHT
+            else:
+                side = PitStop.Side.LEFT
+            PitStop.objects.create(start_date=timezone.now(), side=side)
+        return redirect("agathe:home")
