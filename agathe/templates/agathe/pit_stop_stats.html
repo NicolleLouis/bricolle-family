@@ -1,0 +1,9 @@
+{% extends 'agathe/base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Statistiques Pit Stop</h2>
+<div class="card p-4 shadow-sm">
+    <h5 class="card-title">Pit stops par jour</h5>
+    {{ pit_stops_per_day|safe }}
+</div>
+{% endblock %}
