@@ -5,10 +5,10 @@ from datetime import date
 from agathe.models import PitStop
 
 
-class PitStopTimeseriesService:
+class PitStopTimeseriesChart:
     """Generate a line chart of pit stops per day."""
 
-    START_DATE = date(2024, 8, 28)
+    START_DATE = date(2025, 8, 28)
 
     @classmethod
     def generate(cls):
@@ -25,5 +25,6 @@ class PitStopTimeseriesService:
                 .reindex(day_range, fill_value=0)
                 .reset_index(name="count")
             )
+            df = df.rename(columns={"index": "day"})
         fig = px.line(df, x="day", y="count")
         return fig.to_html(full_html=False, include_plotlyjs="cdn")

@@ -3,7 +3,7 @@ from django.utils import timezone
 
 from agathe.forms.pit_stop import PitStopForm
 from agathe.models import PitStop
-from agathe.services.pit_stop_timeseries import PitStopTimeseriesService
+from agathe.services.pit_stop_timeseries import PitStopTimeseriesChart
 
 
 class PitStopController:
@@ -46,7 +46,7 @@ class PitStopController:
 
     @staticmethod
     def stats(request):
-        pit_stops_per_day = PitStopTimeseriesService.generate()
+        pit_stops_per_day = PitStopTimeseriesChart.generate()
         return render(
             request,
             "agathe/pit_stop_stats.html",
