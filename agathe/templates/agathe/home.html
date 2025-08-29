@@ -35,14 +35,24 @@
     </div>
     <div class="card p-4 shadow-sm">
         <h5>Dernier changement de couche</h5>
-        {% if last_diaper_change %}
-            <ul>
-                <li>{{ last_diaper_change.date|date:"H:i" }}</li>
-                {% if last_diaper_change.pooh %}<li>Avec crotte</li>{% endif %}
-            </ul>
-        {% else %}
-            <p>Aucun changement de couche enregistré.</p>
-        {% endif %}
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                {% if last_diaper_change %}
+                    <ul>
+                        <li>{{ last_diaper_change.date|date:"H:i" }}</li>
+                        {% if last_diaper_change.pooh %}<li>Avec crotte</li>{% endif %}
+                    </ul>
+                {% else %}
+                    <p>Aucun changement de couche enregistré.</p>
+                {% endif %}
+            </div>
+            <div>
+                <form method="post" action="{% url 'agathe:diaper_change_quick' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </form>
+            </div>
+        </div>
     </div>
     <div class="card p-4 shadow-sm mt-4" style="background-color: {% if vitamin_today %}lightgreen{% else %}lightcoral{% endif %};"> 
         <h5>Vitamine</h5>
