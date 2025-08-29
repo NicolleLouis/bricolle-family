@@ -10,6 +10,12 @@
                 <li>{{ last_pit_stop.start_date|date:"H:i" }}</li>
                 <li>Sein <strong>{{ last_pit_stop.get_side_display }}</strong></li>
             </ul>
+            {% if last_pit_stop.ongoing %}
+            <form method="post" action="{% url 'agathe:pit_stop_finish_current' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary mt-2">Fin du pit stop en cours</button>
+            </form>
+            {% endif %}
         {% else %}
             <p>Aucun pit stop enregistré.</p>
         {% endif %}

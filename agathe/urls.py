@@ -14,6 +14,11 @@ urlpatterns = [
     path("", HomeController.home, name="home"),
     path("pit_stop/", PitStopController.pit_stop, name="pit_stop"),
     path("pit_stop/<int:pk>/finish/", PitStopController.finish, name="pit_stop_finish"),
+    path(
+        "pit_stop/finish_current/",
+        PitStopController.finish_current,
+        name="pit_stop_finish_current",
+    ),
     path("diaper_change/", DiaperChangeController.diaper_change, name="diaper_change"),
     path("vitamin_intake/", VitaminIntakeController.create, name="vitamin_intake"),
     path("bath/", BathController.create, name="bath"),
