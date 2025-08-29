@@ -11,6 +11,10 @@ class PitStop(models.Model):
     end_date = models.DateTimeField(null=True, blank=True)
     side = models.CharField(max_length=1, choices=Side.choices)
 
+    @property
+    def ongoing(self):
+        return self.end_date is None
+
 
 @admin.register(PitStop)
 class PitStopAdmin(admin.ModelAdmin):
