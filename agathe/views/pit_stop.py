@@ -27,3 +27,16 @@ class PitStopController:
             pit_stop.end_date = timezone.now()
             pit_stop.save()
         return redirect("agathe:pit_stop")
+
+    @staticmethod
+    def finish_current(request):
+        if request.method == "POST":
+            pit_stop = (
+                PitStop.objects.filter(end_date__isnull=True)
+                .order_by("-start_date")
+                .first()
+            )
+            if pit_stop:
+                pit_stop.end_date = timezone.now()
+                pit_stop.save()
+        return redirect("agathe:home")
