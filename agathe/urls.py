@@ -19,6 +19,7 @@ urlpatterns = [
         PitStopController.finish_current,
         name="pit_stop_finish_current",
     ),
+    path("pit_stop/start/", PitStopController.start, name="pit_stop_start"),
     path("diaper_change/", DiaperChangeController.diaper_change, name="diaper_change"),
     path("vitamin_intake/", VitaminIntakeController.create, name="vitamin_intake"),
     path("bath/", BathController.create, name="bath"),
