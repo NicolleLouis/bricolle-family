@@ -13,6 +13,7 @@ app_name = "agathe"
 urlpatterns = [
     path("", HomeController.home, name="home"),
     path("pit_stop/", PitStopController.pit_stop, name="pit_stop"),
+    path("pit_stop/stats/", PitStopController.stats, name="pit_stop_stats"),
     path("pit_stop/<int:pk>/finish/", PitStopController.finish, name="pit_stop_finish"),
     path(
         "pit_stop/finish_current/",
