@@ -19,3 +19,11 @@ class DiaperChangeController:
             form = DiaperChangeForm()
         changes = DiaperChange.objects.all().order_by("-date")[:5]
         return render(request, "agathe/diaper_change.html", {"form": form, "changes": changes})
+
+    @staticmethod
+    def quick(request):
+        if request.method == "POST":
+            DiaperChange.objects.create(
+                date=timezone.now(), urine=True, pooh=True
+            )
+        return redirect("agathe:home")
