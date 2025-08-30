@@ -70,21 +70,16 @@ class PitStopIntervalTimeseriesChart:
     @staticmethod
     def generate():
         pit_stops = PitStop.objects.filter(
-            start_date__date__gte=AgatheConstant.GRAPH_START_DATE
-        ).order_by("start_date")
-        records = []
-        previous_end = None
-        for ps in pit_stops:
-            if previous_end:
-                delta = ps.start_date - previous_end
-                records.append(
-                    {
-                        "day": ps.start_date.date(),
-                        "interval": delta.total_seconds() / (60 * 60),
-                    }
-                )
-            if ps.end_date:
-                previous_end = ps.end_date
+            start_date__date__gte=AgatheConstant.GRAPH_START_DATE,
+            delay_before_next_pit_stop__isnull=False,
+        )
+        records = [
+            {
+                "day": ps.start_date.date(),
+                "interval": ps.delay_before_next_pit_stop / 60,
+            }
+            for ps in pit_stops
+        ]
         if not records:
             df = pd.DataFrame({"day": [], "avg_interval": []})
         else:
@@ -167,21 +162,16 @@ class PitStopIntervalPerHourChart:
     @staticmethod
     def generate():
         pit_stops = PitStop.objects.filter(
-            start_date__date__gte=AgatheConstant.GRAPH_START_DATE
-        ).order_by("start_date")
-        records = []
-        previous_end = None
-        for ps in pit_stops:
-            if previous_end:
-                delta = ps.start_date - previous_end
-                records.append(
-                    {
-                        "hour": ps.start_date.hour,
-                        "interval": delta.total_seconds() / (60 * 60),
-                    }
-                )
-            if ps.end_date:
-                previous_end = ps.end_date
+            start_date__date__gte=AgatheConstant.GRAPH_START_DATE,
+            delay_before_next_pit_stop__isnull=False,
+        )
+        records = [
+            {
+                "hour": ps.start_date.hour,
+                "interval": ps.delay_before_next_pit_stop / 60,
+            }
+            for ps in pit_stops
+        ]
         hour_range = range(24)
         if not records:
             df = pd.DataFrame({"hour": list(hour_range), "avg_interval": [0] * 24})
@@ -193,7 +183,7 @@ class PitStopIntervalPerHourChart:
                 .reindex(hour_range, fill_value=0)
                 .reset_index()
             )
-            df = df.rename(columns={"interval": "avg_interval"})
+            df = df.rename(columns={"index": "hour", "interval": "avg_interval"})
         fig = px.line(df, x="hour", y="avg_interval")
         fig.update_layout(
             xaxis_title="Heure", yaxis_title="Interval moyen (Heures)"
