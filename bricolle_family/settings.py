@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "altered",
     'runeterra',
     "battery_simulator",
+    "finance_simulator",
     "games_collection",
     "documents",
     "shopping_list.apps.ShoppingListConfig",

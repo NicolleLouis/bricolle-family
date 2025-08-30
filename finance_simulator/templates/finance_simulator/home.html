@@ -1,0 +1,10 @@
+{% extends 'finance_simulator/base.html' %}
+
+{% block content %}
+<h1>Simulation de prêt</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Lancer une simulation</button>
+</form>
+{% endblock %}
