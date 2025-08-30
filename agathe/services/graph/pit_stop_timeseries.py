@@ -25,7 +25,7 @@ class PitStopTimeseriesChart:
                 .reset_index(name="count")
             )
             df = df.rename(columns={"index": "day"})
-        fig = px.line(df, x="day", y="Nombre")
+        fig = px.line(df, x="day", y="count")
         return fig.to_html(full_html=False, include_plotlyjs="cdn")
 
 
@@ -53,7 +53,7 @@ class PitStopDurationTimeseriesChart():
                 .reset_index()
             )
             df = df.rename(columns={"index": "day", "duration": "avg_duration"})
-        fig = px.line(df, x="day", y="Durée moyenne")
+        fig = px.line(df, x="day", y="avg_duration")
         return fig.to_html(full_html=False, include_plotlyjs="cdn")
 
 
@@ -87,5 +87,5 @@ class PitStopIntervalTimeseriesChart():
                 .reset_index()
             )
             df = df.rename(columns={"index": "day", "interval": "avg_interval"})
-        fig = px.line(df, x="day", y="Attente moyenne")
+        fig = px.line(df, x="day", y="avg_interval")
         return fig.to_html(full_html=False, include_plotlyjs="cdn")
