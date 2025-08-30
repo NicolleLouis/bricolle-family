@@ -1,6 +1,5 @@
 import pandas as pd
 import plotly.express as px
-from datetime import date
 
 from agathe.constants.agathe import AgatheConstant
 from agathe.models import PitStop

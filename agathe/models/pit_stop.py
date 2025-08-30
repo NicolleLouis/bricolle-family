@@ -10,6 +10,7 @@ class PitStop(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField(null=True, blank=True)
     side = models.CharField(max_length=1, choices=Side.choices)
+    delay_before_next_pit_stop = models.IntegerField(null=True, blank=True, help_text="in min")
 
     @property
     def ongoing(self):
