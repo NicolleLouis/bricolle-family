@@ -17,6 +17,7 @@ urlpatterns = [
     path("baby_name/", include("baby_name.urls")),
     path("agathe/", include("agathe.urls")),
     path("battery_simulator/", include("battery_simulator.urls")),
+    path("finance_simulator/", include("finance_simulator.urls")),
     path("runeterra/", include("runeterra.urls")),
     path("login", Login.user_login, name="login"),
     path("logout", Login.user_logout, name="logout"),
