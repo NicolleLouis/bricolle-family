@@ -26,5 +26,5 @@ class PitStop(models.Model):
 
 @admin.register(PitStop)
 class PitStopAdmin(admin.ModelAdmin):
-    list_display = ("start_date", "end_date", "side")
+    list_display = ("start_date", "end_date", "delay_before_next_pit_stop", "side")
     ordering = ("-start_date",)
