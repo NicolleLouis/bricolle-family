@@ -15,6 +15,13 @@ class PitStop(models.Model):
     def ongoing(self):
         return self.end_date is None
 
+    @property
+    def duration(self):
+        if self.end_date is None:
+            return None
+        delta = self.end_date - self.start_date
+        return delta.total_seconds() / 60
+
 
 @admin.register(PitStop)
 class PitStopAdmin(admin.ModelAdmin):

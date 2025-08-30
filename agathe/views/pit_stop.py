@@ -3,7 +3,7 @@ from django.utils import timezone
 
 from agathe.forms.pit_stop import PitStopForm
 from agathe.models import PitStop
-from agathe.services.pit_stop_timeseries import PitStopTimeseriesChart
+from agathe.services.graph.pit_stop_timeseries import PitStopTimeseriesChart
 
 
 class PitStopController:
