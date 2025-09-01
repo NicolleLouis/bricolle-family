@@ -2,9 +2,10 @@ from django.db import models
 
 
 class Directories(models.TextChoices):
-    BACK_TO_THE_DAWN = "bttd", "Back to the Dawn"
-    CIVILIZATION7 = "civilization_7", "Civilization 7"
-    ALTERED = "altered", "Altered"
-    RUNETERRA = "runeterra", "Runeterra"
-    BAZAAR = "bazaar", "The Bazaar"
     AGATHE = "agathe", "Agathe"
+    ALTERED = "altered", "Altered"
+    BACK_TO_THE_DAWN = "bttd", "Back to the Dawn"
+    BAZAAR = "bazaar", "The Bazaar"
+    CIVILIZATION7 = "civilization_7", "Civilization 7"
+    FINANCE_SIMULATOR = "finance", "Finance Simulator"
+    RUNETERRA = "runeterra", "Runeterra"
