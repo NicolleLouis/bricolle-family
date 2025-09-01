@@ -1,33 +1,50 @@
 {% extends 'finance_simulator/base.html' %}
 
 {% block content %}
-<h1>Simulation:</h1>
-<ul>
-    <li>Capital emprunté: {{ simulation.capital }}€</li>
-    <li>Taux d'intérêt: {{ simulation.annual_rate }}%</li>
-    <li>Durée: {{ simulation.duration }} années</li>
-</ul>
+<div class="card mb-4 shadow-sm">
+  <div class="card-body">
+    <h1 class="card-title">Simulation</h1>
+    <ul class="list-unstyled">
+      <li>Capital emprunté: {{ simulation.capital }}€</li>
+      <li>Taux d'intérêt: {{ simulation.annual_rate }}%</li>
+      <li>Durée: {{ simulation.duration }} années</li>
+    </ul>
+    <p class="fs-5"><strong>Mensualités: {{ monthly_amount }}€</strong></p>
+  </div>
+</div>
 
-<strong>Mensualités: {{ monthly_amount }}€</strong>
+<div class="card mb-4 shadow-sm">
+  <div class="card-body">
+    <h5 class="card-title">Intérêts payés par mois</h5>
+    {{ interest_chart|safe }}
+  </div>
+</div>
 
-<table>
-    <thead>
+<button class="btn btn-secondary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#amortizationTable" aria-expanded="false" aria-controls="amortizationTable">
+  Voir le tableau d'amortissement
+</button>
+<div class="collapse" id="amortizationTable">
+  <div class="card card-body">
+    <table class="table table-striped">
+      <thead>
         <tr>
-            <th>Mois</th>
-            <th>Intérêts</th>
-            <th>Capital payé</th>
-            <th>Capital restant</th>
+          <th>Mois</th>
+          <th>Intérêts</th>
+          <th>Capital payé</th>
+          <th>Capital restant</th>
         </tr>
-    </thead>
-    <tbody>
+      </thead>
+      <tbody>
         {% for amortization in amortizations %}
         <tr>
-            <td>{{ amortization.month }}</td>
-            <td>{{ amortization.interests }}€</td>
-            <td>{{ amortization.capital_paid }}€</td>
-            <td>{{ amortization.capital_remaining }}€</td>
+          <td>{{ amortization.month }}</td>
+          <td>{{ amortization.interests }}€</td>
+          <td>{{ amortization.capital_paid }}€</td>
+          <td>{{ amortization.capital_remaining }}€</td>
         </tr>
         {% endfor %}
-    </tbody>
-</table>
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}
