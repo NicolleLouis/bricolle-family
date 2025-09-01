@@ -8,3 +8,10 @@ from finance_simulator.domain.amortization_month import AmortizationMonth
 class SimulationResult:
     monthly_amount: float
     amortizations: List[AmortizationMonth]
+
+    @property
+    def total_interest_amount(self):
+        total_amount = 0
+        for amortization in self.amortizations:
+            total_amount += amortization.interests
+        return total_amount
