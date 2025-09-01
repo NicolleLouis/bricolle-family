@@ -14,4 +14,4 @@ class SimulationResult:
         total_amount = 0
         for amortization in self.amortizations:
             total_amount += amortization.interests
-        return total_amount
+        return round(total_amount, 2)

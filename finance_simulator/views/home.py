@@ -22,8 +22,7 @@ def home(request):
                 "finance_simulator/result.html",
                 {
                     "simulation": simulation,
-                    "monthly_amount": simulation_result.monthly_amount,
-                    "amortizations": simulation_result.amortizations,
+                    "simulation_result": simulation_result,
                     "interest_chart": interest_chart,
                 },
             )

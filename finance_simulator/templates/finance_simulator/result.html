@@ -9,7 +9,8 @@
       <li>Taux d'intérêt: {{ simulation.annual_rate }}%</li>
       <li>Durée: {{ simulation.duration }} années</li>
     </ul>
-    <p class="fs-5"><strong>Mensualités: {{ monthly_amount }}€</strong></p>
+    <p class="fs-5"><strong>Mensualités: {{ simulation_result.monthly_amount }}€</strong></p>
+    <p class="fs-5"><strong>Coût total: {{ simulation_result.total_interest_amount  }}€</strong></p>
   </div>
 </div>
 
@@ -35,7 +36,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for amortization in amortizations %}
+        {% for amortization in simulation_result.amortizations %}
         <tr>
           <td>{{ amortization.month }}</td>
           <td>{{ amortization.interests }}€</td>
