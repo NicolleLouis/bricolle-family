@@ -1,10 +1,33 @@
 {% extends 'finance_simulator/base.html' %}
 
 {% block content %}
-<h1>Résultat de la simulation</h1>
+<h1>Simulation:</h1>
 <ul>
-    <li>Capital emprunté: {{ capital }}</li>
-    <li>Années d'emprunt: {{ years }}</li>
-    <li>Taux d'emprunt: {{ rate }}</li>
+    <li>Capital emprunté: {{ simulation.capital }}€</li>
+    <li>Taux d'intérêt: {{ simulation.annual_rate }}%</li>
+    <li>Durée: {{ simulation.duration }} années</li>
 </ul>
+
+<strong>Mensualités: {{ monthly_amount }}€</strong>
+
+<table>
+    <thead>
+        <tr>
+            <th>Mois</th>
+            <th>Intérêts</th>
+            <th>Capital payé</th>
+            <th>Capital restant</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for amortization in amortizations %}
+        <tr>
+            <td>{{ amortization.month }}</td>
+            <td>{{ amortization.interests }}€</td>
+            <td>{{ amortization.capital_paid }}€</td>
+            <td>{{ amortization.capital_remaining }}€</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
