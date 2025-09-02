@@ -16,11 +16,22 @@ class InterestTimeseriesChart:
         df = pd.DataFrame(records)
         fig = px.line(df, x="month", y="interest")
         fig.update_layout(xaxis_title="Mois", yaxis_title="Intérêts payés")
-        if simulation_result.threshold_interests_below_rent is not None:
+        if simulation_result.threshold_marginal_interests_below_rent is not None:
             fig.add_vline(
-                x=simulation_result.threshold_interests_below_rent,
+                x=simulation_result.threshold_marginal_interests_below_rent,
                 line_width=2,
                 line_dash="dash",
                 line_color="red",
+                annotation_text="Marginal interests"
             )
+
+        if simulation_result.threshold_regular_sell_below_rent is not None:
+            fig.add_vline(
+                x=simulation_result.threshold_regular_sell_below_rent,
+                line_width=2,
+                line_dash="dash",
+                line_color="red",
+                annotation_text="Blank Operation"
+            )
+
         return fig.to_html(full_html=False, include_plotlyjs="cdn")

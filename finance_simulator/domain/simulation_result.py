@@ -8,7 +8,8 @@ from finance_simulator.domain.amortization_month import AmortizationMonth
 class SimulationResult:
     monthly_amount: float
     amortizations: List[AmortizationMonth]
-    threshold_interests_below_rent: int | None = None
+    threshold_marginal_interests_below_rent: int | None = None
+    threshold_regular_sell_below_rent: int | None = None
 
     @property
     def total_interest_amount(self):

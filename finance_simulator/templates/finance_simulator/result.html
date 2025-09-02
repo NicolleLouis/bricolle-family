@@ -46,6 +46,7 @@
                     <th>Intérêts</th>
                     <th>Capital payé</th>
                     <th>Capital restant</th>
+                    <th>Coût total si revente</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -55,6 +56,7 @@
                         <td>{{ amortization.interests|readable_amount }}€</td>
                         <td>{{ amortization.capital_paid|readable_amount }}€</td>
                         <td>{{ amortization.capital_remaining|readable_amount }}€</td>
+                        <td>{{ amortization.sell_cost|readable_amount }}€</td>
                     </tr>
                 {% endfor %}
                 </tbody>
