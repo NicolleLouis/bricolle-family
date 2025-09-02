@@ -28,6 +28,6 @@ class SummaryView:
             {"name": "Baby Name", "url": "/baby_name/", "color": "#ff6b6b"},
             {"name": "Battery Simulator", "url": "/battery_simulator/", "color": "#ffbe5c"},
             {"name": "Finance Simulator", "url": "/finance_simulator/", "color": "#1abc9c"},
-            {"name": "Documents", "url": "/documnents/", "color": "#4A7F4C"},
+            {"name": "Documents", "url": "/documents/", "color": "#4A7F4C"},
         ]
         return render(request, "bricolle_family/summary.html", {"modules": modules})
