@@ -12,16 +12,18 @@ def home(request):
         form = SimulationForm(request.POST)
         if form.is_valid():
             simulation = Simulation(
-                capital=form.cleaned_data.get("capital"),
+                house_cost=form.cleaned_data.get("house_cost"),
+                initial_contribution=form.cleaned_data.get("initial_contribution"),
                 duration=form.cleaned_data.get("years"),
                 annual_rate=form.cleaned_data.get("rate"),
-                comparative_rent=form.cleaned_data.get("comparative_rent") or 0,
+                comparative_rent=form.cleaned_data.get("comparative_rent"),
             )
             simulation_result = SimulationService(simulation).simulation_result
             interest_chart = InterestTimeseriesChart.generate(simulation_result)
             form = SimulationForm(
                 initial={
-                    "capital": simulation.capital,
+                    "house_cost": simulation.house_cost,
+                    "initial_contribution": simulation.initial_contribution,
                     "years": simulation.duration,
                     "rate": simulation.annual_rate,
                     "comparative_rent": simulation.comparative_rent,
@@ -48,7 +50,8 @@ def default_simulation(request):
     interest_chart = InterestTimeseriesChart.generate(simulation_result)
     form = SimulationForm(
         initial={
-            "capital": simulation.capital,
+            "house_cost": simulation.house_cost,
+            "initial_contribution": simulation.initial_contribution,
             "years": simulation.duration,
             "rate": simulation.annual_rate,
             "comparative_rent": simulation.comparative_rent,

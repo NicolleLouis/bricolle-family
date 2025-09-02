@@ -1,82 +1,87 @@
 {% extends 'finance_simulator/base.html' %}
 
 {% block content %}
-{% load readable_month readable_amount bootstrap5 %}
+    {% load readable_month readable_amount bootstrap5 %}
 
-<div class="d-flex justify-content-end mb-3">
-  <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editSimulationModal">
-    Modifier
-  </button>
-</div>
-
-<div class="card mb-4 shadow-sm">
-  <div class="card-body">
-    <h1 class="card-title">Simulation</h1>
-    <ul class="list-unstyled">
-      <li>Capital emprunté: {{ simulation.capital|readable_amount }}€</li>
-      <li>Taux d'intérêt: {{ simulation.annual_rate }}%</li>
-      <li>Durée: {{ simulation.duration }} années</li>
-      <li>Loyer: {{ simulation.comparative_rent|readable_amount }}€</li>
-    </ul>
-    <p class="fs-5"><strong>Mensualités: {{ simulation_result.monthly_amount|readable_amount }}€</strong></p>
-    <p class="fs-5"><strong>Coût total: {{ simulation_result.total_interest_amount|readable_amount  }}€</strong></p>
-  </div>
-</div>
-
-<div class="card mb-4 shadow-sm">
-  <div class="card-body">
-    <h5 class="card-title">Intérêts payés par mois</h5>
-    {{ interest_chart|safe }}
-  </div>
-</div>
-
-<button class="btn btn-secondary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#amortizationTable" aria-expanded="false" aria-controls="amortizationTable">
-  Voir le tableau d'amortissement
-</button>
-<div class="collapse" id="amortizationTable">
-  <div class="card card-body">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Mois</th>
-          <th>Intérêts</th>
-          <th>Capital payé</th>
-          <th>Capital restant</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for amortization in simulation_result.amortizations %}
-        <tr {% if amortization.month|divisibleby:12 %}class="table-secondary"{% endif %}>
-          <td>{{ amortization.month|readable_month }}</td>
-          <td>{{ amortization.interests }}€</td>
-          <td>{{ amortization.capital_paid }}€</td>
-          <td>{{ amortization.capital_remaining }}€</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div class="modal fade" id="editSimulationModal" tabindex="-1" aria-labelledby="editSimulationModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editSimulationModalLabel">Modifier la simulation</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form method="post">
-        {% csrf_token %}
-        <div class="modal-body">
-          {% bootstrap_form form %}
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-          <button type="submit" class="btn btn-primary">Relancer</button>
-        </div>
-      </form>
+    <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editSimulationModal">
+            Modifier
+        </button>
     </div>
-  </div>
-</div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h1 class="card-title">Simulation</h1>
+            <ul class="list-unstyled">
+                <li>Capital emprunté: {{ simulation.capital|readable_amount }}€</li>
+                <li>Taux d'intérêt: {{ simulation.annual_rate }}%</li>
+                <li>Durée: {{ simulation.duration }} années</li>
+                {% if simulation.comparative_rent is not None %}
+                    <li>Loyer: {{ simulation.comparative_rent|readable_amount }}€</li>
+                {% endif %}
+            </ul>
+            <p class="fs-5"><strong>Mensualités: {{ simulation_result.monthly_amount|readable_amount }}€</strong></p>
+            <p class="fs-5"><strong>Coût total: {{ simulation_result.total_interest_amount|readable_amount }}€</strong>
+            </p>
+        </div>
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Intérêts payés par mois</h5>
+            {{ interest_chart|safe }}
+        </div>
+    </div>
+
+    <button class="btn btn-secondary mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#amortizationTable"
+            aria-expanded="false" aria-controls="amortizationTable">
+        Voir le tableau d'amortissement
+    </button>
+    <div class="collapse" id="amortizationTable">
+        <div class="card card-body">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Mois</th>
+                    <th>Intérêts</th>
+                    <th>Capital payé</th>
+                    <th>Capital restant</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for amortization in simulation_result.amortizations %}
+                    <tr {% if amortization.month|divisibleby:12 %}class="table-secondary"{% endif %}>
+                        <td>{{ amortization.month|readable_month }}</td>
+                        <td>{{ amortization.interests|readable_amount }}€</td>
+                        <td>{{ amortization.capital_paid|readable_amount }}€</td>
+                        <td>{{ amortization.capital_remaining|readable_amount }}€</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editSimulationModal" tabindex="-1" aria-labelledby="editSimulationModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editSimulationModalLabel">Modifier la simulation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        {% bootstrap_form form %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Relancer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 {% endblock %}
