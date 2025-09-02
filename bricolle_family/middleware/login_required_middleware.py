@@ -2,7 +2,10 @@ from django.shortcuts import redirect
 from django.conf import settings
 from django.urls import reverse
 
-EXEMPT_URLS = [reverse('login'), reverse('admin:login')]
+EXEMPT_URLS = [
+    reverse('login'),
+    reverse('admin:login'),
+]
 if hasattr(settings, 'LOGIN_EXEMPT_URLS'):
     EXEMPT_URLS += [reverse(url) for url in settings.LOGIN_EXEMPT_URLS]
 

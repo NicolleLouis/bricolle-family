@@ -7,6 +7,7 @@ EXEMPT_PREFIXES = [
     "/baby_name/",
     settings.STATIC_URL,
     settings.MEDIA_URL,
+    "/finance_simulator/",
 ]
 
 EXEMPT_URLS = [

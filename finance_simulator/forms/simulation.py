@@ -18,3 +18,8 @@ class SimulationForm(forms.Form):
         min_value=0,
         required=False,
     )
+    use_real_estate_firm = forms.BooleanField(
+        label="Vente par cabinet immobilier",
+        initial=True,
+        required=False,
+    )

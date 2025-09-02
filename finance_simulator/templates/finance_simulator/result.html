@@ -22,6 +22,11 @@
                 {% if simulation.duration_before_usable is not None %}
                     <li>Livraison dans: {{ simulation.duration_before_usable }} Mois</li>
                 {% endif %}
+                <li>Vente: <strong>{% if simulation.use_real_estate_firm %}
+                        avec
+                    {% else %}
+                       sans
+                    {% endif %}</strong> cabinet immobilier</li>
             </ul>
             <p class="fs-5"><strong>Mensualités: {{ simulation_result.monthly_amount|readable_amount }}€</strong></p>
             <p class="fs-5"><strong>Coût bancaire total (Sans revente): {{ simulation_result.total_interest_amount|readable_amount }}€</strong>

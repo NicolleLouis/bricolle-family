@@ -9,6 +9,7 @@ class Simulation:
     annual_rate: float
     comparative_rent: float | None = None
     duration_before_usable: int | None = None
+    use_real_estate_firm: bool = True
 
     @property
     def capital(self):

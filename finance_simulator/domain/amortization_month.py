@@ -13,9 +13,14 @@ class AmortizationMonth:
     net_sell_cost: float | None = None
 
     def compute_sell_cost(self, simulation, total_interest):
+        sell_cost = total_interest
+
         diagnostic_fee = SellConstants.DIAGNOSTIC
-        agency_fee = float(simulation.house_cost) * SellConstants.AGENCY_FEE
-        sell_cost = diagnostic_fee + agency_fee + total_interest
+        sell_cost += diagnostic_fee
+
+        if simulation.use_real_estate_firm:
+            agency_fee = float(simulation.house_cost) * SellConstants.AGENCY_FEE
+            sell_cost += agency_fee
         self.sell_cost = sell_cost
 
         month = self.month + 1
