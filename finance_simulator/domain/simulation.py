@@ -5,6 +5,7 @@ class Simulation:
     capital: int
     duration: int
     annual_rate: float
+    comparative_rent: float = 0.0
 
     @property
     def monthly_interest_rate(self):

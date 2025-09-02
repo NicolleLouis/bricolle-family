@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 from ..domain.simulation import Simulation
-from ..forms import SimulationForm
+from ..forms.simulation import SimulationForm
 from ..services.graph.interest_timeseries import InterestTimeseriesChart
 from ..services.simulation import SimulationService
 
@@ -14,6 +14,7 @@ def home(request):
                 capital=form.cleaned_data.get("capital"),
                 duration=form.cleaned_data.get("years"),
                 annual_rate=form.cleaned_data.get("rate"),
+                comparative_rent=form.cleaned_data.get("comparative_rent"),
             )
             simulation_result = SimulationService(simulation).simulation_result
             interest_chart = InterestTimeseriesChart.generate(simulation_result)
