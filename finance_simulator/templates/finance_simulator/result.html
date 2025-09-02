@@ -1,7 +1,7 @@
 {% extends 'finance_simulator/base.html' %}
 
 {% block content %}
-{% load readable_month bootstrap5 %}
+{% load readable_month readable_amount bootstrap5 %}
 
 <div class="d-flex justify-content-end mb-3">
   <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editSimulationModal">
@@ -13,13 +13,13 @@
   <div class="card-body">
     <h1 class="card-title">Simulation</h1>
     <ul class="list-unstyled">
-      <li>Capital emprunté: {{ simulation.capital }}€</li>
+      <li>Capital emprunté: {{ simulation.capital|readable_amount }}€</li>
       <li>Taux d'intérêt: {{ simulation.annual_rate }}%</li>
       <li>Durée: {{ simulation.duration }} années</li>
-      <li>Loyer: {{ simulation.comparative_rent }}€</li>
+      <li>Loyer: {{ simulation.comparative_rent|readable_amount }}€</li>
     </ul>
-    <p class="fs-5"><strong>Mensualités: {{ simulation_result.monthly_amount }}€</strong></p>
-    <p class="fs-5"><strong>Coût total: {{ simulation_result.total_interest_amount  }}€</strong></p>
+    <p class="fs-5"><strong>Mensualités: {{ simulation_result.monthly_amount|readable_amount }}€</strong></p>
+    <p class="fs-5"><strong>Coût total: {{ simulation_result.total_interest_amount|readable_amount  }}€</strong></p>
   </div>
 </div>
 
