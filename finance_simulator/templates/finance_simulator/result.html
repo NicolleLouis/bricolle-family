@@ -86,7 +86,7 @@
                     <h5 class="modal-title" id="editSimulationModalLabel">Modifier la simulation</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="post">
+                <form method="post" action="{% url 'finance_simulator:home' %}">
                     {% csrf_token %}
                     <div class="modal-body">
                         {% bootstrap_form form %}
