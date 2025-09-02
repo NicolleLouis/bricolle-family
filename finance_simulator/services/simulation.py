@@ -37,8 +37,7 @@ class SimulationService:
         if self.simulation.comparative_rent is None:
             return None
         for amortization in self.amortizations:
-            rent_equivalent_cost = (amortization.month + 1) * self.simulation.comparative_rent
-            if rent_equivalent_cost >= amortization.sell_cost:
+            if amortization.net_sell_cost > 0:
                 return amortization.month
         return self.simulation.duration_in_month
 

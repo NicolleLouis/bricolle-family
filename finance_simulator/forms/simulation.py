@@ -13,3 +13,8 @@ class SimulationForm(forms.Form):
         max_digits=12,
         required=False,
     )
+    duration_before_usable = forms.IntegerField(
+        label="Achat sur Plan (Nombre de mois avant livraison, optionnel)",
+        min_value=0,
+        required=False,
+    )

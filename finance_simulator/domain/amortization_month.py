@@ -18,6 +18,12 @@ class AmortizationMonth:
         sell_cost = diagnostic_fee + agency_fee + total_interest
         self.sell_cost = sell_cost
 
+        month = self.month + 1
+        if simulation.duration_before_usable is not None:
+            month -= simulation.duration_before_usable
+            if month < 0:
+                month = 0
+
         if simulation.comparative_rent is not None:
-            rent_equivalent = (self.month + 1) * simulation.comparative_rent
+            rent_equivalent = month * simulation.comparative_rent
             self.net_sell_cost = float(rent_equivalent) - sell_cost

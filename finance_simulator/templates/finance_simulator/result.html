@@ -15,14 +15,24 @@
             <ul class="list-unstyled">
                 <li>Capital emprunté: {{ simulation.capital|readable_amount }}€</li>
                 <li>Taux d'intérêt: {{ simulation.annual_rate }}%</li>
-                <li>Durée: {{ simulation.duration }} années</li>
+                <li>Durée: {{ simulation.duration }} Années</li>
                 {% if simulation.comparative_rent is not None %}
                     <li>Loyer: {{ simulation.comparative_rent|readable_amount }}€</li>
                 {% endif %}
+                {% if simulation.duration_before_usable is not None %}
+                    <li>Livraison dans: {{ simulation.duration_before_usable }} Mois</li>
+                {% endif %}
             </ul>
             <p class="fs-5"><strong>Mensualités: {{ simulation_result.monthly_amount|readable_amount }}€</strong></p>
-            <p class="fs-5"><strong>Coût total: {{ simulation_result.total_interest_amount|readable_amount }}€</strong>
+            <p class="fs-5"><strong>Coût bancaire total (Sans revente): {{ simulation_result.total_interest_amount|readable_amount }}€</strong>
             </p>
+        </div>
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Balance net en cas de vente</h5>
+            {{ net_cost_chart|safe }}
         </div>
     </div>
 
@@ -47,7 +57,7 @@
                     <th>Capital payé</th>
                     <th>Capital restant</th>
                     <th>{% if simulation.comparative_rent is not None %}
-                        Coût net si revent
+                        Coût net si revente
                     {% else %}
                         Coût total si revente
                     {% endif %}</th>

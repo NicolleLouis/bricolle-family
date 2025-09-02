@@ -7,7 +7,8 @@ class Simulation:
     initial_contribution: int
     duration: int
     annual_rate: float
-    comparative_rent: float | None
+    comparative_rent: float | None = None
+    duration_before_usable: int | None = None
 
     @property
     def capital(self):
