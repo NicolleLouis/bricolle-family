@@ -1,7 +1,7 @@
 {% extends 'finance_simulator/base.html' %}
 
 {% block content %}
-    {% load readable_month readable_amount bootstrap5 %}
+    {% load readable_month readable_amount %}
 
     <div class="d-flex justify-content-end mb-3">
         <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editSimulationModal">
@@ -102,9 +102,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form method="post" action="{% url 'finance_simulator:home' %}">
-                    {% csrf_token %}
                     <div class="modal-body">
-                        {% bootstrap_form form %}
+                        {% include 'finance_simulator/simulation_form.html' %}
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>

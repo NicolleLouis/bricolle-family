@@ -1,0 +1,33 @@
+{% load bootstrap5 %}
+{% csrf_token %}
+<div class="row">
+    <div class="col-md-6 mb-3">
+        {% bootstrap_field form.house_cost %}
+    </div>
+    <div class="col-md-6 mb-3">
+        {% bootstrap_field form.initial_contribution %}
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6 mb-3">
+        {% bootstrap_field form.years %}
+    </div>
+    <div class="col-md-6 mb-3">
+        {% bootstrap_field form.rate %}
+    </div>
+</div>
+<hr>
+<h5>Champs optionnels</h5>
+<div class="row">
+    <div class="col-md-6 mb-3">
+        {% bootstrap_field form.comparative_rent %}
+    </div>
+    <div class="col-md-6 mb-3">
+        {% bootstrap_field form.duration_before_usable %}
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6 mb-3">
+        {% bootstrap_field form.use_real_estate_firm %}
+    </div>
+</div>

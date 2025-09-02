@@ -1,13 +1,11 @@
 {% extends 'finance_simulator/base.html' %}
-{% load bootstrap5 %}
 
 {% block content %}
 <h1 class="mb-4">Simulation de prêt</h1>
 <div class="card shadow-sm">
     <div class="card-body">
         <form method="post">
-            {% csrf_token %}
-            {% bootstrap_form form %}
+            {% include 'finance_simulator/simulation_form.html' %}
             <button type="submit" class="btn btn-primary">Lancer une simulation</button>
         </form>
         <a href="{% url 'finance_simulator:default_simulation' %}" class="btn btn-outline-secondary mt-3">Simulation par défaut</a>
