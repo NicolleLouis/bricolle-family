@@ -46,17 +46,31 @@
                     <th>Intérêts</th>
                     <th>Capital payé</th>
                     <th>Capital restant</th>
-                    <th>Coût total si revente</th>
+                    <th>{% if simulation.comparative_rent is not None %}
+                        Coût net si revent
+                    {% else %}
+                        Coût total si revente
+                    {% endif %}</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for amortization in simulation_result.amortizations %}
-                    <tr {% if amortization.month|divisibleby:12 %}class="table-secondary"{% endif %}>
+                    <tr
+                            {% if amortization.month == simulation_result.threshold_regular_sell_below_rent or amortization.month == simulation_result.threshold_marginal_interests_below_rent %}
+                                class="table-danger"
+                            {% elif amortization.month|divisibleby:12 %}
+                                class="table-secondary"
+                            {% endif %}
+                    >
                         <td>{{ amortization.month|readable_month }}</td>
                         <td>{{ amortization.interests|readable_amount }}€</td>
                         <td>{{ amortization.capital_paid|readable_amount }}€</td>
                         <td>{{ amortization.capital_remaining|readable_amount }}€</td>
-                        <td>{{ amortization.sell_cost|readable_amount }}€</td>
+                        <td>{% if simulation.comparative_rent is not None %}
+                            {{ amortization.net_sell_cost|readable_amount }}€
+                        {% else %}
+                            {{ amortization.sell_cost|readable_amount }}€
+                        {% endif %}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
