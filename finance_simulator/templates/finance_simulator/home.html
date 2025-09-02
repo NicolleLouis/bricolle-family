@@ -10,6 +10,7 @@
             {% bootstrap_form form %}
             <button type="submit" class="btn btn-primary">Lancer une simulation</button>
         </form>
+        <a href="{% url 'finance_simulator:default_simulation' %}" class="btn btn-outline-secondary mt-3">Simulation par défaut</a>
     </div>
 </div>
 {% endblock %}
