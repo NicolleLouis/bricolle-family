@@ -12,22 +12,40 @@
     <div class="card mb-4 shadow-sm">
         <div class="card-body">
             <h1 class="card-title">Simulation</h1>
-            <ul class="list-unstyled">
-                <li>Capital emprunté: {{ simulation.capital|readable_amount }}€</li>
-                <li>Taux d'intérêt: {{ simulation.annual_rate }}%</li>
-                <li>Durée: {{ simulation.duration }} Années</li>
-                {% if simulation.comparative_rent is not None %}
-                    <li>Loyer: {{ simulation.comparative_rent|readable_amount }}€</li>
-                {% endif %}
-                {% if simulation.duration_before_usable is not None %}
-                    <li>Livraison dans: {{ simulation.duration_before_usable }} Mois</li>
-                {% endif %}
-                <li>Vente: <strong>{% if simulation.use_real_estate_firm %}
-                        avec
-                    {% else %}
-                       sans
-                    {% endif %}</strong> cabinet immobilier</li>
-            </ul>
+            <button class="btn btn-link p-0 mb-3" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#simulationDetails" aria-expanded="false"
+                    aria-controls="simulationDetails">
+                Voir les détails de la simulation
+            </button>
+            <div class="collapse" id="simulationDetails">
+                <dl class="row mb-0">
+                    <dt class="col-sm-6">Capital emprunté</dt>
+                    <dd class="col-sm-6 text-sm-end">{{ simulation.capital|readable_amount }}€</dd>
+                    <dt class="col-sm-6">Taux d'intérêt</dt>
+                    <dd class="col-sm-6 text-sm-end">{{ simulation.annual_rate }}%</dd>
+                    <dt class="col-sm-6">Durée</dt>
+                    <dd class="col-sm-6 text-sm-end">{{ simulation.duration }} Années</dd>
+                    {% if simulation.comparative_rent is not None %}
+                        <dt class="col-sm-6">Loyer</dt>
+                        <dd class="col-sm-6 text-sm-end">{{ simulation.comparative_rent|readable_amount }}€</dd>
+                    {% endif %}
+                    {% if simulation.duration_before_usable is not None %}
+                        <dt class="col-sm-6">Livraison dans</dt>
+                        <dd class="col-sm-6 text-sm-end">{{ simulation.duration_before_usable }} Mois</dd>
+                    {% endif %}
+                    <dt class="col-sm-6">Vente</dt>
+                    <dd class="col-sm-6 text-sm-end">
+                        <strong>
+                            {% if simulation.use_real_estate_firm %}
+                                avec
+                            {% else %}
+                                sans
+                            {% endif %}
+                        </strong>
+                        cabinet immobilier
+                    </dd>
+                </dl>
+            </div>
             <p class="fs-5"><strong>Mensualités: {{ simulation_result.monthly_amount|readable_amount }}€</strong></p>
             <p class="fs-5"><strong>Coût bancaire total (Sans revente): {{ simulation_result.total_interest_amount|readable_amount }}€</strong>
             </p>
