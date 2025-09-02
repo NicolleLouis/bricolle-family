@@ -5,6 +5,6 @@ DEFAULT_SIMULATION = Simulation(
     initial_contribution=112472,
     duration=20,
     annual_rate=3.09,
-    comparative_rent=1600,
+    comparative_rent=2000,
     duration_before_usable=21,
 )
