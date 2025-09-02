@@ -1,6 +1,8 @@
 {% extends 'finance_simulator/base.html' %}
 
 {% block content %}
+{% load readable_month %}
+
 <div class="card mb-4 shadow-sm">
   <div class="card-body">
     <h1 class="card-title">Simulation</h1>
@@ -38,8 +40,8 @@
       </thead>
       <tbody>
         {% for amortization in simulation_result.amortizations %}
-        <tr>
-          <td>{{ amortization.month }}</td>
+        <tr {% if amortization.month|divisibleby:12 %}class="table-secondary"{% endif %}>
+          <td>{{ amortization.month|readable_month }}</td>
           <td>{{ amortization.interests }}€</td>
           <td>{{ amortization.capital_paid }}€</td>
           <td>{{ amortization.capital_remaining }}€</td>

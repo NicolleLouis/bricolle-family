@@ -20,6 +20,6 @@ class InterestTimeseriesChart:
             x=simulation_result.threshold_interests_below_rent,
             line_width=2,
             line_dash="dash",
-            line_color="red"
+            line_color="red",
         )
         return fig.to_html(full_html=False, include_plotlyjs="cdn")
