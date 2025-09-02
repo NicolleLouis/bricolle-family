@@ -5,4 +5,10 @@ class SimulationForm(forms.Form):
     capital = forms.DecimalField(label="Capital emprunté", min_value=0, decimal_places=2, max_digits=12)
     years = forms.IntegerField(label="Années d'emprunt", min_value=1)
     rate = forms.DecimalField(label="Taux d'emprunt", min_value=0, decimal_places=2, max_digits=5)
-    comparative_rent = forms.DecimalField(label="Loyer actuel", min_value=0, decimal_places=2, max_digits=12)
+    comparative_rent = forms.DecimalField(
+        label="Loyer actuel (optionnel)",
+        min_value=0,
+        decimal_places=2,
+        max_digits=12,
+        required=False,
+    )
