@@ -14,10 +14,18 @@ def home(request):
                 capital=form.cleaned_data.get("capital"),
                 duration=form.cleaned_data.get("years"),
                 annual_rate=form.cleaned_data.get("rate"),
-                comparative_rent=form.cleaned_data.get("comparative_rent"),
+                comparative_rent=form.cleaned_data.get("comparative_rent") or 0,
             )
             simulation_result = SimulationService(simulation).simulation_result
             interest_chart = InterestTimeseriesChart.generate(simulation_result)
+            form = SimulationForm(
+                initial={
+                    "capital": simulation.capital,
+                    "years": simulation.duration,
+                    "rate": simulation.annual_rate,
+                    "comparative_rent": simulation.comparative_rent,
+                }
+            )
             return render(
                 request,
                 "finance_simulator/result.html",
@@ -25,6 +33,7 @@ def home(request):
                     "simulation": simulation,
                     "simulation_result": simulation_result,
                     "interest_chart": interest_chart,
+                    "form": form,
                 },
             )
     else:

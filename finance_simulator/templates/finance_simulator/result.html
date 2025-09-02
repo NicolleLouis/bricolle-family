@@ -1,7 +1,13 @@
 {% extends 'finance_simulator/base.html' %}
 
 {% block content %}
-{% load readable_month %}
+{% load readable_month bootstrap5 %}
+
+<div class="d-flex justify-content-end mb-3">
+  <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editSimulationModal">
+    Modifier
+  </button>
+</div>
 
 <div class="card mb-4 shadow-sm">
   <div class="card-body">
@@ -51,4 +57,26 @@
     </table>
   </div>
 </div>
+
+<div class="modal fade" id="editSimulationModal" tabindex="-1" aria-labelledby="editSimulationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editSimulationModalLabel">Modifier la simulation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="modal-body">
+          {% bootstrap_form form %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary">Relancer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
