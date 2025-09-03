@@ -1,7 +1,7 @@
 from finance_simulator.domain.simulation import Simulation
 
 DEFAULT_SIMULATION = Simulation(
-    house_cost=480000,
+    house_cost=552000,
     initial_contribution=112472,
     duration=20,
     annual_rate=3.09,
