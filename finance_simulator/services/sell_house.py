@@ -28,7 +28,7 @@ class SellHouseService:
     def real_estate_firm_cost(self):
         if not self.simulation.use_real_estate_firm:
             return 0
-        return float(self.simulation.house_cost) * SellConstants.AGENCY_FEE
+        return float(self.simulation.sell_price) * SellConstants.AGENCY_FEE
 
     def house_price_evolution(self):
         if not self.simulation.sell_price_change:
