@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from finance_simulator.constants.sell import SellConstants
+from finance_simulator.services.sell_house import SellHouseService
 
 
 @dataclass
@@ -15,13 +16,11 @@ class AmortizationMonth:
     def compute_sell_cost(self, simulation, total_interest):
         sell_cost = total_interest
 
-        diagnostic_fee = SellConstants.DIAGNOSTIC
-        sell_cost += diagnostic_fee
-
-        if simulation.use_real_estate_firm:
-            agency_fee = float(simulation.house_cost) * SellConstants.AGENCY_FEE
-            sell_cost += agency_fee
-        self.sell_cost = sell_cost
+        sell_house_service = SellHouseService(
+            simulation=simulation,
+            amortization_month=self
+        )
+        sell_cost += sell_house_service.compute_sell_cost()
 
         month = self.month + 1
         if simulation.duration_before_usable is not None:
