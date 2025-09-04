@@ -26,4 +26,4 @@ class Simulation:
 
     @property
     def sell_price(self):
-        return (100 + self.sell_price_change) * self.house_cost
+        return (100 + self.sell_price_change) * self.house_cost / 100

@@ -18,6 +18,7 @@ class SellHouseService:
         sell_cost = 0
         sell_cost += self.diagnostic_cost()
         sell_cost += self.real_estate_firm_cost()
+        sell_cost += self.house_price_evolution()
         return sell_cost
 
     @staticmethod
@@ -28,3 +29,8 @@ class SellHouseService:
         if not self.simulation.use_real_estate_firm:
             return 0
         return float(self.simulation.house_cost) * SellConstants.AGENCY_FEE
+
+    def house_price_evolution(self):
+        if not self.simulation.sell_price_change:
+            return 0
+        return float(self.simulation.house_cost - self.simulation.sell_price)

@@ -28,3 +28,7 @@ class SimulationForm(forms.Form):
         initial=True,
         required=False,
     )
+    sell_price_change = forms.DecimalField(
+        label="Changement de valeur du bien (%)",
+        required=False,
+    )

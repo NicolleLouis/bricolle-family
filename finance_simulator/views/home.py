@@ -22,6 +22,7 @@ def home(request, simulation: Optional[Simulation] = None):
                     comparative_rent=form.cleaned_data.get("comparative_rent"),
                     duration_before_usable=form.cleaned_data.get("duration_before_usable"),
                     use_real_estate_firm=form.cleaned_data.get("use_real_estate_firm"),
+                    sell_price_change=form.cleaned_data.get("sell_price_change"),
                 )
             else:
                 raise ValueError("Form is invalid")
@@ -37,6 +38,7 @@ def home(request, simulation: Optional[Simulation] = None):
                 "comparative_rent": simulation.comparative_rent,
                 "duration_before_usable": simulation.duration_before_usable,
                 "use_real_estate_firm": simulation.use_real_estate_firm,
+                "sell_price_change": simulation.sell_price_change,
             }
         )
         return render(

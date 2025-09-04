@@ -7,4 +7,5 @@ DEFAULT_SIMULATION = Simulation(
     annual_rate=3.09,
     comparative_rent=2000,
     duration_before_usable=0,
+    sell_price_change=0,
 )
