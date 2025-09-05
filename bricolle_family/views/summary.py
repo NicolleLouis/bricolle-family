@@ -18,6 +18,7 @@ class SummaryView:
             {"name": "Runeterra", "url": "/runeterra/", "color": "#4A7F4C"},
             {"name": "Games Collection", "url": "/games_collection/", "color": "#8e44ad"},
             {"name": "The Bazaar", "url": "/the_bazaar/", "color": "#5DADE2"},
+            {"name": "Civilization 7", "url": "/civilization7/", "color": "#d35400"},
         ]
         return render(request, "bricolle_family/summary.html", {"modules": modules})
 

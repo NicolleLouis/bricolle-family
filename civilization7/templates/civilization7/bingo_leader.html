@@ -1,0 +1,25 @@
+{% extends 'civilization7/base.html' %}
+
+{% block content %}
+<h1>Bingo Leader</h1>
+<table class="table table-bordered text-center">
+    <thead>
+    <tr>
+        <th>Leader</th>
+        {% for value, label in victory_choices %}
+            <th>{{ label }}</th>
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in rows %}
+    <tr>
+        <td>{{ row.leader.name }}</td>
+        {% for ok in row.results %}
+            <td class="{% if ok %}table-success{% else %}table-danger{% endif %}"></td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

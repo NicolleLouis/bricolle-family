@@ -1,0 +1,14 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light px-3">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'civilization7:recent_games' %}">Civilization 7 🎮</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" href="{% url 'civilization7:recent_games' %}">Parties récentes</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'civilization7:stats' %}">Stats</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'civilization7:bingo_leader' %}">Bingo Leader</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'civilization7:bingo_civilization' %}">Bingo Civilization</a></li>
+        </ul>
+    </div>
+</nav>
