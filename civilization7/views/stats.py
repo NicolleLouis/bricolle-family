@@ -1,7 +1,7 @@
 from django.db.models import Count
 from django.shortcuts import render
 
-from civilization7.constants.victoire import Victoire
+from civilization7.constants.victory import Victory
 from civilization7.models import Game
 
 
@@ -13,7 +13,7 @@ def stats(request):
         .values("victory_type")
         .annotate(count=Count("id"))
     )
-    victory_choices = list(Victoire.choices)
+    victory_choices = list(Victory.choices)
     victory_map = {value: 0 for value, _ in victory_choices}
     for item in victories_raw:
         victory_map[item["victory_type"]] = item["count"]

@@ -1,12 +1,12 @@
 from django.db.models import Q
 from django.shortcuts import render
 
-from civilization7.constants.victoire import Victoire
+from civilization7.constants.victory import Victory
 from civilization7.models import Civilization, Game, Leader
 
 
 def bingo_leader(request):
-    victory_choices = list(Victoire.choices)
+    victory_choices = list(Victory.choices)
     rows = []
     for leader in Leader.objects.all().order_by("name"):
         results = [
@@ -24,7 +24,7 @@ def bingo_leader(request):
 
 
 def bingo_civilization(request):
-    victory_choices = list(Victoire.choices)
+    victory_choices = list(Victory.choices)
     rows = []
     civs = Civilization.objects.all().order_by("name")
     for civ in civs:
@@ -33,9 +33,9 @@ def bingo_civilization(request):
                 victory=True,
                 victory_type=value,
             ).filter(
-                Q(civ_antiquite=civ)
-                | Q(civ_exploration=civ)
-                | Q(civ_moderne=civ)
+                Q(ancient_civ=civ)
+                | Q(exploration_civ=civ)
+                | Q(modern_civ=civ)
             ).exists()
             for value, _ in victory_choices
         ]

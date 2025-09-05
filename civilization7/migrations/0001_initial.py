@@ -23,16 +23,20 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("name", models.CharField(max_length=255, unique=True)),
                 (
-                    "epoque",
+                    "name",
+                    models.CharField(max_length=255, unique=True, verbose_name="Nom"),
+                ),
+                (
+                    "era",
                     models.CharField(
                         choices=[
-                            ("ANTIQUITE", "Antiquité"),
+                            ("ANCIENT", "Antiquité"),
                             ("EXPLORATION", "Exploration"),
-                            ("MODERNE", "Moderne"),
+                            ("MODERN", "Moderne"),
                         ],
                         max_length=20,
+                        verbose_name="Époque",
                     ),
                 ),
             ],
@@ -64,16 +68,20 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("name", models.CharField(max_length=255, unique=True)),
                 (
-                    "epoque",
+                    "name",
+                    models.CharField(max_length=255, unique=True, verbose_name="Nom"),
+                ),
+                (
+                    "era",
                     models.CharField(
                         choices=[
-                            ("ANTIQUITE", "Antiquité"),
+                            ("ANCIENT", "Antiquité"),
                             ("EXPLORATION", "Exploration"),
-                            ("MODERNE", "Moderne"),
+                            ("MODERN", "Moderne"),
                         ],
                         max_length=20,
+                        verbose_name="Époque",
                     ),
                 ),
             ],
@@ -90,45 +98,55 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("victory", models.BooleanField(default=False)),
+                (
+                    "victory",
+                    models.BooleanField(default=False, verbose_name="Victoire"),
+                ),
                 (
                     "victory_type",
                     models.CharField(
                         blank=True,
                         choices=[
                             ("CULTURE", "Culture"),
-                            ("SCIENTIFIQUE", "Scientifique"),
-                            ("COMMERCIALE", "Commerciale"),
-                            ("MILITAIRE", "Militaire"),
+                            ("SCIENCE", "Scientifique"),
+                            ("COMMERCIAL", "Commerciale"),
+                            ("MILITARY", "Militaire"),
                         ],
                         max_length=20,
                         null=True,
+                        verbose_name="Type de victoire",
                     ),
                 ),
-                ("comment", models.TextField(blank=True)),
-                ("created_at", models.DateField(auto_now_add=True)),
+                ("comment", models.TextField(blank=True, verbose_name="Commentaire")),
                 (
-                    "civ_antiquite",
+                    "created_at",
+                    models.DateField(auto_now_add=True, verbose_name="Date"),
+                ),
+                (
+                    "ancient_civ",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="games_antiquite",
+                        related_name="games_ancient",
                         to="civilization7.civilization",
+                        verbose_name="Antiquité",
                     ),
                 ),
                 (
-                    "civ_exploration",
+                    "exploration_civ",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="games_exploration",
                         to="civilization7.civilization",
+                        verbose_name="Exploration",
                     ),
                 ),
                 (
-                    "civ_moderne",
+                    "modern_civ",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="games_moderne",
+                        related_name="games_modern",
                         to="civilization7.civilization",
+                        verbose_name="Moderne",
                     ),
                 ),
                 (
@@ -136,6 +154,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         to="civilization7.leader",
+                        verbose_name="Leader",
                     ),
                 ),
             ],

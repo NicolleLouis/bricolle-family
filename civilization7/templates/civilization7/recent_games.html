@@ -26,9 +26,9 @@
     <tr>
         <td>{{ game.created_at }}</td>
         <td>{{ game.leader }}</td>
-        <td>{{ game.civ_antiquite }}</td>
-        <td>{{ game.civ_exploration }}</td>
-        <td>{{ game.civ_moderne }}</td>
+        <td>{{ game.ancient_civ }}</td>
+        <td>{{ game.exploration_civ }}</td>
+        <td>{{ game.modern_civ }}</td>
         <td>{% if game.victory %}✅{% else %}❌{% endif %}</td>
         <td>{{ game.get_victory_type_display }}</td>
         <td>{{ game.comment }}</td>

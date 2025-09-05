@@ -8,9 +8,9 @@ class GameForm(forms.ModelForm):
         model = Game
         fields = [
             "leader",
-            "civ_antiquite",
-            "civ_exploration",
-            "civ_moderne",
+            "ancient_civ",
+            "exploration_civ",
+            "modern_civ",
             "victory",
             "victory_type",
             "comment",
