@@ -1,0 +1,47 @@
+{% extends 'civilization7/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Parties récentes</h1>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createGameModal">➕ Nouvelle partie</button>
+</div>
+
+{% if games %}
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Date</th>
+        <th>Leader</th>
+        <th>Antiquité</th>
+        <th>Exploration</th>
+        <th>Moderne</th>
+        <th>Victoire</th>
+        <th>Type</th>
+        <th>Commentaire</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for game in games %}
+    <tr>
+        <td>{{ game.created_at }}</td>
+        <td>{{ game.leader }}</td>
+        <td>{{ game.ancient_civ }}</td>
+        <td>{{ game.exploration_civ }}</td>
+        <td>{{ game.modern_civ }}</td>
+        <td>{% if game.victory %}✅{% else %}❌{% endif %}</td>
+        <td>{{ game.get_victory_type_display }}</td>
+        <td>{{ game.comment }}</td>
+        <td><button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editGameModal{{ game.id }}">🖊️</button></td>
+    </tr>
+    {% include 'civilization7/game_edit_modal.html' %}
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Aucune partie.</p>
+{% endif %}
+
+{% include 'civilization7/game_create_modal.html' %}
+
+{% endblock %}

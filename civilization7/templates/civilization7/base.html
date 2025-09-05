@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civilization 7</title>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+</head>
+<body>
+{% include 'civilization7/header.html' %}
+<div class="container py-4">
+    {% block content %}{% endblock %}
+    {% block scripts %}{% endblock %}
+</div>
+<script src="{% static 'keystrokes.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{% extends 'civilization7/base.html' %}
+
+{% block content %}
+<h1>Stats</h1>
+<ul>
+    <li>Nombre de parties : {{ total_games }}</li>
+    <li>Nombre de victoires : {{ victories }}</li>
+</ul>
+<table class="table table-striped w-auto">
+    <thead>
+    <tr><th>Type de victoire</th><th>Nombre</th></tr>
+    </thead>
+    <tbody>
+    {% for label, count in victories_by_type %}
+    <tr>
+        <td>{{ label }}</td>
+        <td>{{ count }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
