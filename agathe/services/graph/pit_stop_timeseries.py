@@ -201,7 +201,7 @@ class PitStopDurationTotalTimeseriesChart:
             end_date__isnull=False,
         )
         records = [
-            {"day": ps.start_date.date(), "duration": ps.duration} for ps in pit_stops
+            {"day": ps.start_date.date(), "duration": ps.duration / 60} for ps in pit_stops
         ]
         if not records:
             df = pd.DataFrame({"day": [], "total_duration": []})
@@ -218,7 +218,7 @@ class PitStopDurationTotalTimeseriesChart:
             )
             df = df.rename(columns={"index": "day", "duration": "total_duration"})
         fig = px.line(df, x="day", y="total_duration")
-        fig.update_layout(xaxis_title="Jour", yaxis_title="Durée totale (Minutes)")
+        fig.update_layout(xaxis_title="Jour", yaxis_title="Durée totale (Heures)")
         return fig.to_html(full_html=False, include_plotlyjs="cdn")
 
 
