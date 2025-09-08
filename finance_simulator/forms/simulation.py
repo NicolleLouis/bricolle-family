@@ -1,7 +1,9 @@
 from django import forms
 
+from ..models import Simulation
 
-class SimulationForm(forms.Form):
+
+class SimulationForm(forms.ModelForm):
     house_cost = forms.DecimalField(label="Prix du bien", min_value=0, decimal_places=2, max_digits=12)
     initial_contribution = forms.DecimalField(
         label="Apport initial (€)",
@@ -9,8 +11,8 @@ class SimulationForm(forms.Form):
         decimal_places=2,
         max_digits=12,
     )
-    years = forms.IntegerField(label="Années d'emprunt", min_value=1)
-    rate = forms.DecimalField(label="Taux d'emprunt (%)", min_value=0, decimal_places=2, max_digits=5)
+    duration = forms.IntegerField(label="Années d'emprunt", min_value=1)
+    annual_rate = forms.DecimalField(label="Taux d'emprunt (%)", min_value=0, decimal_places=2, max_digits=5)
     comparative_rent = forms.DecimalField(
         label="Loyer actuel (€/Mois)",
         min_value=0,
@@ -32,3 +34,16 @@ class SimulationForm(forms.Form):
         label="Changement de valeur du bien (%)",
         required=False,
     )
+
+    class Meta:
+        model = Simulation
+        fields = [
+            "house_cost",
+            "initial_contribution",
+            "duration",
+            "annual_rate",
+            "comparative_rent",
+            "duration_before_usable",
+            "use_real_estate_firm",
+            "sell_price_change",
+        ]

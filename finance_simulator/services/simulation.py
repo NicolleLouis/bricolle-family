@@ -1,5 +1,5 @@
 from finance_simulator.domain.amortization_month import AmortizationMonth
-from finance_simulator.domain.simulation import Simulation
+from finance_simulator.models import Simulation
 from finance_simulator.domain.simulation_result import SimulationResult
 
 
