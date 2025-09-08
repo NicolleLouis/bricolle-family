@@ -189,3 +189,139 @@ class PitStopIntervalPerHourChart:
             xaxis_title="Heure", yaxis_title="Interval moyen (Heures)"
         )
         return fig.to_html(full_html=False, include_plotlyjs="cdn")
+
+
+class PitStopDurationTotalTimeseriesChart:
+    """Generate a line chart of total pit stop duration per day."""
+
+    @staticmethod
+    def generate():
+        pit_stops = PitStop.objects.filter(
+            start_date__date__gte=AgatheConstant.GRAPH_START_DATE,
+            end_date__isnull=False,
+        )
+        records = [
+            {"day": ps.start_date.date(), "duration": ps.duration} for ps in pit_stops
+        ]
+        if not records:
+            df = pd.DataFrame({"day": [], "total_duration": []})
+        else:
+            df = pd.DataFrame(records)
+            day_range = pd.date_range(
+                start=AgatheConstant.GRAPH_START_DATE, end=df["day"].max()
+            )
+            df = (
+                df.groupby("day")["duration"]
+                .sum()
+                .reindex(day_range, fill_value=0)
+                .reset_index()
+            )
+            df = df.rename(columns={"index": "day", "duration": "total_duration"})
+        fig = px.line(df, x="day", y="total_duration")
+        fig.update_layout(xaxis_title="Jour", yaxis_title="Durée totale (Minutes)")
+        return fig.to_html(full_html=False, include_plotlyjs="cdn")
+
+
+class PitStopPerDayBySideChart:
+    """Generate a line chart of pit stop count per day and side."""
+
+    @staticmethod
+    def generate():
+        pit_stops = PitStop.objects.filter(
+            start_date__date__gte=AgatheConstant.GRAPH_START_DATE
+        )
+        records = [
+            {"day": ps.start_date.date(), "side": ps.get_side_display()}
+            for ps in pit_stops
+        ]
+        side_labels = [choice.label for choice in PitStop.Side]
+        if not records:
+            df = pd.DataFrame({"day": [], "side": [], "count": []})
+        else:
+            df = pd.DataFrame(records)
+            day_range = pd.date_range(
+                start=AgatheConstant.GRAPH_START_DATE, end=df["day"].max()
+            )
+            index = pd.MultiIndex.from_product(
+                [day_range, side_labels], names=["day", "side"]
+            )
+            df = (
+                df.groupby(["day", "side"])
+                .size()
+                .reindex(index, fill_value=0)
+                .reset_index(name="count")
+            )
+        fig = px.line(df, x="day", y="count", color="side")
+        fig.update_layout(xaxis_title="Jour", yaxis_title="Nombre")
+        return fig.to_html(full_html=False, include_plotlyjs="cdn")
+
+
+class PitStopDurationAvgPerDayBySideChart:
+    """Generate a line chart of average pit stop duration per day and side."""
+
+    @staticmethod
+    def generate():
+        pit_stops = PitStop.objects.filter(
+            start_date__date__gte=AgatheConstant.GRAPH_START_DATE,
+            end_date__isnull=False,
+        )
+        records = [
+            {
+                "day": ps.start_date.date(),
+                "side": ps.get_side_display(),
+                "duration": ps.duration,
+            }
+            for ps in pit_stops
+        ]
+        side_labels = [choice.label for choice in PitStop.Side]
+        if not records:
+            df = pd.DataFrame({"day": [], "side": [], "avg_duration": []})
+        else:
+            df = pd.DataFrame(records)
+            day_range = pd.date_range(
+                start=AgatheConstant.GRAPH_START_DATE, end=df["day"].max()
+            )
+            index = pd.MultiIndex.from_product(
+                [day_range, side_labels], names=["day", "side"]
+            )
+            df = (
+                df.groupby(["day", "side"])["duration"]
+                .mean()
+                .reindex(index, fill_value=0)
+                .reset_index()
+            )
+            df = df.rename(columns={"duration": "avg_duration"})
+        fig = px.line(df, x="day", y="avg_duration", color="side")
+        fig.update_layout(
+            xaxis_title="Jour", yaxis_title="Durée moyenne (Minutes)"
+        )
+        return fig.to_html(full_html=False, include_plotlyjs="cdn")
+
+
+class PitStopDurationTotalBySideChart:
+    """Generate a donut chart of total pit stop duration by side."""
+
+    @staticmethod
+    def generate():
+        pit_stops = PitStop.objects.filter(
+            start_date__date__gte=AgatheConstant.GRAPH_START_DATE,
+            end_date__isnull=False,
+        )
+        records = [
+            {"side": ps.get_side_display(), "duration": ps.duration} for ps in pit_stops
+        ]
+        side_labels = [choice.label for choice in PitStop.Side]
+        if not records:
+            df = pd.DataFrame({"side": side_labels, "total_duration": [0] * len(side_labels)})
+        else:
+            df = pd.DataFrame(records)
+            df = (
+                df.groupby("side")["duration"]
+                .sum()
+                .reindex(side_labels, fill_value=0)
+                .reset_index()
+            )
+            df = df.rename(columns={"duration": "total_duration"})
+        fig = px.pie(df, values="total_duration", names="side", hole=0.4)
+        fig.update_layout(showlegend=True)
+        return fig.to_html(full_html=False, include_plotlyjs="cdn")

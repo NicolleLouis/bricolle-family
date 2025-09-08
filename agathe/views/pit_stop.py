@@ -10,6 +10,10 @@ from agathe.services.graph.pit_stop_timeseries import (
     PitStopPerHourChart,
     PitStopDurationPerHourChart,
     PitStopIntervalPerHourChart,
+    PitStopDurationTotalTimeseriesChart,
+    PitStopPerDayBySideChart,
+    PitStopDurationAvgPerDayBySideChart,
+    PitStopDurationTotalBySideChart,
 )
 
 
@@ -63,12 +67,21 @@ class PitStopController:
                     "pit_stop_interval_avg_per_hour": PitStopIntervalPerHourChart.generate(),
                 }
             )
+        elif tab == "side":
+            context.update(
+                {
+                    "pit_stops_per_day_by_side": PitStopPerDayBySideChart.generate(),
+                    "pit_stop_duration_avg_per_day_by_side": PitStopDurationAvgPerDayBySideChart.generate(),
+                    "pit_stop_duration_total_by_side": PitStopDurationTotalBySideChart.generate(),
+                }
+            )
         else:
             context.update(
                 {
                     "pit_stops_per_day": PitStopTimeseriesChart.generate(),
                     "pit_stop_duration_avg_per_day": PitStopDurationTimeseriesChart.generate(),
                     "pit_stop_interval_avg_per_day": PitStopIntervalTimeseriesChart.generate(),
+                    "pit_stop_duration_total_per_day": PitStopDurationTotalTimeseriesChart.generate(),
                 }
             )
         return render(request, "agathe/pit_stop_stats.html", context)
