@@ -7,11 +7,18 @@
         <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editSimulationModal">
             Modifier
         </button>
+        {% if user.is_authenticated %}
+            <button class="btn btn-outline-success ms-2" data-bs-toggle="modal" data-bs-target="#saveSimulationModal">
+                Sauvegarder
+            </button>
+        {% endif %}
     </div>
 
     <div class="card mb-4 shadow-sm">
         <div class="card-body">
-            <h1 class="card-title">Simulation</h1>
+            {% if simulation.name %}
+                <h1 class="card-title">{{ simulation.name }}</h1>
+            {% endif %}
             <button class="btn btn-link p-0 mb-3" type="button" data-bs-toggle="collapse"
                     data-bs-target="#simulationDetails" aria-expanded="false"
                     aria-controls="simulationDetails">
@@ -131,5 +138,32 @@
             </div>
         </div>
     </div>
+
+    {% if user.is_authenticated %}
+    <div class="modal fade" id="saveSimulationModal" tabindex="-1" aria-labelledby="saveSimulationModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="saveSimulationModalLabel">Sauvegarder la simulation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="{% url 'finance_simulator:save_simulation' %}">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_save_name" class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="id_save_name" name="name">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
 {% endblock %}
