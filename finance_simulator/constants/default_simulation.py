@@ -1,4 +1,4 @@
-from finance_simulator.domain.simulation import Simulation
+from finance_simulator.models import Simulation
 
 DEFAULT_SIMULATION = Simulation(
     house_cost=552000,

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from finance_simulator.constants.sell import SellConstants
-from finance_simulator.domain.simulation import Simulation
+from finance_simulator.models import Simulation
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
