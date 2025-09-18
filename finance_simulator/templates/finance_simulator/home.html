@@ -9,6 +9,13 @@
             <button type="submit" class="btn btn-primary">Lancer une simulation</button>
         </form>
         <a href="{% url 'finance_simulator:default_simulation' %}" class="btn btn-outline-secondary mt-3">Simulation par défaut</a>
+        {% if user.is_authenticated %}
+            <button type="button" class="btn btn-outline-info mt-3" data-bs-toggle="modal"
+                    data-bs-target="#selectSimulationModal">
+                Choisir simulation
+            </button>
+        {% endif %}
     </div>
 </div>
+{% include 'finance_simulator/choose_simulation_modal.html' %}
 {% endblock %}

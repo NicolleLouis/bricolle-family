@@ -1,0 +1,30 @@
+{% if user.is_authenticated %}
+<div class="modal fade" id="selectSimulationModal" tabindex="-1" aria-labelledby="selectSimulationModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="selectSimulationModalLabel">Choisir une simulation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% if user_simulations %}
+                    <div class="list-group">
+                        {% for saved_simulation in user_simulations %}
+                            <a href="{% url 'finance_simulator:open_simulation' saved_simulation.pk %}"
+                               class="list-group-item list-group-item-action">
+                                {{ saved_simulation.name|default:"Sans nom" }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="mb-0 text-muted">Aucune simulation sauvegardée pour le moment.</p>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

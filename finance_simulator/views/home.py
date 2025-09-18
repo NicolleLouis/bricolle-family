@@ -1,7 +1,7 @@
 from typing import Optional
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from ..constants.default_simulation import DEFAULT_SIMULATION
 from ..models import Simulation
@@ -43,7 +43,14 @@ def _initial_from_simulation(simulation: Simulation):
     }
 
 
+def _get_user_simulations(request):
+    if request.user.is_authenticated:
+        return Simulation.objects.filter(user=request.user).order_by("name", "pk")
+    return Simulation.objects.none()
+
+
 def home(request, simulation: Optional[Simulation] = None):
+    user_simulations = _get_user_simulations(request)
     if simulation is not None:
         request.session["simulation_data"] = _serialize_simulation(simulation)
     elif request.method == "POST":
@@ -55,7 +62,11 @@ def home(request, simulation: Optional[Simulation] = None):
             raise ValueError("Form is invalid")
     else:
         form = SimulationForm()
-        return render(request, "finance_simulator/home.html", {"form": form})
+        return render(
+            request,
+            "finance_simulator/home.html",
+            {"form": form, "user_simulations": user_simulations},
+        )
 
     simulation_result = SimulationService(simulation).simulation_result
     interest_chart = InterestTimeseriesChart.generate(simulation_result)
@@ -70,6 +81,7 @@ def home(request, simulation: Optional[Simulation] = None):
             "interest_chart": interest_chart,
             "net_cost_chart": net_cost_chart,
             "form": form,
+            "user_simulations": user_simulations,
         },
     )
 
@@ -89,4 +101,10 @@ def save_simulation(request):
     simulation, _created = Simulation.objects.update_or_create(
         user=request.user, name=name, defaults=data
     )
+    return home(request, simulation)
+
+
+@login_required
+def open_simulation(request, pk: int):
+    simulation = get_object_or_404(Simulation, pk=pk, user=request.user)
     return home(request, simulation)

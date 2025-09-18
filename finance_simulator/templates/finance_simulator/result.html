@@ -3,12 +3,15 @@
 {% block content %}
     {% load readable_month readable_amount %}
 
-    <div class="d-flex justify-content-end mb-3">
+    <div class="d-flex justify-content-end flex-wrap gap-2 mb-3">
         <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editSimulationModal">
             Modifier
         </button>
         {% if user.is_authenticated %}
-            <button class="btn btn-outline-success ms-2" data-bs-toggle="modal" data-bs-target="#saveSimulationModal">
+            <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#selectSimulationModal">
+                Choisir simulation
+            </button>
+            <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#saveSimulationModal">
                 Sauvegarder
             </button>
         {% endif %}
@@ -165,5 +168,7 @@
         </div>
     </div>
     {% endif %}
+
+    {% include 'finance_simulator/choose_simulation_modal.html' %}
 
 {% endblock %}
