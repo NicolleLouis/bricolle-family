@@ -8,4 +8,6 @@ DEFAULT_SIMULATION = Simulation(
     comparative_rent=2000,
     duration_before_usable=0,
     sell_price_change=0,
+    monthly_expenses=375,
+    property_tax=2000,
 )
