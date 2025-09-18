@@ -34,6 +34,20 @@ class SimulationForm(forms.ModelForm):
         label="Changement de valeur du bien (%)",
         required=False,
     )
+    monthly_expenses = forms.DecimalField(
+        label="Charge Mensuelle (€/Mois)",
+        min_value=0,
+        decimal_places=2,
+        max_digits=12,
+        required=False,
+    )
+    property_tax = forms.DecimalField(
+        label="Taxe foncière (€/Année)",
+        min_value=0,
+        decimal_places=2,
+        max_digits=12,
+        required=False,
+    )
 
     class Meta:
         model = Simulation
@@ -46,4 +60,6 @@ class SimulationForm(forms.ModelForm):
             "duration_before_usable",
             "use_real_estate_firm",
             "sell_price_change",
+            "monthly_expenses",
+            "property_tax",
         ]

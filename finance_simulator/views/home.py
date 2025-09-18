@@ -14,19 +14,38 @@ from ..services.simulation import SimulationService
 
 
 def _serialize_simulation(simulation: Simulation):
+    if simulation.comparative_rent is not None:
+        comparative_rent = float(simulation.comparative_rent)
+    else:
+        comparative_rent = None
+
+    if simulation.sell_price_change is not None:
+        sell_price_change = float(simulation.sell_price_change)
+    else:
+        sell_price_change = None
+
+    if simulation.monthly_expenses is not None:
+        monthly_expenses = float(simulation.monthly_expenses)
+    else:
+        monthly_expenses = None
+
+    if simulation.property_tax is not None:
+        property_tax = float(simulation.property_tax)
+    else:
+        property_tax = None
+
+
     return {
         "house_cost": float(simulation.house_cost),
         "initial_contribution": float(simulation.initial_contribution),
         "duration": simulation.duration,
         "annual_rate": float(simulation.annual_rate),
-        "comparative_rent": float(simulation.comparative_rent)
-        if simulation.comparative_rent is not None
-        else None,
+        "comparative_rent": comparative_rent,
         "duration_before_usable": simulation.duration_before_usable,
         "use_real_estate_firm": simulation.use_real_estate_firm,
-        "sell_price_change": float(simulation.sell_price_change)
-        if simulation.sell_price_change is not None
-        else None,
+        "sell_price_change": sell_price_change,
+        "monthly_expenses": monthly_expenses,
+        "property_tax": property_tax,
     }
 
 
@@ -40,6 +59,8 @@ def _initial_from_simulation(simulation: Simulation):
         "duration_before_usable": simulation.duration_before_usable,
         "use_real_estate_firm": simulation.use_real_estate_firm,
         "sell_price_change": simulation.sell_price_change,
+        "monthly_expenses": simulation.monthly_expenses,
+        "property_tax": simulation.property_tax,
     }
 
 

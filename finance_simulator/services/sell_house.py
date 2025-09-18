@@ -13,12 +13,14 @@ class SellHouseService:
     def __init__(self, simulation: Simulation, amortization_month: AmortizationMonth):
         self.simulation = simulation
         self.amortization_month = amortization_month
+        self.month = self.amortization_month.month + 1
 
     def compute_sell_cost(self):
         sell_cost = 0
         sell_cost += self.diagnostic_cost()
         sell_cost += self.real_estate_firm_cost()
         sell_cost += self.house_price_evolution()
+        sell_cost += self.monthly_expenses()
         return sell_cost
 
     @staticmethod
@@ -34,3 +36,8 @@ class SellHouseService:
         if not self.simulation.sell_price_change:
             return 0
         return float(self.simulation.house_cost - self.simulation.sell_price)
+
+    def monthly_expenses(self):
+        if self.simulation.additional_monthly_cost is None:
+            return 0
+        return float(self.month * self.simulation.additional_monthly_cost)
