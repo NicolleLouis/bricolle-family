@@ -44,15 +44,15 @@ def _initial_from_simulation(simulation: Simulation):
 
 
 def home(request, simulation: Optional[Simulation] = None):
-    if request.method == "POST":
+    if simulation is not None:
+        request.session["simulation_data"] = _serialize_simulation(simulation)
+    elif request.method == "POST":
         form = SimulationForm(request.POST)
         if form.is_valid():
             simulation = form.save(commit=False)
             request.session["simulation_data"] = _serialize_simulation(simulation)
         else:
             raise ValueError("Form is invalid")
-    elif simulation is not None:
-        request.session["simulation_data"] = _serialize_simulation(simulation)
     else:
         form = SimulationForm()
         return render(request, "finance_simulator/home.html", {"form": form})
@@ -86,8 +86,7 @@ def save_simulation(request):
     data = request.session.get("simulation_data")
     if not data or not name:
         return redirect("finance_simulator:home")
-    Simulation.objects.update_or_create(
+    simulation, _created = Simulation.objects.update_or_create(
         user=request.user, name=name, defaults=data
     )
-    simulation = Simulation(name=name, user=request.user, **data)
     return home(request, simulation)
