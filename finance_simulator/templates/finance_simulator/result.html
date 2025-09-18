@@ -56,8 +56,13 @@
                     </dd>
                 </dl>
             </div>
-            <p class="fs-5"><strong>Mensualités: {{ simulation_result.monthly_amount|readable_amount }}€</strong></p>
-            <p class="fs-5"><strong>Coût bancaire total (Sans revente): {{ simulation_result.total_interest_amount|readable_amount }}€</strong>
+            <p class="fs-5"><strong>Mensualités
+                bancaires: {{ simulation_result.monthly_amount|readable_amount }}€</strong></p>
+            {% if simulation.additional_monthly_cost is not None %}
+                <p class="fs-5"><strong>Autres coûts: {{ simulation.additional_monthly_cost|readable_amount }}€</strong>
+                </p>{% endif %}
+            <p class="fs-5"><strong>Coût bancaire total (Sans
+                revente): {{ simulation_result.total_interest_amount|readable_amount }}€</strong>
             </p>
         </div>
     </div>
@@ -143,30 +148,30 @@
     </div>
 
     {% if user.is_authenticated %}
-    <div class="modal fade" id="saveSimulationModal" tabindex="-1" aria-labelledby="saveSimulationModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="saveSimulationModalLabel">Sauvegarder la simulation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form method="post" action="{% url 'finance_simulator:save_simulation' %}">
-                    <div class="modal-body">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="id_save_name" class="form-label">Nom</label>
-                            <input type="text" class="form-control" id="id_save_name" name="name">
+        <div class="modal fade" id="saveSimulationModal" tabindex="-1" aria-labelledby="saveSimulationModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="saveSimulationModalLabel">Sauvegarder la simulation</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="post" action="{% url 'finance_simulator:save_simulation' %}">
+                        <div class="modal-body">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="id_save_name" class="form-label">Nom</label>
+                                <input type="text" class="form-control" id="id_save_name" name="name">
+                            </div>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                        <button type="submit" class="btn btn-primary">Sauvegarder</button>
-                    </div>
-                </form>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
     {% endif %}
 
     {% include 'finance_simulator/choose_simulation_modal.html' %}

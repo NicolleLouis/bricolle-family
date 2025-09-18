@@ -14,6 +14,8 @@ class Simulation(models.Model):
     duration_before_usable = models.IntegerField(null=True, blank=True)
     use_real_estate_firm = models.BooleanField(default=True)
     sell_price_change = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    monthly_expenses = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    property_tax = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
     @property
     def capital(self):
@@ -33,6 +35,17 @@ class Simulation(models.Model):
             return self.house_cost
         return (100 + self.sell_price_change) * self.house_cost / 100
 
+    @property
+    def additional_monthly_cost(self):
+        if self.monthly_expenses is None and self.property_tax is None:
+            return None
+        monthly_cost = 0
+        if self.monthly_expenses is not None:
+            monthly_cost += self.monthly_expenses
+        if self.property_tax is not None:
+            monthly_cost += self.property_tax / 12
+        return monthly_cost
+
 
 @admin.register(Simulation)
 class SimulationAdmin(admin.ModelAdmin):
@@ -45,7 +58,14 @@ class SimulationAdmin(admin.ModelAdmin):
             'fields': ('name', 'user')
         }),
         ('House Details', {
-            'fields': ('house_cost', 'initial_contribution', 'sell_price_change', 'use_real_estate_firm')
+            'fields': (
+                'house_cost',
+                'initial_contribution',
+                'sell_price_change',
+                'use_real_estate_firm',
+                'monthly_expenses',
+                'property_tax',
+            )
         }),
         ('Loan Details', {
             'fields': ('duration', 'annual_rate')
