@@ -17,6 +17,7 @@ class SummaryView:
             {"name": "Altered", "url": "/altered/", "color": "#2C3E50"},
             {"name": "Runeterra", "url": "/runeterra/", "color": "#4A7F4C"},
             {"name": "Games Collection", "url": "/games_collection/", "color": "#8e44ad"},
+            {"name": "SilkSong", "url": "/silksong/", "color": "#9b59b6"},
             {"name": "The Bazaar", "url": "/the_bazaar/", "color": "#5DADE2"},
             {"name": "Civilization 7", "url": "/civilization7/", "color": "#d35400"},
         ]

@@ -1,0 +1,79 @@
+{% extends "silksong/base.html" %}
+{% load bootstrap5 %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h1 class="h3 mb-1">Sessions Speedrun</h1>
+        <p class="text-muted mb-0">Affichage des {{ limit }} dernières sessions.</p>
+    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#speedrunModal">➕ Ajouter</button>
+</div>
+<div class="table-responsive shadow-sm">
+    <table class="table table-striped align-middle mb-0">
+        <thead>
+            <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Durée (min)</th>
+                <th scope="col">Nombre de morts</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for session in sessions %}
+            <tr>
+                <td>{{ session.created_at|date:"d/m/Y H:i" }}</td>
+                <td>
+                    {% if session.duration %}
+                        {{ session.duration }}
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if session.death_number is not None %}
+                        {{ session.death_number }}
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="3" class="text-center text-muted py-4">Aucune session enregistrée pour le moment.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="speedrunModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter une session Speedrun</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <form method="post" action="{% url 'silksong:speedrun_sessions' %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    {% bootstrap_form form %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    {% if show_modal %}
+    <script>
+        const speedrunModal = new bootstrap.Modal(document.getElementById('speedrunModal'));
+        speedrunModal.show();
+    </script>
+    {% endif %}
+{% endblock %}
