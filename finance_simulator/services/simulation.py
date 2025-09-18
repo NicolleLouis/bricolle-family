@@ -27,8 +27,11 @@ class SimulationService:
     def compute_interest_reached_comparative_rent(self):
         if self.simulation.comparative_rent is None:
             return None
+        comparative_rent = self.simulation.comparative_rent
+        if self.simulation.additional_monthly_cost is not None:
+            comparative_rent += self.simulation.additional_monthly_cost
         for amortization in self.amortizations:
-            if amortization.interests < self.simulation.comparative_rent:
+            if amortization.interests < comparative_rent:
                 return amortization.month
         return self.simulation.duration_in_month
 
