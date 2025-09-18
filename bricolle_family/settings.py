@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "battery_simulator",
     "finance_simulator",
     "games_collection",
+    "silksong",
     "civilization7",
     "documents",
     "shopping_list.apps.ShoppingListConfig",
