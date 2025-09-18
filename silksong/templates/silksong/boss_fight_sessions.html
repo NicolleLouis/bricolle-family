@@ -16,7 +16,6 @@
                 <th scope="col">Date</th>
                 <th scope="col">Boss</th>
                 <th scope="col">Nombre de morts</th>
-                <th scope="col">Victoire</th>
             </tr>
         </thead>
         <tbody>
@@ -35,13 +34,6 @@
                         {{ session.death_number }}
                     {% else %}
                         <span class="text-muted">—</span>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if session.victory %}
-                        <span class="badge bg-success">Oui</span>
-                    {% else %}
-                        <span class="badge bg-secondary">Non</span>
                     {% endif %}
                 </td>
             </tr>

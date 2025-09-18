@@ -1,6 +1,7 @@
 from django.db import models
 
-from silksong.constants import Boss, DEATH_EXPLANATION_CHOICES, GameSessionType
+from silksong.constants import Boss, GameSessionType
+from silksong.constants.death_explanation import DEATH_EXPLANATION_CHOICES
 
 
 class GameSession(models.Model):
