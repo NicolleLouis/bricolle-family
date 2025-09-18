@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib import admin
 from django.db import models
 
 
@@ -31,3 +32,29 @@ class Simulation(models.Model):
         if self.sell_price_change is None:
             return self.house_cost
         return (100 + self.sell_price_change) * self.house_cost / 100
+
+
+@admin.register(Simulation)
+class SimulationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'user', 'house_cost', 'initial_contribution', 'duration', 'annual_rate', 'comparative_rent')
+    list_filter = ('user', 'duration', 'use_real_estate_firm')
+    search_fields = ('name', 'user__username')
+    readonly_fields = ('capital', 'monthly_interest_rate', 'duration_in_month', 'sell_price')
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'user')
+        }),
+        ('House Details', {
+            'fields': ('house_cost', 'initial_contribution', 'sell_price_change', 'use_real_estate_firm')
+        }),
+        ('Loan Details', {
+            'fields': ('duration', 'annual_rate')
+        }),
+        ('Comparison', {
+            'fields': ('comparative_rent', 'duration_before_usable')
+        }),
+        ('Calculated Fields', {
+            'fields': ('capital', 'monthly_interest_rate', 'duration_in_month', 'sell_price'),
+            'classes': ('collapse',)
+        }),
+    )
