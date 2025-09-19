@@ -1,3 +1,4 @@
+from .documents import ideas, objectives
 from .home import home
 from .sessions import boss_fight_sessions, speedrun_sessions, steel_soul_sessions
 
@@ -6,4 +7,6 @@ __all__ = [
     "boss_fight_sessions",
     "speedrun_sessions",
     "steel_soul_sessions",
+    "objectives",
+    "ideas",
 ]

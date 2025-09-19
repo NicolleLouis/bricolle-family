@@ -8,4 +8,5 @@ class Directories(models.TextChoices):
     BAZAAR = "bazaar", "The Bazaar"
     CIVILIZATION7 = "civilization_7", "Civilization 7"
     FINANCE_SIMULATOR = "finance", "Finance Simulator"
+    SILKSONG = "silksong", "Silksong"
     RUNETERRA = "runeterra", "Runeterra"
