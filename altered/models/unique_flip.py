@@ -33,7 +33,7 @@ class UniqueFlip(models.Model):
     @property
     def balance(self):
         sold = self.sold_price or 0
-        return (sold * Decimal('0.95')) - self.bought_price
+        return round((sold * Decimal('0.95')) - self.bought_price, 2)
 
     @property
     def balance_percentage(self):
