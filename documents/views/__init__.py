@@ -3,4 +3,5 @@ from .document import (
     document_detail,
     DocumentCreateView,
     DocumentUpdateView,
+    render_document,
 )
