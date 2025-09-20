@@ -81,6 +81,7 @@ class WinRateStatsService:
         ratio = max(0.0, min(win_ratio, 100.0))
         red = (220, 53, 69)
         orange = (253, 126, 20)
+        yellow = (255, 193, 7)
         green = (25, 135, 84)
         if ratio <= 50:
             factor = ratio / 50
@@ -91,7 +92,7 @@ class WinRateStatsService:
         else:
             factor = (ratio - 50) / 50
             color = tuple(
-                int(orange[idx] + (green[idx] - orange[idx]) * factor)
+                int(yellow[idx] + (green[idx] - yellow[idx]) * factor)
                 for idx in range(3)
             )
         return "#{:02x}{:02x}{:02x}".format(*color)
