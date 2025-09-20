@@ -13,5 +13,10 @@ def home(request):
             "url": reverse("games_collection:civilization_7"),
             "color": "#2C3E50",
         },
+        {
+            "name": "Speedrun",
+            "url": reverse("games_collection:speedrun"),
+            "color": "#E67E22",
+        },
     ]
     return render(request, "games_collection/home.html", {"games": games})
