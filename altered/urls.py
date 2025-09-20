@@ -8,6 +8,7 @@ from altered.views.unique_flip import (
     unique_flip_list_view,
     unique_flip_detail_view,
 )
+from altered.views.win_rate import win_rate_view
 
 app_name = "altered"
 
@@ -16,6 +17,7 @@ urlpatterns = [
     path('game/', game_form_view, name='game_form'),
     path('decks/', deck_stats_view, name='deck_stats'),
     path('meta/', meta_stats_view, name='meta_stats'),
+    path('win-rate/', win_rate_view, name='win_rate'),
     path('career/', career_view, name='career'),
     path('flips/', unique_flip_list_view, name='unique_flip_list'),
     path('flips/<int:flip_id>/', unique_flip_detail_view, name='unique_flip_detail'),

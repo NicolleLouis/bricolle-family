@@ -1,0 +1,152 @@
+{% extends 'altered/base.html' %}
+
+{% block content %}
+<div class="container mt-4 win-rate-page">
+    <h2 class="mb-3">Win Rate Overview</h2>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row gy-3 gx-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label" for="{{ form.scope.id_for_label }}">{{ form.scope.label }}</label>
+                    {{ form.scope }}
+                    {% if form.scope.errors %}
+                        <div class="text-danger small">{{ form.scope.errors|join:', ' }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3 scope-field d-none" data-scope="faction">
+                    <label class="form-label" for="{{ form.faction.id_for_label }}">{{ form.faction.label }}</label>
+                    {{ form.faction }}
+                    {% if form.faction.errors %}
+                        <div class="text-danger small">{{ form.faction.errors|join:', ' }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3 scope-field d-none" data-scope="champion">
+                    <label class="form-label" for="{{ form.champion.id_for_label }}">{{ form.champion.label }}</label>
+                    {{ form.champion }}
+                    {% if form.champion.errors %}
+                        <div class="text-danger small">{{ form.champion.errors|join:', ' }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3 scope-field d-none" data-scope="deck">
+                    <label class="form-label" for="{{ form.deck.id_for_label }}">{{ form.deck.label }}</label>
+                    {{ form.deck }}
+                    {% if form.deck.errors %}
+                        <div class="text-danger small">{{ form.deck.errors|join:', ' }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3 col-lg-2">
+                    <div class="form-check form-switch">
+                        {{ form.achievement_only }}
+                        <label class="form-check-label" for="{{ form.achievement_only.id_for_label }}">{{ form.achievement_only.label }}</label>
+                    </div>
+                </div>
+                <div class="col-md-3 col-lg-2">
+                    <button type="submit" class="btn btn-primary w-100">Appliquer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+            <tr>
+                <th>Champion</th>
+                <th>Faction</th>
+                <th class="text-center">Matches</th>
+                <th class="text-center">Wins</th>
+                <th class="text-center">Win Rate</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for stat in stats %}
+                <tr>
+                    <td>{{ stat.champion.name }}</td>
+                    <td>{{ stat.champion.faction }}</td>
+                    <td class="text-center">{{ stat.match_number }}</td>
+                    <td class="text-center">{{ stat.win_number }}</td>
+                    <td class="win-rate-cell"
+                        {% if achievement_only %}
+                            {% if not stat.has_game %}
+                                title="Not played yet"
+                            {% elif stat.has_win %}
+                                title="Win already achieved"
+                            {% else %}
+                                title="Played but not won"
+                            {% endif %}
+                        {% else %}
+                            {% if stat.win_ratio is not None %}
+                                title="Win rate: {{ stat.win_ratio }}%"
+                            {% else %}
+                                title="No games recorded"
+                            {% endif %}
+                        {% endif %}
+                        style="background-color: {% if achievement_only %}{{ stat.achievement_color }}{% else %}{{ stat.ratio_color }}{% endif %}; color: {% if achievement_only %}#212529{% else %}{{ stat.ratio_text_color }}{% endif %};">
+                        {% if achievement_only %}
+                            {% if stat.has_game %}
+                                {% if stat.has_win %}
+                                    <span class="visually-hidden">Win recorded</span>
+                                {% else %}
+                                    <span class="visually-hidden">No win yet</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="visually-hidden">Not played</span>
+                            {% endif %}
+                            <span aria-hidden="true">&nbsp;</span>
+                        {% else %}
+                            {% if stat.win_ratio is not None %}
+                                {{ stat.win_ratio }}%
+                            {% else %}
+                                —
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No champion data available.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const scopeSelect = document.getElementById('id_scope');
+        const scopeFields = document.querySelectorAll('.scope-field');
+
+        function toggleScopeFields() {
+            const value = scopeSelect ? scopeSelect.value : '';
+            scopeFields.forEach((field) => {
+                if (field.dataset.scope === value) {
+                    field.classList.remove('d-none');
+                } else {
+                    field.classList.add('d-none');
+                }
+            });
+        }
+
+        if (scopeSelect) {
+            toggleScopeFields();
+            scopeSelect.addEventListener('change', toggleScopeFields);
+        }
+    });
+</script>
+<style>
+    .win-rate-page .win-rate-cell {
+        text-align: center;
+        font-weight: 600;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    .win-rate-page .win-rate-cell span[aria-hidden="true"] {
+        display: inline-block;
+        width: 100%;
+    }
+</style>
+{% endblock %}
