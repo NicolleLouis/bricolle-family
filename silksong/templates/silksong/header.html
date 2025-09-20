@@ -1,0 +1,43 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light px-3">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'silksong:home' %}">SilkSong</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#silksongNavbar"
+                aria-controls="silksongNavbar" aria-expanded="false" aria-label="Basculer la navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="silksongNavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link{% if active_page == 'home' %} active{% endif %}"
+                       {% if active_page == 'home' %}aria-current="page"{% endif %}
+                       href="{% url 'silksong:home' %}">Accueil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link{% if active_page == 'speedrun' %} active{% endif %}"
+                       {% if active_page == 'speedrun' %}aria-current="page"{% endif %}
+                       href="{% url 'silksong:speedrun_sessions' %}">Speedrun</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link{% if active_page == 'steel_soul' %} active{% endif %}"
+                       {% if active_page == 'steel_soul' %}aria-current="page"{% endif %}
+                       href="{% url 'silksong:steel_soul_sessions' %}">Steel Soul</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link{% if active_page == 'boss_fight' %} active{% endif %}"
+                       {% if active_page == 'boss_fight' %}aria-current="page"{% endif %}
+                       href="{% url 'silksong:boss_fight_sessions' %}">Boss Fight</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link{% if active_page == 'objectives' %} active{% endif %}"
+                       {% if active_page == 'objectives' %}aria-current="page"{% endif %}
+                       href="{% url 'silksong:objectives' %}">Objectives</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link{% if active_page == 'ideas' %} active{% endif %}"
+                       {% if active_page == 'ideas' %}aria-current="page"{% endif %}
+                       href="{% url 'silksong:ideas' %}">Ideas</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

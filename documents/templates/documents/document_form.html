@@ -5,6 +5,9 @@
 <h1>{% if form.instance.pk %}Edit{% else %}New{% endif %} Document</h1>
 <form method="post" class="mt-4">
     {% csrf_token %}
+    {% if redirect_to %}
+    <input type="hidden" name="{{ redirect_field_name|default:'next' }}" value="{{ redirect_to }}">
+    {% endif %}
     <div class="mb-3">
         <label for="id_title" class="form-label">Titre</label>
         {{ form.title|add_class:'form-control' }}

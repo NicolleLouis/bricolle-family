@@ -1,0 +1,13 @@
+{% extends "silksong/base.html" %}
+
+{% block title %}{{ title }} - SilkSong{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+    <h1 class="mb-0">{{ title }}</h1>
+    {% if edit_url %}
+    <a class="btn btn-outline-secondary" href="{{ edit_url }}">Edit</a>
+    {% endif %}
+</div>
+<div class="mt-4">{{ content_html }}</div>
+{% endblock %}
