@@ -52,3 +52,23 @@ class DocumentUpdateView(UpdateView):
     form_class = DocumentForm
     template_name = "documents/document_form.html"
     success_url = reverse_lazy("documents:document_list")
+    redirect_field_name = "next"
+
+    def _get_redirect_to(self):
+        return self.request.POST.get(self.redirect_field_name) or self.request.GET.get(
+            self.redirect_field_name
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        redirect_to = self._get_redirect_to()
+        if redirect_to:
+            context["redirect_to"] = redirect_to
+            context["redirect_field_name"] = self.redirect_field_name
+        return context
+
+    def get_success_url(self):
+        redirect_to = self._get_redirect_to()
+        if redirect_to:
+            return redirect_to
+        return super().get_success_url()
