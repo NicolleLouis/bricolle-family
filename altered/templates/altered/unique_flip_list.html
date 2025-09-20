@@ -112,10 +112,10 @@
                             détail</a>
                     </td>
                     {% if status == 'sold' %}
-                        <td>{{ flip.balance }}</td>
-                        <td>{{ flip.bought_price }}</td>
+                        <td>{{ flip.balance }}€</td>
+                        <td>{{ flip.bought_price }}€</td>
                         <td>{{ flip.balance_percentage|default_if_none:''|floatformat:2 }}{% if flip.balance_percentage is not None %}%{% endif %}</td>
-                        <td>{{ flip.sold_price }}</td>
+                        <td>{{ flip.sold_price }}€</td>
                     {% else %}
                         <td>
                             <form method="post" class="d-inline">
