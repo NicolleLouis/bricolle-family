@@ -54,20 +54,25 @@ class WinRateStatsService:
             )
             match_number = data["match_number"]
             win_number = data["win_number"]
-            win_ratio = (
+            ratio_value = (
                 round(win_number / match_number * 100, 2)
                 if match_number
                 else None
             )
-            ratio_color = self.get_ratio_color(win_ratio)
-            ratio_text_color = self.get_ratio_text_color(win_ratio)
+            display_ratio = (
+                ratio_value
+                if ratio_value is not None and win_number > 0
+                else None
+            )
+            ratio_color = self.get_ratio_color(ratio_value)
+            ratio_text_color = self.get_ratio_text_color(ratio_value)
             achievement_color = self.get_achievement_color(match_number, win_number)
             self.result.append(
                 ChampionWinRate(
                     champion=champion,
                     match_number=match_number,
                     win_number=win_number,
-                    win_ratio=win_ratio,
+                    win_ratio=display_ratio,
                     ratio_color=ratio_color,
                     ratio_text_color=ratio_text_color,
                     achievement_color=achievement_color,

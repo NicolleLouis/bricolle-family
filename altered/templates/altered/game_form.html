@@ -11,3 +11,57 @@
         </form>
     </div>
 {% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const factionSelect = document.querySelector('select[name="opponent_faction"]');
+            const championSelect = document.querySelector('select[name="opponent_champion"]');
+
+            if (!factionSelect || !championSelect) {
+                return;
+            }
+
+            let factionMap = {};
+            const factionData = championSelect.dataset.championFactions;
+            if (factionData) {
+                try {
+                    factionMap = JSON.parse(factionData);
+                } catch (error) {
+                    console.error('Unable to parse champion factions data.', error);
+                }
+            }
+
+            const filterChampions = () => {
+                const selectedFaction = factionSelect.value;
+                let resetSelection = false;
+
+                Array.from(championSelect.options).forEach((option) => {
+                    if (!option.value) {
+                        option.hidden = false;
+                        option.disabled = false;
+                        return;
+                    }
+
+                    const optionFaction = factionMap[option.value] || '';
+                    const shouldShow = !selectedFaction || optionFaction === selectedFaction;
+
+                    option.hidden = !shouldShow;
+                    option.disabled = !shouldShow;
+
+                    if (!shouldShow && option.selected) {
+                        resetSelection = true;
+                    }
+                });
+
+                if (resetSelection) {
+                    championSelect.value = '';
+                }
+            };
+
+            factionSelect.addEventListener('change', filterChampions);
+            filterChampions();
+        });
+    </script>
+{% endblock %}
