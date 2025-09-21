@@ -7,6 +7,7 @@ DEFAULT_SIMULATION = Simulation(
     annual_rate=3.09,
     comparative_rent=2000,
     duration_before_usable=0,
+    notary_fees=Simulation.NOTARY_FEES_NO,
     sell_price_change=0,
     monthly_expenses=375,
     property_tax=2000,

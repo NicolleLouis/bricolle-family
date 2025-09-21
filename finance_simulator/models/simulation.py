@@ -4,6 +4,16 @@ from django.db import models
 
 
 class Simulation(models.Model):
+    NOTARY_FEES_NO = "no"
+    NOTARY_FEES_NEW_PROPERTY = "new_property"
+    NOTARY_FEES_OLD_PROPERTY = "old_property"
+
+    NOTARY_FEES_CHOICES = (
+        (NOTARY_FEES_NO, "Non"),
+        (NOTARY_FEES_NEW_PROPERTY, "Neuf"),
+        (NOTARY_FEES_OLD_PROPERTY, "Ancien"),
+    )
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=255, blank=True, null=True)
     house_cost = models.DecimalField(max_digits=12, decimal_places=2)
@@ -13,6 +23,11 @@ class Simulation(models.Model):
     comparative_rent = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     duration_before_usable = models.IntegerField(null=True, blank=True)
     use_real_estate_firm = models.BooleanField(default=True)
+    notary_fees = models.CharField(
+        max_length=20,
+        choices=NOTARY_FEES_CHOICES,
+        default=NOTARY_FEES_NO,
+    )
     sell_price_change = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     monthly_expenses = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     property_tax = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
@@ -63,6 +78,7 @@ class SimulationAdmin(admin.ModelAdmin):
                 'initial_contribution',
                 'sell_price_change',
                 'use_real_estate_firm',
+                'notary_fees',
                 'monthly_expenses',
                 'property_tax',
             )
