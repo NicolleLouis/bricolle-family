@@ -2,18 +2,10 @@ from django.conf import settings
 from django.contrib import admin
 from django.db import models
 
+from finance_simulator.constants.notary_fee import NotaryFeesOption
+
 
 class Simulation(models.Model):
-    NOTARY_FEES_NO = "no"
-    NOTARY_FEES_NEW_PROPERTY = "new_property"
-    NOTARY_FEES_OLD_PROPERTY = "old_property"
-
-    NOTARY_FEES_CHOICES = (
-        (NOTARY_FEES_NO, "Non"),
-        (NOTARY_FEES_NEW_PROPERTY, "Neuf"),
-        (NOTARY_FEES_OLD_PROPERTY, "Ancien"),
-    )
-
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=255, blank=True, null=True)
     house_cost = models.DecimalField(max_digits=12, decimal_places=2)
@@ -25,8 +17,8 @@ class Simulation(models.Model):
     use_real_estate_firm = models.BooleanField(default=True)
     notary_fees = models.CharField(
         max_length=20,
-        choices=NOTARY_FEES_CHOICES,
-        default=NOTARY_FEES_NO,
+        choices=NotaryFeesOption.choices,
+        default=NotaryFeesOption.NO,
     )
     sell_price_change = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     monthly_expenses = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
@@ -34,7 +26,7 @@ class Simulation(models.Model):
 
     @property
     def capital(self):
-        return self.house_cost - self.initial_contribution
+        return (1 + self.notary_fee_percentage) * float(self.house_cost) - float(self.initial_contribution)
 
     @property
     def monthly_interest_rate(self):
@@ -60,6 +52,17 @@ class Simulation(models.Model):
         if self.property_tax is not None:
             monthly_cost += self.property_tax / 12
         return monthly_cost
+
+    @property
+    def notary_fee_percentage(self):
+        if self.notary_fees == NotaryFeesOption.NO:
+            return 0
+        elif self.notary_fees == NotaryFeesOption.NEW_PROPERTY:
+            return 0.035
+        elif self.notary_fees == NotaryFeesOption.OLD_PROPERTY:
+            return 0.08
+        else:
+            raise ValueError("Fee unknown")
 
 
 @admin.register(Simulation)
