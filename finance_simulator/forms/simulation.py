@@ -1,5 +1,6 @@
 from django import forms
 
+from ..constants.notary_fee import NotaryFeesOption
 from ..models import Simulation
 
 
@@ -13,6 +14,11 @@ class SimulationForm(forms.ModelForm):
     )
     duration = forms.IntegerField(label="Années d'emprunt", min_value=1)
     annual_rate = forms.DecimalField(label="Taux d'emprunt (%)", min_value=0, decimal_places=2, max_digits=5)
+    notary_fees = forms.ChoiceField(
+        label="Frais de notaire",
+        choices=NotaryFeesOption.choices,
+        initial=NotaryFeesOption.NO,
+    )
     comparative_rent = forms.DecimalField(
         label="Loyer actuel (€/Mois)",
         min_value=0,
@@ -56,6 +62,7 @@ class SimulationForm(forms.ModelForm):
             "initial_contribution",
             "duration",
             "annual_rate",
+            "notary_fees",
             "comparative_rent",
             "duration_before_usable",
             "use_real_estate_firm",
