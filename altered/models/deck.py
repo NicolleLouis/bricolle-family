@@ -30,7 +30,14 @@ class DeckAdmin(admin.ModelAdmin):
     list_display = ('name', 'champion', 'is_active',)
     list_filter = ('is_active', 'champion')
     ordering = ('name',)
-    actions = ["update_version"]
+    actions = ["update_version", "deactivate_decks"]
+
+    def get_queryset(self, request):
+        """
+        Override default queryset to only show active decks by default.
+        """
+        queryset = super().get_queryset(request)
+        return queryset.filter(is_active=True)
 
     @admin.action(description="Update version")
     def update_version(self, request, queryset):
@@ -41,5 +48,14 @@ class DeckAdmin(admin.ModelAdmin):
         self.message_user(
             request,
             f"Updated {queryset.count()} deck(s)",
+            messages.SUCCESS,
+        )
+
+    @admin.action(description="Deactivate decks")
+    def deactivate_decks(self, request, queryset):
+        updated = queryset.update(is_active=False)
+        self.message_user(
+            request,
+            f"Deactivated {updated} deck(s)",
             messages.SUCCESS,
         )

@@ -1,5 +1,24 @@
 from django.contrib import admin
 from django.db import models
+from django.contrib.admin import SimpleListFilter
+
+
+class DeckActiveFilter(SimpleListFilter):
+    title = 'deck active status'
+    parameter_name = 'deck_active'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('yes', 'Active'),
+            ('no', 'Inactive'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yes':
+            return queryset.filter(deck__is_active=True)
+        if self.value() == 'no':
+            return queryset.filter(deck__is_active=False)
+        return queryset
 
 
 class DeckVersion(models.Model):
@@ -16,5 +35,12 @@ class DeckVersion(models.Model):
 @admin.register(DeckVersion)
 class DeckVersionAdmin(admin.ModelAdmin):
     list_display = ('deck', 'version_number', 'change_cost')
-    list_filter = ('deck',)
+    list_filter = (DeckActiveFilter, 'deck',)
     ordering = ('version_number',)
+
+    def get_queryset(self, request):
+        """
+        Override default queryset to only show versions of active decks by default.
+        """
+        queryset = super().get_queryset(request)
+        return queryset.filter(deck__is_active=True)
