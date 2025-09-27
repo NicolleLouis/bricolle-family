@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render
 from django.utils import timezone
 import calendar
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from agathe.constants.agathe import AgatheConstant
 from agathe.models import PitStop, DiaperChange, VitaminIntake, Bath
@@ -27,6 +27,9 @@ class HomeController:
 
         last_pit_stop = PitStop.objects.order_by("-start_date").first()
         last_diaper_change = DiaperChange.objects.order_by("-date").first()
+        diaper_overdue = False
+        if last_diaper_change:
+            diaper_overdue = timezone.now() - last_diaper_change.date > timedelta(hours=24)
         vitamin_today = VitaminIntake.objects.filter(
             date__date=timezone.now().date()
         ).exists()
@@ -49,6 +52,7 @@ class HomeController:
             {
                 "last_pit_stop": last_pit_stop,
                 "last_diaper_change": last_diaper_change,
+                "diaper_overdue": diaper_overdue,
                 "vitamin_today": vitamin_today,
                 "last_bath": last_bath,
                 "bath_recent": bath_recent,

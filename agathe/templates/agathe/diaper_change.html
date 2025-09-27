@@ -4,12 +4,7 @@
     <h2 class="mb-4">Changement de couche</h2>
     <form method="post" class="card p-4 shadow-sm mb-5">
         {% csrf_token %}
-        <div class="mb-3">
-            {{ form.urine }} {{ form.urine.label_tag }}
-        </div>
-        <div class="mb-3">
-            {{ form.pooh }} {{ form.pooh.label_tag }}
-        </div>
+        <p class="mb-3">Enregistrer un changement de couche.</p>
         <button type="submit" class="btn btn-primary">Enregistrer</button>
     </form>
     <div class="mt-5">
@@ -20,16 +15,12 @@
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Urine</th>
-                        <th>Caca</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for c in changes %}
                     <tr>
                         <td>{{ c.date|date:"H:i" }}</td>
-                        <td>{{ c.urine|yesno:"Oui,Non" }}</td>
-                        <td>{{ c.pooh|yesno:"Oui,Non" }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

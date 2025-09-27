@@ -1,10 +1,8 @@
 from django import forms
 
-from agathe.models import DiaperChange
 
+class DiaperChangeForm(forms.Form):
+    """Empty form used to trigger a diaper change record."""
 
-class DiaperChangeForm(forms.ModelForm):
-    class Meta:
-        model = DiaperChange
-        fields = ["urine", "pooh"]
-        labels = {"pooh": "Caca"}
+    pass
+
