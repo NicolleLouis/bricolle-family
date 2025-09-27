@@ -28,7 +28,7 @@ class Deck(models.Model):
 @admin.register(Deck)
 class DeckAdmin(admin.ModelAdmin):
     list_display = ('name', 'champion', 'is_active',)
-    list_filter = ('champion', 'is_active',)
+    list_filter = ('is_active', 'champion')
     ordering = ('name',)
     actions = ["update_version"]
 
