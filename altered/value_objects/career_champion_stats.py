@@ -7,3 +7,4 @@ from altered.models import Champion
 class CareerChampionStats:
     champion: Champion
     win_number: int = 0
+    row_color: str | None = None
