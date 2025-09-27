@@ -1,28 +1,38 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.utils import timezone
 import calendar
 from datetime import datetime
 
 from agathe.constants.agathe import AgatheConstant
-from agathe.models import PitStop, DiaperChange, VitaminIntake, Bath, AspirinIntake
+from agathe.models import PitStop, DiaperChange, VitaminIntake, Bath
+from agathe.forms.pit_stop import PitStopForm
 
 
 class HomeController:
     @staticmethod
     def home(request):
+        if request.method == "POST":
+            form = PitStopForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect("agathe:home")
+        else:
+            now = timezone.now()
+            form = PitStopForm(
+                initial={
+                    "start_date": now.strftime("%Y-%m-%dT%H:%M"),
+                    "quantity": 90,
+                }
+            )
+
         last_pit_stop = PitStop.objects.order_by("-start_date").first()
         last_diaper_change = DiaperChange.objects.order_by("-date").first()
         vitamin_today = VitaminIntake.objects.filter(
             date__date=timezone.now().date()
         ).exists()
         last_bath = Bath.objects.order_by("-date").first()
-        last_aspirin = AspirinIntake.objects.order_by("-date").first()
         today = timezone.now().date()
         bath_recent = last_bath and (today - last_bath.date.date()).days <= 2
-        aspirin_recent = (
-            last_aspirin
-            and (timezone.now() - last_aspirin.date).total_seconds() < 8 * 3600
-        )
         birthdate = datetime.strptime(AgatheConstant.BIRTHDATE, "%Y-%m-%d").date()
         months = (today.year - birthdate.year) * 12 + today.month - birthdate.month
         if today.day < birthdate.day:
@@ -42,9 +52,8 @@ class HomeController:
                 "vitamin_today": vitamin_today,
                 "last_bath": last_bath,
                 "bath_recent": bath_recent,
-                "last_aspirin": last_aspirin,
-                "aspirin_recent": aspirin_recent,
                 "age_months": months,
                 "age_days": days,
-            },
+                "pit_stop_form": form,
+        },
         )

@@ -3,34 +3,26 @@
 {% block content %}
     {% load feeding_colors %}
     <h2 class="mb-4" >Accueil</h2>
-    <div class="card p-4 shadow-sm mb-4" style="background-color: {{ last_pit_stop.start_date|feeding_color }};">
+    <div class="card p-4 shadow-sm mb-4" style="background-color: {{ last_pit_stop.start_date|default_if_none:''|feeding_color }};">
         <h5>Dernier pit stop</h5>
         {% if last_pit_stop %}
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <ul>
-                        <li>{{ last_pit_stop.start_date|date:"H:i" }}</li>
-                        <li>Sein <strong>{{ last_pit_stop.get_side_display }}</strong></li>
+                        <li>{{ last_pit_stop.start_date|date:"d/m/Y H:i" }}</li>
+                        <li>Quantité : <strong>{{ last_pit_stop.quantity }} mL</strong></li>
+                        {% if last_pit_stop.comment %}
+                        <li>Commentaire : {{ last_pit_stop.comment }}</li>
+                        {% endif %}
                     </ul>
                 </div>
-                {% if last_pit_stop.ongoing %}
                 <div>
-                    <form method="post" action="{% url 'agathe:pit_stop_finish_current' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-secondary">Finir actuel</button>
-                    </form>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pitStopModal">Add new</button>
                 </div>
-                {% else %}
-                <div>
-                    <form method="post" action="{% url 'agathe:pit_stop_start' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-primary">Nouveau pit stop</button>
-                    </form>
-                </div>
-                {% endif %}
             </div>
         {% else %}
             <p>Aucun pit stop enregistré.</p>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pitStopModal">Add new</button>
         {% endif %}
     </div>
     <div class="card p-4 shadow-sm">
@@ -66,18 +58,6 @@
             <button type="submit" class="btn btn-primary">Prendre maintenant</button>
         </form>
     </div>
-    <div class="card p-4 shadow-sm mt-4" style="background-color: {% if aspirin_recent %}lightcoral{% else %}lightgreen{% endif %};">
-        <h5>Aspirine</h5>
-        {% if last_aspirin %}
-            <p>Dernière prise {{ last_aspirin.date|date:"d/m/Y H:i" }}</p>
-        {% else %}
-            <p>Aucune prise enregistrée.</p>
-        {% endif %}
-        <form method="post" action="{% url 'agathe:aspirin_intake' %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-primary">Prendre maintenant</button>
-        </form>
-    </div>
     <div class="card p-4 shadow-sm mt-4" style="background-color: {% if bath_recent %}lightgreen{% else %}lightcoral{% endif %};"> 
         <h5>Dernier bain</h5>
         {% if last_bath %}
@@ -91,4 +71,52 @@
         </form>
     </div>
     <p>Agathe a {{ age_months }} mois et {{ age_days }} jours.</p>
+
+    <div class="modal fade" id="pitStopModal" tabindex="-1" aria-labelledby="pitStopModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pitStopModalLabel">Nouveau pit stop</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        {{ pit_stop_form.non_field_errors }}
+                        <div class="mb-3">
+                            {{ pit_stop_form.start_date.label_tag }}
+                            {{ pit_stop_form.start_date }}
+                            {{ pit_stop_form.start_date.errors }}
+                        </div>
+                        <div class="mb-3">
+                            {{ pit_stop_form.quantity.label_tag }}
+                            {{ pit_stop_form.quantity }}
+                            {{ pit_stop_form.quantity.errors }}
+                        </div>
+                        <div class="mb-3">
+                            {{ pit_stop_form.comment.label_tag }}
+                            {{ pit_stop_form.comment }}
+                            {{ pit_stop_form.comment.errors }}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    {% if pit_stop_form.errors %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var modal = new bootstrap.Modal(document.getElementById('pitStopModal'));
+            modal.show();
+        });
+    </script>
+    {% endif %}
 {% endblock %}

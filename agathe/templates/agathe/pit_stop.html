@@ -4,9 +4,21 @@
     <h2 class="mb-4">Pit Stop</h2>
     <form method="post" class="card p-4 shadow-sm mb-5">
         {% csrf_token %}
+        {{ form.non_field_errors }}
         <div class="mb-3">
-            {{ form.side.label_tag }}
-            {{ form.side }}
+            {{ form.start_date.label_tag }}
+            {{ form.start_date }}
+            {{ form.start_date.errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.quantity.label_tag }}
+            {{ form.quantity }}
+            {{ form.quantity.errors }}
+        </div>
+        <div class="mb-3">
+            {{ form.comment.label_tag }}
+            {{ form.comment }}
+            {{ form.comment.errors }}
         </div>
         <button type="submit" class="btn btn-primary">Enregistrer</button>
     </form>
@@ -17,26 +29,17 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Début</th>
-                        <th>Fin</th>
-                        <th>Côté</th>
-                        <th></th>
+                        <th>Date</th>
+                        <th>Quantité (mL)</th>
+                        <th>Commentaire</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for p in pit_stops %}
                     <tr>
-                        <td>{{ p.start_date|date:"H:i" }}</td>
-                        <td>{% if p.end_date %}{{ p.end_date|date:"H:i" }}{% endif %}</td>
-                        <td>{{ p.get_side_display }}</td>
-                        <td>
-                            {% if not p.end_date %}
-                            <form method="post" action="{% url 'agathe:pit_stop_finish' p.pk %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-secondary">Finir</button>
-                            </form>
-                            {% endif %}
-                        </td>
+                        <td>{{ p.start_date|date:"d/m/Y H:i" }}</td>
+                        <td>{{ p.quantity }}</td>
+                        <td>{{ p.comment|default:"-" }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
