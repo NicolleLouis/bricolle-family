@@ -9,9 +9,6 @@
     <li class="nav-item">
         <a class="nav-link {% if tab == 'hour' %}active{% endif %}" href="?tab=hour">Par heure</a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link {% if tab == 'side' %}active{% endif %}" href="?tab=side">Par côté</a>
-    </li>
     </ul>
 {% if tab == 'hour' %}
 <div class="card p-4 shadow-sm mb-4">
@@ -19,25 +16,12 @@
     {{ pit_stops_per_hour|safe }}
     </div>
 <div class="card p-4 shadow-sm mb-4">
-    <h5 class="card-title">Durée moyenne des pit stops par heure</h5>
-    {{ pit_stop_duration_avg_per_hour|safe }}
+    <h5 class="card-title">Quantité moyenne par heure</h5>
+    {{ pit_stop_quantity_avg_per_hour|safe }}
     </div>
 <div class="card p-4 shadow-sm">
     <h5 class="card-title">Temps moyen entre deux pit stops</h5>
     {{ pit_stop_interval_avg_per_hour|safe }}
-    </div>
-{% elif tab == 'side' %}
-<div class="card p-4 shadow-sm mb-4">
-    <h5 class="card-title">Pit stops par jour par côté</h5>
-    {{ pit_stops_per_day_by_side|safe }}
-    </div>
-<div class="card p-4 shadow-sm mb-4">
-    <h5 class="card-title">Durée moyenne des pit stops par jour par côté</h5>
-    {{ pit_stop_duration_avg_per_day_by_side|safe }}
-    </div>
-<div class="card p-4 shadow-sm">
-    <h5 class="card-title">Durée totale par côté</h5>
-    {{ pit_stop_duration_total_by_side|safe }}
     </div>
 {% else %}
 <div class="card p-4 shadow-sm mb-4">
@@ -45,12 +29,12 @@
     {{ pit_stops_per_day|safe }}
     </div>
 <div class="card p-4 shadow-sm mb-4">
-    <h5 class="card-title">Durée moyenne des pit stops par jour</h5>
-    {{ pit_stop_duration_avg_per_day|safe }}
+    <h5 class="card-title">Quantité moyenne par jour</h5>
+    {{ pit_stop_quantity_avg_per_day|safe }}
     </div>
 <div class="card p-4 shadow-sm mb-4">
-    <h5 class="card-title">Durée totale des pit stops par jour</h5>
-    {{ pit_stop_duration_total_per_day|safe }}
+    <h5 class="card-title">Quantité totale par jour</h5>
+    {{ pit_stop_quantity_total_per_day|safe }}
     </div>
 <div class="card p-4 shadow-sm">
     <h5 class="card-title">Temps moyen entre deux pit stops</h5>

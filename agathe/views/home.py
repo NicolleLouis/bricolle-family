@@ -1,15 +1,30 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.utils import timezone
 import calendar
 from datetime import datetime
 
 from agathe.constants.agathe import AgatheConstant
 from agathe.models import PitStop, DiaperChange, VitaminIntake, Bath, AspirinIntake
+from agathe.forms.pit_stop import PitStopForm
 
 
 class HomeController:
     @staticmethod
     def home(request):
+        if request.method == "POST":
+            form = PitStopForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect("agathe:home")
+        else:
+            now = timezone.now()
+            form = PitStopForm(
+                initial={
+                    "start_date": now.strftime("%Y-%m-%dT%H:%M"),
+                    "quantity": 90,
+                }
+            )
+
         last_pit_stop = PitStop.objects.order_by("-start_date").first()
         last_diaper_change = DiaperChange.objects.order_by("-date").first()
         vitamin_today = VitaminIntake.objects.filter(
@@ -46,5 +61,6 @@ class HomeController:
                 "aspirin_recent": aspirin_recent,
                 "age_months": months,
                 "age_days": days,
-            },
+                "pit_stop_form": form,
+        },
         )
