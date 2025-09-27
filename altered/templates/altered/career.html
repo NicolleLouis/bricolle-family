@@ -34,7 +34,7 @@
         </thead>
         <tbody>
         {% for stat in stats %}
-            <tr class="{% if stat.win_number|default:0 > 0 %}table-success{% else %}table-danger{% endif %}">
+            <tr {% if only_missing and stat.row_color %}style="background-color: {{ stat.row_color }}; color: #212529;"{% else %}class="{% if stat.win_number|default:0 > 0 %}table-success{% else %}table-danger{% endif %}"{% endif %}>
                 <td>{{ stat.champion.name }}</td>
                 <td>{{ stat.champion.faction }}</td>
                 <td>{{ stat.win_number }}</td>
