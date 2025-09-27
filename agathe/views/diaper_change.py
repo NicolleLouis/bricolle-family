@@ -11,9 +11,7 @@ class DiaperChangeController:
         if request.method == "POST":
             form = DiaperChangeForm(request.POST)
             if form.is_valid():
-                change = form.save(commit=False)
-                change.date = timezone.now()
-                change.save()
+                DiaperChange.objects.create(date=timezone.now())
                 return redirect("agathe:diaper_change")
         else:
             form = DiaperChangeForm()
@@ -23,7 +21,5 @@ class DiaperChangeController:
     @staticmethod
     def quick(request):
         if request.method == "POST":
-            DiaperChange.objects.create(
-                date=timezone.now(), urine=True, pooh=True
-            )
+            DiaperChange.objects.create(date=timezone.now())
         return redirect("agathe:home")
