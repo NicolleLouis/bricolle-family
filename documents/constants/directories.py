@@ -11,3 +11,4 @@ class Directories(models.TextChoices):
     SILKSONG = "silksong", "Silksong"
     RUNETERRA = "runeterra", "Runeterra"
     SPEEDRUN = "speedrun", "Speedrun"
+    SPORT = "sport", "Sport"
