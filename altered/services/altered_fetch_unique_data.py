@@ -4,7 +4,7 @@ from altered.models import UniqueFlip
 import requests
 
 
-class AlteredFetchUniqueFlipDataService:
+class AlteredFetchUniqueDataService:
     TIMEOUT = 30
 
     def __init__(self, unique: UniqueFlip):
@@ -23,7 +23,6 @@ class AlteredFetchUniqueFlipDataService:
 
     def handle(self):
         self.fetch_data()
-        print(self.data)
         self.unique.faction = self.find_faction()
         self.unique.name = self.data["name"]
         self.unique.image_path = self.get_image_path()

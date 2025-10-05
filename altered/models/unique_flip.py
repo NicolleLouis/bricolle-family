@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.utils import timezone
 
 from django.db import models
 from django.contrib import admin
@@ -28,7 +29,9 @@ class UniqueFlip(models.Model):
     in_use = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.unique_id
+        if self.sold_price is None:
+            return f"{self.unique_id} bought at: {self.bought_price}"
+        return f"{self.unique_id} sold with balance: {self.balance}"
 
     @property
     def balance(self):
@@ -40,6 +43,31 @@ class UniqueFlip(models.Model):
         if self.bought_price == 0:
             return None
         return (self.balance / self.bought_price) * 100
+
+    @property
+    def is_sold(self):
+        return self.sold_price is not None
+
+    @property
+    def current_price(self):
+        prices = self.prices.all()
+        if prices.exists():
+            return prices.first().price
+        return None
+
+    def save_price(self, price):
+        from altered.models.unique_price import UniquePrice
+
+        current = self.current_price
+
+        if current == price:
+            return
+
+        UniquePrice.objects.create(
+            date=timezone.now(),
+            price=price,
+            unique_flip=self
+        )
 
 
 @admin.register(UniqueFlip)
