@@ -27,15 +27,12 @@ class DeckVersion(models.Model):
     content = models.TextField(null=True, blank=True)
     change_cost = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    cards = models.ManyToManyField(
-        'altered.Card',
-        through='altered.CardWithQuantity',
-        related_name='deck_versions',
-        blank=True,
-    )
-
     def __str__(self):
         return f"{self.deck.name} (v{self.version_number})"
+
+    def add_card_with_quantity(self, card, quantity):
+        """Attach a card to this deck version with the given quantity."""
+        return self.card_quantities.create(card=card, quantity=quantity)
 
 
 @admin.register(DeckVersion)
