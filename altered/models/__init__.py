@@ -1,3 +1,5 @@
+from .card import Card
+from .card_with_quantity import CardWithQuantity
 from .champion import Champion
 from .deck import Deck
 from .deck_version import DeckVersion
