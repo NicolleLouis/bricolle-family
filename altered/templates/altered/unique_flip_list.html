@@ -98,6 +98,7 @@
                 {% else %}
                     <th>En cours d'utilisation</th>
                     <th>Prix achat</th>
+                    <th>Prix actuel</th>
                     <th></th>
                 {% endif %}
             </tr>
@@ -128,7 +129,8 @@
                                 </button>
                             </form>
                         </td>
-                        <td>{{ flip.bought_price }}</td>
+                        <td>{{ flip.bought_price }}€</td>
+                        <td>{% if flip.current_price %}{{ flip.current_price }}€{% else %}-{% endif %}</td>
                         <td>
                             <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal"
                                     data-bs-target="#sellModal{{ flip.id }}">Vendre
@@ -163,7 +165,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="{% if status == 'sold' %}7{% else %}6{% endif %}" class="text-center">No data.</td>
+                    <td colspan="7" class="text-center">No data.</td>
                 </tr>
             {% endfor %}
             </tbody>
