@@ -27,7 +27,6 @@ class PitStopController:
             form = PitStopForm(
                 initial={
                     "start_date": now.strftime("%Y-%m-%dT%H:%M"),
-                    "quantity": 90,
                 }
             )
         pit_stops = PitStop.objects.all().order_by("-start_date")[:5]

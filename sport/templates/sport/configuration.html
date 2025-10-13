@@ -1,0 +1,98 @@
+{% extends 'sport/base.html' %}
+
+{% block title %}Configuration Sport{% endblock %}
+
+{% block content %}
+<div class="py-4">
+    <h1 class="mb-4">Configuration</h1>
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">Ajouter un objectif</h2>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="target">
+                        {{ target_form.non_field_errors }}
+                        <div class="mb-3">
+                            {{ target_form.name.label_tag }}
+                            {{ target_form.name }}
+                            {{ target_form.name.errors }}
+                        </div>
+                        <button class="btn btn-primary" type="submit">Ajouter l'objectif</button>
+                    </form>
+                </div>
+            </div>
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h3 class="h6 mb-3">Objectifs existants</h3>
+                    {% if targets %}
+                        <ul class="list-group list-group-flush">
+                            {% for target in targets %}
+                                <li class="list-group-item">{{ target.name }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-0">Aucun objectif défini.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">Ajouter un entraînement</h2>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="training">
+                        {{ training_form.non_field_errors }}
+                        <div class="mb-3">
+                            {{ training_form.name.label_tag }}
+                            {{ training_form.name }}
+                            {{ training_form.name.errors }}
+                        </div>
+                        <div class="mb-3">
+                            {{ training_form.training_targets.label_tag }}
+                            {{ training_form.training_targets }}
+                            {{ training_form.training_targets.errors }}
+                        </div>
+                        <div class="mb-3">
+                            {{ training_form.content.label_tag }}
+                            {{ training_form.content }}
+                            {{ training_form.content.errors }}
+                        </div>
+                        <button class="btn btn-primary" type="submit">Créer l'entraînement</button>
+                    </form>
+                </div>
+            </div>
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h3 class="h6 mb-3">Entraînements existants</h3>
+                    {% if trainings %}
+                        <ul class="list-group list-group-flush">
+                            {% for training in trainings %}
+                                <li class="list-group-item">
+                                    <div class="fw-semibold">{{ training.name }}</div>
+                                    {% if training.training_targets.all %}
+                                        <div class="small text-muted">
+                                            Objectifs :
+                                            {% for target in training.training_targets.all %}
+                                                {{ target.name }}{% if not forloop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    {% if training.content %}
+                                        <div class="small text-muted mt-1">{{ training.content }}</div>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-0">Aucun entraînement défini.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

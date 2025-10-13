@@ -20,6 +20,7 @@ urlpatterns = [
     path("finance_simulator/", include("finance_simulator.urls")),
     path("runeterra/", include("runeterra.urls")),
     path("civilization7/", include("civilization7.urls")),
+    path("sport/", include("sport.urls")),
     path("login", Login.user_login, name="login"),
     path("logout", Login.user_logout, name="logout"),
     path("games_collection/", include("games_collection.urls")),

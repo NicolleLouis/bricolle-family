@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "games_collection",
     "silksong",
     "civilization7",
+    "sport.apps.SportConfig",
     "documents",
     "shopping_list.apps.ShoppingListConfig",
     "django.contrib.admin",

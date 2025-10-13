@@ -21,7 +21,6 @@ class HomeController:
             form = PitStopForm(
                 initial={
                     "start_date": now.strftime("%Y-%m-%dT%H:%M"),
-                    "quantity": 90,
                 }
             )
 

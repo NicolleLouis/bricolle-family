@@ -1,0 +1,124 @@
+{% extends 'sport/base.html' %}
+
+{% block title %}Sport - {{ month_label }}{% endblock %}
+
+{% block content %}
+<div class="py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a class="btn btn-outline-secondary" href="{% url 'sport:home' %}?year={{ prev_month.year }}&month={{ prev_month.month }}">‹ Mois précédent</a>
+        <h1 class="mb-0 text-capitalize">{{ month_label }}</h1>
+        <a class="btn btn-outline-secondary" href="{% url 'sport:home' %}?year={{ next_month.year }}&month={{ next_month.month }}">Mois suivant ›</a>
+    </div>
+    <div class="mb-3">
+        <a class="btn btn-success" href="{% url 'sport:planning' %}">Planifier des sessions</a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <table class="table table-bordered text-center calendar-table">
+                <thead class="table-light">
+                    <tr>
+                        <th>Lun</th>
+                        <th>Mar</th>
+                        <th>Mer</th>
+                        <th>Jeu</th>
+                        <th>Ven</th>
+                        <th>Sam</th>
+                        <th>Dim</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for week in weeks %}
+                    <tr>
+                    {% for day in week %}
+                        <td class="align-top day-cell {% if not day.in_month %}text-muted bg-light{% endif %} {% if day.date == today %}border-primary border-2{% endif %}">
+                            <div class="fw-semibold mb-1">{{ day.date.day }}</div>
+                            {% if day.sessions %}
+                                <ul class="list-unstyled mt-2 mb-0 text-start">
+                                    {% for session in day.sessions %}
+                                        <li class="mb-1">
+                                            <div class="d-flex align-items-center gap-2 bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1">
+                                                <span class="small fw-semibold">{{ session.training.name }}</span>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-lg-4">
+            <div class="mb-4">
+                <h2 class="h5">Derniers entraînements</h2>
+                {% if recent_sessions %}
+                    <ul class="list-group">
+                        {% for session in recent_sessions %}
+                            <li class="list-group-item bg-primary-subtle text-primary border-0 mb-2 rounded">
+                                <form method="post" action="{% url 'sport:session_delete' session.id %}" class="d-flex align-items-center justify-content-between">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="year" value="{{ current_month.year }}">
+                                    <input type="hidden" name="month" value="{{ current_month.month }}">
+                                    <span class="fw-semibold">{{ session.training.name }}</span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="text-muted">{{ session.date|date:"d/m/Y" }}</span>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle lh-1 px-2" title="Supprimer cette session">&times;</button>
+                                    </div>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted mb-0">Aucun entraînement récent.</p>
+                {% endif %}
+            </div>
+            <div>
+                <h2 class="h5">Entraînements à venir</h2>
+                {% if upcoming_sessions %}
+                    <ul class="list-group">
+                        {% for session in upcoming_sessions %}
+                            <li class="list-group-item bg-success-subtle text-success border-0 mb-2 rounded">
+                                <form method="post" action="{% url 'sport:session_delete' session.id %}" class="d-flex align-items-center justify-content-between">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="year" value="{{ current_month.year }}">
+                                    <input type="hidden" name="month" value="{{ current_month.month }}">
+                                    <span class="fw-semibold">{{ session.training.name }}</span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="text-muted">{{ session.date|date:"d/m/Y" }}</span>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle lh-1 px-2" title="Supprimer cette session">&times;</button>
+                                    </div>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted mb-0">Aucun entraînement planifié.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    .calendar-table {
+        table-layout: fixed;
+    }
+    .calendar-table .day-cell {
+        min-height: 120px;
+        height: 120px;
+        max-width: 14%;
+        vertical-align: top;
+    }
+    @media (max-width: 768px) {
+        .calendar-table .day-cell {
+            min-height: 100px;
+            height: auto;
+        }
+    }
+</style>
+{% endblock %}
