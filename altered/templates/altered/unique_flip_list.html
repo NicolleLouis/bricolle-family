@@ -105,7 +105,7 @@
             </thead>
             <tbody>
             {% for flip in flips %}
-                <tr>
+                <tr class="{% if status != 'sold' and not flip.current_price %}table-danger{% elif status != 'sold' and flip.advised_price and flip.current_price != flip.advised_price %}table-warning{% endif %}">
                     <td>{{ flip.name }}</td>
                     <td>{{ flip.unique_id }}</td>
                     <td>
@@ -130,8 +130,52 @@
                             </form>
                         </td>
                         <td>{{ flip.bought_price }}€</td>
-                        <td>{% if flip.current_price %}{{ flip.current_price }}€{% else %}-{% endif %}</td>
                         <td>
+                            {% if flip.current_price %}
+                                {% if flip.advised_price and flip.current_price != flip.advised_price %}
+                                    {{ flip.current_price }}€ → {{ flip.advised_price }}€
+                                {% else %}
+                                    {{ flip.current_price }}€
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal"
+                                    data-bs-target="#currentPriceModal{{ flip.id }}">Ajouter prix actuel
+                            </button>
+                            <div class="modal fade" id="currentPriceModal{{ flip.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Ajouter prix actuel pour {{ flip.unique_id }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                        </div>
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="set_current_price" value="1">
+                                            <input type="hidden" name="flip_id" value="{{ flip.id }}">
+                                            <div class="modal-body">
+                                                <label for="id_current_price_{{ flip.id }}" class="form-label">Prix
+                                                    actuel</label>
+                                                <input type="number" name="current_price" step="0.01"
+                                                       class="form-control"
+                                                       id="id_current_price_{{ flip.id }}"
+                                                       value="{{ flip.current_price|default_if_none:'' }}">
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">
+                                                    Cancel
+                                                </button>
+                                                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                             <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal"
                                     data-bs-target="#sellModal{{ flip.id }}">Vendre
                             </button>

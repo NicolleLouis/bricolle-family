@@ -28,3 +28,11 @@ class UniqueFlipFilterForm(forms.Form):
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
 
+
+class UniqueFlipCurrentPriceForm(forms.Form):
+    current_price = forms.DecimalField(
+        label='Current price',
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'})
+    )

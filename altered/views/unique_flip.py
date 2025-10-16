@@ -10,6 +10,7 @@ from altered.forms import (
     UniqueFlipPurchaseForm,
     UniqueFlipSellForm,
     UniqueFlipFilterForm,
+    UniqueFlipCurrentPriceForm,
 )
 
 
@@ -23,13 +24,15 @@ def unique_flip_list_view(request):
         faction = filter_form.cleaned_data.get('faction') or None
         hide_zero = filter_form.cleaned_data.get('hide_zero')
 
+    purchase_form = UniqueFlipPurchaseForm()
+
     if request.method == 'POST':
         if 'purchase' in request.POST:
-            form = UniqueFlipPurchaseForm(request.POST)
-            if form.is_valid():
+            purchase_form = UniqueFlipPurchaseForm(request.POST)
+            if purchase_form.is_valid():
                 UniqueFlip.objects.create(
-                    unique_id=form.cleaned_data['unique_id'],
-                    bought_price=form.cleaned_data['bought_price'],
+                    unique_id=purchase_form.cleaned_data['unique_id'],
+                    bought_price=purchase_form.cleaned_data['bought_price'],
                     bought_at=timezone.now(),
                 )
                 return redirect('altered:unique_flip_list')
@@ -46,8 +49,12 @@ def unique_flip_list_view(request):
             flip.in_use = not flip.in_use
             flip.save(update_fields=['in_use'])
             return redirect(request.path + f'?status={status}')
-    else:
-        form = UniqueFlipPurchaseForm()
+        elif 'set_current_price' in request.POST:
+            flip = get_object_or_404(UniqueFlip, id=request.POST.get('flip_id'))
+            form = UniqueFlipCurrentPriceForm(request.POST)
+            if form.is_valid():
+                flip.save_price(form.cleaned_data['current_price'])
+                return redirect(request.path + f'?status={status}')
 
     flips = UniqueFlip.objects.all()
     if status == 'sold':
@@ -94,7 +101,7 @@ def unique_flip_list_view(request):
         'balance': balance,
         'hide_zero': hide_zero,
         'sort': sort,
-        'purchase_form': form,
+        'purchase_form': purchase_form,
         'sell_form': UniqueFlipSellForm(),
         'filter_form': filter_form,
     }

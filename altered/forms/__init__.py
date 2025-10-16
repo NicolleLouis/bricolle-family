@@ -4,6 +4,7 @@ from .unique_flip import (
     UniqueFlipPurchaseForm,
     UniqueFlipSellForm,
     UniqueFlipFilterForm,
+    UniqueFlipCurrentPriceForm,
 )
 
 __all__ = [
@@ -12,5 +13,5 @@ __all__ = [
     'UniqueFlipPurchaseForm',
     'UniqueFlipSellForm',
     'UniqueFlipFilterForm',
+    'UniqueFlipCurrentPriceForm',
 ]
-

@@ -26,6 +26,7 @@ class UniqueFlip(models.Model):
     bought_price = models.DecimalField(max_digits=10, decimal_places=2)
     sold_at = models.DateTimeField(null=True, blank=True)
     sold_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    advised_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     in_use = models.BooleanField(default=False)
 
     def __str__(self):
@@ -62,6 +63,9 @@ class UniqueFlip(models.Model):
 
         if current == price:
             return
+
+        self.advised_price = None
+        self.save(update_fields=['advised_price'])
 
         UniquePrice.objects.create(
             date=timezone.now(),
