@@ -47,6 +47,31 @@
             </div>
         </div>
 
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <div class="border rounded-3 p-3 text-center">
+                    <div class="text-uppercase text-muted small">Balance sold only</div>
+                    <div class="fs-5 {% if balance_sold_only >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ balance_sold_only|floatformat:2 }}€
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="border rounded-3 p-3 text-center">
+                    <div class="text-uppercase text-muted small">Stock immobilisé</div>
+                    <div class="fs-5">{{ stock_immobilised|floatformat:2 }}€</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="border rounded-3 p-3 text-center">
+                    <div class="text-uppercase text-muted small">Espérance de gain actuelle</div>
+                    <div class="fs-5 {% if expected_gain >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ expected_gain|floatformat:2 }}€
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <ul class="nav nav-tabs mb-3">
             <li class="nav-item">
                 <a class="nav-link {% if status == 'current' %}active{% endif %}"
