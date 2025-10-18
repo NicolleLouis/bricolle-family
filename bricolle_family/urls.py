@@ -16,7 +16,6 @@ urlpatterns = [
     path("altered/", include("altered.urls")),
     path("baby_name/", include("baby_name.urls")),
     path("agathe/", include("agathe.urls")),
-    path("battery_simulator/", include("battery_simulator.urls")),
     path("finance_simulator/", include("finance_simulator.urls")),
     path("runeterra/", include("runeterra.urls")),
     path("civilization7/", include("civilization7.urls")),
@@ -26,8 +25,8 @@ urlpatterns = [
     path("games_collection/", include("games_collection.urls")),
     path("silksong/", include("silksong.urls")),
     path("documents/", include("documents.urls")),
-    path("shopping_list/", include("shopping_list.urls")),
     path("the_bazaar/", include("the_bazaar.urls")),
+    path("habit_tracker/", include("habit_tracker.urls")),
 ]
 
 if settings.ENV == 'local':

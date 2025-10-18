@@ -1,0 +1,52 @@
+{% extends "habit_tracker/base.html" %}
+
+{% block title %}Progression des objectifs{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h4 mb-0">{{ current_month|title }}</h1>
+    <span class="text-muted">Mois : {{ current_month_number }}/{{ current_year }}</span>
+</div>
+
+<div class="row g-3">
+    {% for card in objective_cards %}
+        <div class="col-md-6 col-xl-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5 d-flex justify-content-between align-items-center">
+                        <span>{{ card.objective.name }}</span>
+                        <span class="fs-4">{% if card.status_success %}❤️{% else %}☠️{% endif %}</span>
+                    </h2>
+                    <p class="text-muted mb-3">{{ card.status_label }} &mdash; {{ card.progress|floatformat:1 }}%</p>
+
+                    {% if card.habits %}
+                        <h3 class="h6 text-uppercase text-muted">Habitudes liées</h3>
+                        <ul class="list-unstyled small mb-3">
+                            {% for habit in card.habits %}
+                                <li>• {{ habit.name }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted small fst-italic">Aucune habitude associée pour le moment.</p>
+                    {% endif %}
+
+                    <p class="small mb-2"><strong>Série en cours :</strong> {{ card.current_streak }} semaine{% if card.current_streak|default:0 > 1 %}s{% endif %}</p>
+
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar" role="progressbar" style="width: {{ card.progress }}%;" aria-valuenow="{{ card.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p class="small text-muted mt-2">
+                        {{ card.progress_description }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info mb-0">
+                Aucun objectif n'est disponible pour le moment.
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

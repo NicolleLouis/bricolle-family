@@ -1,8 +1,0 @@
-- When closing the meal, open a form to enter rating + Notes
-- History for ingredient bought? 
-- Add the notion link?
-- Button reset cart
-- Reverse search, input an ingredient, we sent you the list of meal containing it
-- Add seasons inside ingredients to put seasonal meal
-- Make an algo to suggest meals (Based on season + not eaten in a while + coup de coeur (meal with high score))
-- Meal stats page

@@ -1,0 +1,94 @@
+{% extends "habit_tracker/base.html" %}
+
+{% block title %}Habit Tracker{% endblock %}
+
+{% block content %}
+<section class="mb-4">
+    <h1 class="h3">Tableau de bord Habit Tracker</h1>
+    <p class="text-muted">Retrouvez un aperçu rapide de vos objectifs et habitudes.</p>
+</section>
+
+<section class="mb-4">
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h2 class="h6 text-uppercase text-muted mb-2">Objectifs actifs</h2>
+                    <p class="display-6 mb-0">{{ total_objectives }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h2 class="h6 text-uppercase text-muted mb-2">Habitudes suivies</h2>
+                    <p class="display-6 mb-0">{{ total_habits }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h2 class="h6 text-uppercase text-muted mb-2">Habitudes du jour</h2>
+                    <p class="mb-0">{{ today|date:"d F Y" }}</p>
+                    <p class="fs-4 mb-0">{{ today_habits|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="mb-4">
+    <h2 class="h5">Vos habitudes du jour</h2>
+    {% if today_habits %}
+        <ul class="list-group shadow-sm">
+            {% for habit in today_habits %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>{{ habit.name }}</span>
+                    {% if habit.objective %}
+                        <span class="badge bg-primary">{{ habit.objective.name }}</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="alert alert-info mb-0">
+            Aucune habitude renseignée pour aujourd'hui. Rendez-vous dans le <a href="{% url 'habit_tracker:calendar' %}">calendrier</a> pour planifier votre journée.
+        </div>
+    {% endif %}
+</section>
+
+<section class="mb-4">
+    <h2 class="h5">Dernière validation des habitudes</h2>
+    {% if habits_stats %}
+        <ul class="list-group shadow-sm">
+            {% for item in habits_stats %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>{{ item.habit.name }}</span>
+                    {% if item.days_since is None %}
+                        <span class="badge bg-secondary">Jamais réalisé</span>
+                    {% elif item.days_since == 0 %}
+                        <span class="badge bg-success">Aujourd'hui</span>
+                    {% elif item.days_since == 1 %}
+                        <span class="badge bg-info text-dark">Hier</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">{{ item.days_since }} jours</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="alert alert-info mb-0">
+            Aucune habitude n'est enregistrée pour le moment.
+        </div>
+    {% endif %}
+</section>
+
+<section>
+    <div class="d-flex gap-3 flex-wrap">
+        <a class="btn btn-primary" href="{% url 'habit_tracker:calendar' %}">Voir le calendrier</a>
+        <a class="btn btn-outline-primary" href="{% url 'habit_tracker:objectives' %}">Suivre les objectifs</a>
+        <a class="btn btn-outline-secondary" href="{% url 'habit_tracker:day_create' %}?date={{ today|date:'Y-m-d' }}">Ajouter une journée</a>
+    </div>
+</section>
+{% endblock %}

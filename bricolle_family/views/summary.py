@@ -5,7 +5,7 @@ class SummaryView:
     def home(request):
         modules = [
             {"name": "Agathe", "url": "/agathe/", "color": "#e09cff"},
-            {"name": "Shopping List", "url": "/shopping_list/", "color": "#58d68d"},
+            {"name": "Habit Tracker", "url": "/habit_tracker/", "color": "#1abc9c"},
             {"name": "Games", "url": "/games", "color": "#ffbe5c"},
             {"name": "More...", "url": "/more", "color": "#3498db"},
         ]
@@ -28,7 +28,6 @@ class SummaryView:
         modules = [
             {"name": "Admin", "url": "/admin/", "color": "#3498db"},
             {"name": "Baby Name", "url": "/baby_name/", "color": "#ff6b6b"},
-            {"name": "Battery Simulator", "url": "/battery_simulator/", "color": "#ffbe5c"},
             {"name": "Finance Simulator", "url": "/finance_simulator/", "color": "#1abc9c"},
             {"name": "Sport", "url": "/sport/", "color": "#e67e22"},
             {"name": "Documents", "url": "/documents/", "color": "#4A7F4C"},

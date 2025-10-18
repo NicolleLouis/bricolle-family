@@ -1,0 +1,56 @@
+{% extends "habit_tracker/base.html" %}
+
+{% block title %}Calendrier des habitudes{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <a class="btn btn-outline-secondary" href="?year={{ prev_year }}&month={{ prev_month }}">←</a>
+    <h1 class="h4 mb-0">{{ current_month|title }}</h1>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary" href="{% url 'habit_tracker:day_create' %}?date={{ today|date:'Y-m-d' }}">Ajouter une journée</a>
+        <a class="btn btn-outline-secondary" href="?year={{ next_year }}&month={{ next_month }}">→</a>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered text-center align-middle shadow-sm">
+        <thead class="table-light">
+            <tr>
+                {% for weekday in weekdays %}
+                    <th scope="col">{{ weekday }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for week in weeks %}
+                <tr>
+                    {% for day in week %}
+                        <td class="
+                            {% if day.date == today %}table-primary shadow-sm{% endif %}
+                            {% if not day.in_current_month %}text-muted bg-light{% endif %}
+                        ">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="fw-semibold">
+                                    {% if day.date == today %}
+                                        <span class="badge bg-primary text-white rounded-circle fs-6 p-2">{{ day.date.day }}</span>
+                                    {% else %}
+                                        {{ day.date.day }}
+                                    {% endif %}
+                                </div>
+                                <a
+                                    class="btn btn-sm btn-outline-primary"
+                                    href="{% url 'habit_tracker:day_create' %}?date={{ day.date|date:'Y-m-d' }}"
+                                    title="Modifier la journée"
+                                >
+                                    ✏️
+                                </a>
+                            </div>
+                            <div class="text-muted small mt-2">{{ day.habit_count }} habitude{% if day.habit_count|default:0 > 1 %}s{% endif %}</div>
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
