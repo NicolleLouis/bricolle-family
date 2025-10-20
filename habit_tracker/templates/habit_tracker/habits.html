@@ -1,0 +1,108 @@
+{% extends "habit_tracker/base.html" %}
+
+{% block title %}Habitudes{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Habitudes</h1>
+</div>
+
+{% if cards %}
+    <div class="row g-3">
+        {% for card in cards %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h2 class="h5 card-title mb-1">{{ card.habit.name }}</h2>
+                                {% if card.habit.objective %}
+                                    <p class="text-muted small mb-0">
+                                        Objectif : {{ card.habit.objective.name }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                            <span class="badge bg-secondary">{{ card.habit.get_check_frequency_display }}</span>
+                        </div>
+                        <p class="mb-1 text-muted">{{ card.period_label }}</p>
+                        <p class="mb-1">
+                            Résultat :
+                            {% if card.success %}
+                                <span class="badge bg-success">{{ card.checks_last_period }} / {{ card.required_checks }}</span>
+                            {% else %}
+                                <span class="badge bg-danger">{{ card.checks_last_period }} / {{ card.required_checks }}</span>
+                            {% endif %}
+                        </p>
+                        <p class="mb-3">Streak : <strong>{{ card.streak }}</strong></p>
+
+                        <details class="mt-auto">
+                            <summary class="text-primary" style="cursor: pointer;">Modifier l'habitude</summary>
+                            <div class="pt-3">
+                                <form method="post" class="habit-edit-form needs-validation">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="habit_id" value="{{ card.habit.id }}">
+                                    {% if card.form.non_field_errors %}
+                                        <div class="alert alert-danger py-1">
+                                            {% for error in card.form.non_field_errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="mb-3">
+                                        {{ card.form.check_frequency.label_tag }}
+                                        {{ card.form.check_frequency }}
+                                        {% for error in card.form.check_frequency.errors %}
+                                            <div class="text-danger small">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="mb-3">
+                                        {{ card.form.objective_in_frequency.label_tag }}
+                                        {{ card.form.objective_in_frequency }}
+                                        <div class="form-text">
+                                            Nombre de validations nécessaires par période.
+                                        </div>
+                                        {% for error in card.form.objective_in_frequency.errors %}
+                                            <div class="text-danger small">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm">Enregistrer</button>
+                                </form>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>Aucune habitude définie pour le moment.</p>
+{% endif %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const forms = document.querySelectorAll("form.habit-edit-form");
+        forms.forEach((form) => {
+            const frequencySelect = form.querySelector("select[name$='check_frequency']");
+            const objectiveInput = form.querySelector("input[name$='objective_in_frequency']");
+            if (!frequencySelect || !objectiveInput) {
+                return;
+            }
+
+            const syncObjectiveField = () => {
+                if (frequencySelect.value === "daily") {
+                    objectiveInput.value = "1";
+                    objectiveInput.setAttribute("readonly", "readonly");
+                } else {
+                    objectiveInput.removeAttribute("readonly");
+                    if (!objectiveInput.value) {
+                        objectiveInput.value = "1";
+                    }
+                }
+            };
+
+            frequencySelect.addEventListener("change", syncObjectiveField);
+            syncObjectiveField();
+        });
+    });
+</script>
+{% endblock %}

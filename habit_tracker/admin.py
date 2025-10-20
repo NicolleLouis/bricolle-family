@@ -5,15 +5,16 @@ from habit_tracker.models import Day, Habit, Objective
 
 @admin.register(Objective)
 class ObjectiveAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = ("name", "check_frequency", "objective_duration")
     search_fields = ("name",)
+    list_filter = ("check_frequency",)
 
 
 @admin.register(Habit)
 class HabitAdmin(admin.ModelAdmin):
-    list_display = ("name", "objective")
+    list_display = ("name", "objective", "check_frequency", "objective_in_frequency")
     search_fields = ("name", "objective__name")
-    list_filter = ("objective",)
+    list_filter = ("objective", "check_frequency")
 
 
 @admin.register(Day)

@@ -15,6 +15,10 @@
                        href="{% url 'habit_tracker:objectives' %}">Objectifs</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match and request.resolver_match.url_name == 'habits' %}active{% endif %}"
+                       href="{% url 'habit_tracker:habits' %}">Habitudes</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {% if request.resolver_match and request.resolver_match.url_name == 'home' %}active{% endif %}"
                        href="{% url 'habit_tracker:home' %}">Tableau de bord</a>
                 </li>

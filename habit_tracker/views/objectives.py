@@ -5,11 +5,8 @@ from django.db.models import Prefetch
 from django.shortcuts import render
 
 from habit_tracker.models import Habit, Objective
-from habit_tracker.services.cooking_objective import CookingObjectiveService
-from habit_tracker.services.happiness_objective import HappinessObjectiveService
-from habit_tracker.services.intelligence_objective import IntelligenceObjectiveService
+from habit_tracker.models.choices import CheckFrequency
 from habit_tracker.services.objective_completion import ObjectiveCompletionService
-from habit_tracker.services.sport_objective import SportObjectiveService
 
 
 def objectives_overview(request):
@@ -24,33 +21,15 @@ def objectives_overview(request):
         year = first_day.year
         month = first_day.month
 
-    last_day = date(year, month, calendar.monthrange(year, month)[1])
-
     objectives = Objective.objects.prefetch_related(
         Prefetch("habits", queryset=Habit.objects.order_by("name"))
     ).order_by("name")
 
     objective_cards = []
     for objective in objectives:
-        if objective.name == SportObjectiveService.OBJECTIVE_NAME:
-            progress_data = SportObjectiveService.evaluate(today)
-            total_value = progress_data.total_value or progress_data.streak_target
-        elif objective.name == CookingObjectiveService.OBJECTIVE_NAME:
-            progress_data = CookingObjectiveService.evaluate(today)
-            total_value = progress_data.total_value or progress_data.streak_target
-        elif objective.name == HappinessObjectiveService.OBJECTIVE_NAME:
-            progress_data = HappinessObjectiveService.evaluate(today)
-            total_value = progress_data.total_value or progress_data.streak_target
-        elif objective.name == IntelligenceObjectiveService.OBJECTIVE_NAME:
-            progress_data = IntelligenceObjectiveService.evaluate(today)
-            total_value = progress_data.total_value or progress_data.streak_target
-        else:
-            progress_data = ObjectiveCompletionService.compute_objective_completion(
-                objective,
-                start_date=first_day,
-                end_date=last_day,
-            )
-            total_value = progress_data.total_value
+        progress_data = ObjectiveCompletionService.evaluate(objective, today=today)
+        total_value = progress_data.total_value
+        streak_unit = "jour" if objective.check_frequency == CheckFrequency.DAILY else "semaine"
 
         progress = progress_data.percentage
         completed_value = progress_data.completed_value
@@ -67,6 +46,7 @@ def objectives_overview(request):
                 "completed_value": completed_value,
                 "total_value": total_value,
                 "current_streak": current_streak,
+                "streak_unit": streak_unit,
                 "progress_description": progress_description,
                 "status_success": status_success,
                 "status_label": status_label,
