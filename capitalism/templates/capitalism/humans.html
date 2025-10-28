@@ -1,0 +1,183 @@
+{% extends 'capitalism/base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Humans</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">Filters</div>
+                <div class="card-body">
+                    <form method="get" class="row gy-3 gx-3 align-items-end">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label" for="id_name">Name</label>
+                            <input type="text" id="id_name" name="name" value="{{ name_filter }}" class="form-control" placeholder="Search by name">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label" for="id_job">Job</label>
+                            <select class="form-select" id="id_job" name="job">
+                                <option value="">All</option>
+                                {% for value, label in jobs %}
+                                    <option value="{{ value }}" {% if job_filter == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label" for="id_state">State</label>
+                            <select class="form-select" id="id_state" name="state">
+                                <option value="">All</option>
+                                <option value="alive" {% if state_filter == "alive" %}selected{% endif %}>Alive</option>
+                                <option value="dead" {% if state_filter == "dead" %}selected{% endif %}>Dead</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-auto d-flex align-items-end justify-content-md-end">
+                            <button type="submit" class="btn btn-primary px-4">Apply</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Job</th>
+                            <th scope="col">Age</th>
+                            <th scope="col">Money</th>
+                            <th scope="col">Alive</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for human in humans %}
+                            <tr
+                                class="{% if selected_human_id == human.id %}table-primary{% endif %}"
+                                style="cursor: pointer;"
+                                onclick="window.location='{% if base_query %}?{{ base_query }}&{% else %}?{% endif %}human_id={{ human.id }}';"
+                            >
+                                <td>{{ human.name|default:"Unnamed" }}</td>
+                                <td>{{ human.get_job_display }}</td>
+                                <td>{{ human.age }}</td>
+                                <td>{{ human.money }}</td>
+                                <td>
+                                    {% if human.dead %}
+                                        <span class="badge bg-danger">Dead</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Alive</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">No humans found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if selected_human %}
+        <div class="col-lg-4">
+            <div class="card shadow-sm" style="position: sticky; top: 4.5rem;">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>
+                        {% if selected_human.name %}
+                            {{ selected_human.name }}
+                        {% else %}
+                            Human #{{ selected_human.id }}
+                        {% endif %}
+                    </span>
+                    <div class="d-flex gap-2">
+                        <a class="btn btn-sm btn-primary" href="{% url 'capitalism:human_detail' selected_human.id %}">Détail</a>
+                        {% if base_query %}
+                            <a class="btn btn-sm btn-outline-secondary" href="?{{ base_query }}">Close</a>
+                        {% else %}
+                            <a class="btn btn-sm btn-outline-secondary" href="{% url 'capitalism:humans' %}">Close</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Profile</h5>
+                    <dl class="row mb-0">
+                        <dt class="col-6">Name</dt>
+                        <dd class="col-6 text-end">{{ selected_human.name|default:"Unnamed" }}</dd>
+                        <dt class="col-6">Job</dt>
+                        <dd class="col-6 text-end">{{ selected_human.get_job_display }}</dd>
+                        <dt class="col-6">Step</dt>
+                        <dd class="col-6 text-end">{{ selected_human.get_step_display }}</dd>
+                        <dt class="col-6">Money</dt>
+                        <dd class="col-6 text-end">{{ selected_human.money }}</dd>
+                        <dt class="col-6">Days since needs met</dt>
+                        <dd class="col-6 text-end">{{ selected_human.time_since_need_fulfilled }}</dd>
+                        <dt class="col-6">Total unmet days</dt>
+                        <dd class="col-6 text-end">{{ selected_human.time_without_full_needs }}</dd>
+                        <dt class="col-6">Status</dt>
+                        <dd class="col-6 text-end">
+                            {% if selected_human.dead %}
+                                <span class="badge bg-danger">Dead</span>
+                            {% else %}
+                                <span class="badge bg-success">Alive</span>
+                            {% endif %}
+                        </dd>
+                    </dl>
+
+                    <h5 class="card-title mt-4">Objects</h5>
+                    {% if object_summary %}
+                        <ul class="list-group list-group-flush">
+                            {% for item in object_summary %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ item.label }}
+                                    <span class="badge bg-secondary rounded-pill">{{ item.quantity }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-0">No objects owned.</p>
+                    {% endif %}
+
+                    <button class="btn btn-sm btn-outline-primary mt-4 w-100"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#add-object-form-{{ selected_human.id }}">
+                        Ajouter un objet
+                    </button>
+
+                    <div class="collapse mt-3" id="add-object-form-{{ selected_human.id }}">
+                        <form method="post"
+                              action="{% if base_query %}?{{ base_query }}&{% else %}?{% endif %}human_id={{ selected_human.id }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="human_id" value="{{ selected_human.id }}">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-7">
+                                    <label class="form-label" for="id_object_type_{{ selected_human.id }}">Objet</label>
+                                    <select class="form-select" id="id_object_type_{{ selected_human.id }}" name="object_type" required>
+                                        {% for value, label in object_types %}
+                                            <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-5">
+                                    <label class="form-label" for="id_quantity_{{ selected_human.id }}">Quantité</label>
+                                    <input type="number"
+                                           class="form-control"
+                                           id="id_quantity_{{ selected_human.id }}"
+                                           name="quantity"
+                                           value="1"
+                                           min="1"
+                                           required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-3 w-100">Ajouter</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'capitalism/base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Human Analytics</h1>
+            <p class="text-muted mb-0">Population and wealth distribution per job.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            Job Breakdown
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Job</th>
+                            <th scope="col" class="text-end">Humans</th>
+                            <th scope="col" class="text-end">Min Money</th>
+                            <th scope="col" class="text-end">Avg Money</th>
+                            <th scope="col" class="text-end">Max Money</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in stats %}
+                            <tr>
+                                <td>{{ entry.label }}</td>
+                                <td class="text-end">{{ entry.count }}</td>
+                                <td class="text-end">
+                                    {% if entry.min_money is not None %}
+                                        {{ entry.min_money|floatformat:2 }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if entry.avg_money is not None %}
+                                        {{ entry.avg_money|floatformat:2 }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if entry.max_money is not None %}
+                                        {{ entry.max_money|floatformat:2 }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

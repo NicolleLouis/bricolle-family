@@ -1,0 +1,60 @@
+{% extends 'capitalism/base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Objects Overview</h1>
+            <p class="text-muted mb-0">Inventory counts and pricing distribution by object type.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            Object Statistics
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Type</th>
+                            <th scope="col" class="text-end">Quantity</th>
+                            <th scope="col" class="text-end">Min Price</th>
+                            <th scope="col" class="text-end">Avg Price</th>
+                            <th scope="col" class="text-end">Max Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in stats %}
+                            <tr>
+                                <td>{{ entry.label }}</td>
+                                <td class="text-end">{{ entry.quantity }}</td>
+                                <td class="text-end">
+                                    {% if entry.min_price is not None %}
+                                        {{ entry.min_price|floatformat:2 }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if entry.avg_price is not None %}
+                                        {{ entry.avg_price|floatformat:2 }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if entry.max_price is not None %}
+                                        {{ entry.max_price|floatformat:2 }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

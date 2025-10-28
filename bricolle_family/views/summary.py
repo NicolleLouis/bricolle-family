@@ -31,5 +31,6 @@ class SummaryView:
             {"name": "Finance Simulator", "url": "/finance_simulator/", "color": "#1abc9c"},
             {"name": "Sport", "url": "/sport/", "color": "#e67e22"},
             {"name": "Documents", "url": "/documents/", "color": "#4A7F4C"},
+            {"name": "Capitalism", "url": "/capitalism/", "color": "#2ecc71"},
         ]
         return render(request, "bricolle_family/summary.html", {"modules": modules})

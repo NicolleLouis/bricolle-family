@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capitalism</title>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+</head>
+<body>
+{% include 'capitalism/header.html' %}
+<div class="container py-4">
+    {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+                {% with message.level_tag as level %}
+                    {% if level == "error" %}
+                        {% with "danger" as level %}
+                            <div class="alert alert-{{ level }} border border-{{ level }} border-2 d-flex align-items-center gap-2" role="alert">
+                                <strong>Erreur :</strong>
+                                <span>{{ message }}</span>
+                            </div>
+                        {% endwith %}
+                    {% else %}
+                        <div class="alert alert-{{ level }}" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+</div>
+</body>
+</html>

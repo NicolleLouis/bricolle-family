@@ -6,7 +6,7 @@ from altered.models import UniqueFlip
 
 
 class UniqueFlipSignalTests(TestCase):
-    @patch('altered.services.altered_fetch_unique_flip_data.requests.get')
+    @patch('altered.services.altered_fetch_unique_data.requests.get')
     def test_fetch_data_after_create(self, mock_get):
         mock_response = mock_get.return_value
         mock_response.json.return_value = {

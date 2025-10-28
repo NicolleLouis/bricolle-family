@@ -1,0 +1,41 @@
+{% extends 'capitalism/base.html' %}
+
+{% block content %}
+    <div class="text-center">
+        <h1>Capitalism Dashboard</h1>
+        <p class="lead">Track humans, their jobs, and their pursuit of needs.</p>
+    </div>
+
+    <div class="card mx-auto mt-4" style="max-width: 480px;">
+        <div class="card-header text-center">
+            Statistiques de la simulation
+        </div>
+        <div class="card-body">
+            {% if macro_info.has_simulation %}
+                <p class="mb-2">
+                    <strong>Jour courant :</strong> {{ macro_info.day_number }}
+                </p>
+                <p class="mb-3">
+                    <strong>Étape actuelle :</strong> {{ macro_info.step_label }}
+                </p>
+            {% else %}
+                <p class="mb-3 text-muted">
+                    Aucune simulation disponible. Lancez une simulation pour voir sa progression.
+                </p>
+            {% endif %}
+            <p class="mb-0">
+                <strong>Humains en vie :</strong> {{ macro_info.alive_humans }}
+            </p>
+        </div>
+    </div>
+
+    <div class="card mx-auto mt-4" style="max-width: 480px;">
+        <div class="card-body">
+            <form method="post" action="">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="next_step">
+                <button type="submit" class="btn btn-primary w-100">Next Step</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

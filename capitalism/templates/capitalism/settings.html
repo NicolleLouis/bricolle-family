@@ -1,0 +1,67 @@
+{% extends 'capitalism/base.html' %}
+
+{% block content %}
+    <div class="mb-4">
+        <h1>Simulation Settings</h1>
+        {% if simulation %}
+            <p class="text-muted mb-0">
+                Current simulation: day <strong>{{ simulation.day_number }}</strong>,
+                step <strong>{{ simulation.get_step_display }}</strong>.
+            </p>
+        {% else %}
+            <p class="text-muted mb-0">
+                No simulation created yet.
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            Generate Humans
+        </div>
+        <div class="card-body">
+            <form method="post" action="" class="row g-3">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="generate">
+                {% for value, label in jobs %}
+                    <div class="col-md-4">
+                        <label class="form-label" for="id_count_{{ value }}">{{ label }}</label>
+                        <input type="number" min="0" value="0" class="form-control"
+                               id="id_count_{{ value }}" name="count_{{ value }}">
+                    </div>
+                {% endfor %}
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-danger">
+        <div class="card-header bg-danger text-white">
+            Danger zone
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                These actions affect the entire simulation. Proceed with caution.
+            </p>
+            <div class="d-flex flex-column flex-md-row gap-2">
+                <form method="post" action="" class="me-md-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="start">
+                    <button type="submit" class="btn btn-success">
+                        Start Simulation
+                    </button>
+                </form>
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reset">
+                    <button type="submit" class="btn btn-outline-danger"
+                            onclick="return confirm('Êtes-vous certains ?');">
+                        Reset Simulation
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

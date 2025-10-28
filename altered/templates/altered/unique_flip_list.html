@@ -75,12 +75,12 @@
         <ul class="nav nav-tabs mb-3">
             <li class="nav-item">
                 <a class="nav-link {% if status == 'current' %}active{% endif %}"
-                   href="?status=current{% if selected_faction %}&faction={{ selected_faction }}{% endif %}">En
+                   href="?status=current{% if selected_faction %}&faction={{ selected_faction }}{% endif %}{% if hide_zero %}&hide_zero=on{% endif %}{% if price_issues_only %}&price_issues_only=on{% endif %}">En
                     cours</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link {% if status == 'sold' %}active{% endif %}"
-                   href="?status=sold{% if selected_faction %}&faction={{ selected_faction }}{% endif %}">Vendus</a>
+                   href="?status=sold{% if selected_faction %}&faction={{ selected_faction }}{% endif %}{% if hide_zero %}&hide_zero=on{% endif %}{% if price_issues_only %}&price_issues_only=on{% endif %}">Vendus</a>
             </li>
         </ul>
 
@@ -90,9 +90,13 @@
                 {{ filter_form.faction.label_tag }}
                 {{ filter_form.faction|add_class:"form-select" }}
             </div>
-            <div class="col-auto form-check">
+            <div class="col-auto form-check form-switch">
                 {{ filter_form.hide_zero }}
                 <label class="form-check-label" for="{{ filter_form.hide_zero.id_for_label }}">{{ filter_form.hide_zero.label }}</label>
+            </div>
+            <div class="col-auto form-check form-switch">
+                {{ filter_form.price_issues_only }}
+                <label class="form-check-label" for="{{ filter_form.price_issues_only.id_for_label }}">{{ filter_form.price_issues_only.label }}</label>
             </div>
             <div class="col-auto">
                 <button type="submit" class="btn btn-primary">Filtrer</button>

@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from django.db.models import Sum, F, DecimalField, ExpressionWrapper, OuterRef, Subquery, Value
+from django.db.models import Sum, F, DecimalField, ExpressionWrapper, OuterRef, Subquery, Value, Q
 from django.db.models.functions import Coalesce
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -18,6 +18,9 @@ BALANCE_EXPRESSION = ExpressionWrapper(
     output_field=DecimalField(max_digits=10, decimal_places=2),
 )
 
+# Include historic sales completed before the marketplace tracking existed.
+PRE_MARKETPLACE_BALANCE = Decimal('400')
+
 
 def unique_flip_list_view(request):
     status = request.GET.get('status', 'current')
@@ -25,9 +28,11 @@ def unique_flip_list_view(request):
     filter_form = UniqueFlipFilterForm(request.GET)
     faction = None
     hide_zero = False
+    price_issues_only = False
     if filter_form.is_valid():
         faction = filter_form.cleaned_data.get('faction') or None
         hide_zero = filter_form.cleaned_data.get('hide_zero')
+        price_issues_only = filter_form.cleaned_data.get('price_issues_only')
 
     purchase_form = UniqueFlipPurchaseForm()
 
@@ -36,7 +41,13 @@ def unique_flip_list_view(request):
         if response:
             return response
 
-    flips = _filter_flips(UniqueFlip.objects.all(), status, faction, hide_zero)
+    flips = _filter_flips(
+        UniqueFlip.objects.all(),
+        status,
+        faction,
+        hide_zero,
+        price_issues_only,
+    )
     flips = _sort_flips(flips, sort)
     flips = flips.annotate(balance_value=BALANCE_EXPRESSION)
 
@@ -48,6 +59,7 @@ def unique_flip_list_view(request):
         'selected_faction': faction,
         **metrics,
         'hide_zero': hide_zero,
+        'price_issues_only': price_issues_only,
         'sort': sort,
         'purchase_form': purchase_form,
         'sell_form': UniqueFlipSellForm(),
@@ -102,7 +114,7 @@ def _handle_post(request, status, purchase_form):
     return None, purchase_form
 
 
-def _filter_flips(queryset, status, faction, hide_zero):
+def _filter_flips(queryset, status, faction, hide_zero, price_issues_only):
     if status == 'sold':
         queryset = queryset.filter(sold_at__isnull=False)
     else:
@@ -113,6 +125,16 @@ def _filter_flips(queryset, status, faction, hide_zero):
 
     if hide_zero:
         queryset = queryset.exclude(bought_price=0)
+
+    if price_issues_only:
+        latest_price_subquery = UniquePrice.objects.filter(
+            unique_flip=OuterRef('pk')
+        ).order_by('-date').values('price')[:1]
+        queryset = queryset.annotate(latest_price=Subquery(latest_price_subquery))
+        queryset = queryset.filter(
+            Q(latest_price__isnull=True) |
+            (Q(advised_price__isnull=False) & ~Q(advised_price=F('latest_price')))
+        )
 
     return queryset
 
@@ -135,6 +157,7 @@ def _compute_metrics(hide_zero):
     balance = balance_queryset.aggregate(
         balance=Sum(BALANCE_EXPRESSION)
     )['balance'] or Decimal('0')
+    balance += PRE_MARKETPLACE_BALANCE
     balance = round(balance, 2)
 
     sold_balance_queryset = UniqueFlip.objects.filter(sold_at__isnull=False)

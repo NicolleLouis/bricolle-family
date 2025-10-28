@@ -27,6 +27,11 @@ class UniqueFlipFilterForm(forms.Form):
         label='Hide 0 buy price',
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
+    price_issues_only = forms.BooleanField(
+        required=False,
+        label='Uniquement les prix à vérifier',
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input', 'role': 'switch'})
+    )
 
 
 class UniqueFlipCurrentPriceForm(forms.Form):

@@ -1,0 +1,64 @@
+{% extends 'capitalism/base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Price Analytics</h1>
+            <p class="text-muted mb-0">Evolution des prix pour chaque type d'objet.</p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">Filtrer par objet</div>
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label" for="id_object">Objet</label>
+                    <select class="form-select" id="id_object" name="object">
+                        {% for value, label in object_choices %}
+                            <option value="{{ value }}" {% if value == selected_object %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary">Afficher</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Historique des prix - {{ object_label }}</span>
+            <span class="badge bg-info text-dark">{{ analytics|length }} jours</span>
+        </div>
+        <div class="card-body p-0">
+            {% if analytics %}
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th scope="col">Jour</th>
+                                <th scope="col" class="text-end">Prix min</th>
+                                <th scope="col" class="text-end">Prix moyen</th>
+                                <th scope="col" class="text-end">Prix max</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in analytics %}
+                                <tr>
+                                    <td>{{ entry.day_number }}</td>
+                                    <td class="text-end">{{ entry.lowest_price_displayed|floatformat:2 }}</td>
+                                    <td class="text-end">{{ entry.average_price_displayed|floatformat:2 }}</td>
+                                    <td class="text-end">{{ entry.max_price_displayed|floatformat:2 }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted p-3 mb-0">Aucune donnée disponible pour cet objet.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
