@@ -1,7 +1,5 @@
 from django.contrib import admin
 from django.db import models
-from django.db.models import Avg, Max, Min
-
 from capitalism.constants.simulation_step import (
     SimulationStep,
     DEFAULT_STEP_SEQUENCE,
@@ -142,7 +140,17 @@ class Simulation(models.Model):
         return True
 
     def can_change_step_price_stats(self):
-        return True
+        from capitalism.constants.object_type import ObjectType
+        from capitalism.models import PriceAnalytics
+
+        day_number = self.day_number
+        analytics_types = set(
+            PriceAnalytics.objects.filter(day_number=day_number).values_list(
+                "object_type", flat=True
+            )
+        )
+        expected_types = {choice for choice, _label in ObjectType.choices}
+        return expected_types.issubset(analytics_types)
 
     def can_change_step_buying(self):
         return True
@@ -181,7 +189,10 @@ class Simulation(models.Model):
         return self.next_step()
 
     def finish_current_step_price_stats(self):
-        self._record_price_analytics()
+        from capitalism.services.pricing import PriceAnalyticsRecorderService
+
+        PriceAnalyticsRecorderService(day_number=self.day_number).run()
+
         humans = Human.objects.filter(dead=False, step=SimulationStep.PRICE_STATS)
         for human in humans:
             human.perform_current_step()
@@ -202,44 +213,6 @@ class Simulation(models.Model):
 
     def finish_current_step_end_of_day(self):
         return self.next_step()
-
-    def _record_price_analytics(self):
-        from capitalism.constants.object_type import ObjectType
-        from capitalism.models import Object, PriceAnalytics
-
-        day_number = self.day_number
-        price_data = (
-            Object.objects.filter(in_sale=True, price__isnull=False)
-            .values("type")
-            .annotate(
-                min_price=Min("price"),
-                max_price=Max("price"),
-                avg_price=Avg("price"),
-            )
-        )
-        aggregated = {row["type"]: row for row in price_data}
-
-        for object_type, _label in ObjectType.choices:
-            stats = aggregated.get(object_type)
-            if stats is None:
-                min_price = max_price = avg_price = 0.0
-            else:
-                min_price = float(stats["min_price"] or 0.0)
-                max_price = float(stats["max_price"] or 0.0)
-                avg_price = float(stats["avg_price"] or 0.0)
-
-            PriceAnalytics.objects.update_or_create(
-                day_number=day_number,
-                object_type=object_type,
-                defaults={
-                    "lowest_price_displayed": min_price,
-                    "max_price_displayed": max_price,
-                    "average_price_displayed": avg_price,
-                    "lowest_price": min_price,
-                    "max_price": max_price,
-                    "average_price": avg_price,
-                },
-            )
 
 
 @admin.register(Simulation)

@@ -1,7 +1,8 @@
 import pytest
 
 from capitalism.constants.simulation_step import SimulationStep
-from capitalism.models import Simulation, Human
+from capitalism.models import Simulation, Human, PriceAnalytics
+from capitalism.constants.object_type import ObjectType
 
 
 @pytest.mark.django_db
@@ -18,6 +19,19 @@ def test_simulation_next_step_cycles_through_sequence():
     simulation = Simulation.objects.create(step=SimulationStep.PRICE_STATS)
 
     Human.objects.create(step=SimulationStep.BUYING)
+    for object_type, _label in ObjectType.choices:
+        PriceAnalytics.objects.update_or_create(
+            day_number=simulation.day_number,
+            object_type=object_type,
+            defaults={
+                "lowest_price_displayed": 0.0,
+                "max_price_displayed": 0.0,
+                "average_price_displayed": 0.0,
+                "lowest_price": 0.0,
+                "max_price": 0.0,
+                "average_price": 0.0,
+            },
+        )
     next_step = simulation.next_step()
     assert next_step == SimulationStep.BUYING
     simulation.refresh_from_db()
@@ -41,10 +55,38 @@ def test_run_complete_day_advances_day():
     for _ in range(len(Simulation.STEP_SEQUENCE) - 1):
         human.step = simulation._next_step_value().value
         human.save(update_fields=["step"])
+        if simulation.step == SimulationStep.PRICE_STATS:
+            for object_type, _label in ObjectType.choices:
+                PriceAnalytics.objects.update_or_create(
+                    day_number=simulation.day_number,
+                    object_type=object_type,
+                    defaults={
+                        "lowest_price_displayed": 0.0,
+                        "max_price_displayed": 0.0,
+                        "average_price_displayed": 0.0,
+                        "lowest_price": 0.0,
+                        "max_price": 0.0,
+                        "average_price": 0.0,
+                    },
+                )
         simulation.next_step()
 
     human.step = simulation._next_step_value().value
     human.save(update_fields=["step"])
+    if simulation.step == SimulationStep.PRICE_STATS:
+        for object_type, _label in ObjectType.choices:
+            PriceAnalytics.objects.update_or_create(
+                day_number=simulation.day_number,
+                object_type=object_type,
+                defaults={
+                    "lowest_price_displayed": 0.0,
+                    "max_price_displayed": 0.0,
+                    "average_price_displayed": 0.0,
+                    "lowest_price": 0.0,
+                    "max_price": 0.0,
+                    "average_price": 0.0,
+                },
+            )
     simulation.next_step()
 
     simulation.refresh_from_db()

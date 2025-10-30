@@ -119,3 +119,56 @@ def test_finish_price_stats_records_price_analytics_and_advances_humans():
     assert ore_stats.lowest_price_displayed == pytest.approx(0.0)
     assert ore_stats.max_price_displayed == pytest.approx(0.0)
     assert ore_stats.average_price_displayed == pytest.approx(0.0)
+
+
+@pytest.mark.django_db
+def test_can_change_step_price_stats_returns_true_when_all_object_types_present():
+    simulation = Simulation.objects.create(step=SimulationStep.PRICE_STATS, day_number=2)
+
+    for object_type, _label in ObjectType.choices:
+        PriceAnalytics.objects.create(
+            day_number=2,
+            object_type=object_type,
+            lowest_price_displayed=0.0,
+            max_price_displayed=0.0,
+            average_price_displayed=0.0,
+            lowest_price=0.0,
+            max_price=0.0,
+            average_price=0.0,
+        )
+
+    assert simulation.can_change_step_price_stats() is True
+
+
+@pytest.mark.django_db
+def test_can_change_step_price_stats_returns_false_when_object_type_missing():
+    simulation = Simulation.objects.create(step=SimulationStep.PRICE_STATS, day_number=5)
+
+    missing_type = ObjectType.choices[-1][0]
+    for object_type, _label in ObjectType.choices:
+        if object_type == missing_type:
+            continue
+        PriceAnalytics.objects.create(
+            day_number=5,
+            object_type=object_type,
+            lowest_price_displayed=0.0,
+            max_price_displayed=0.0,
+            average_price_displayed=0.0,
+            lowest_price=0.0,
+            max_price=0.0,
+            average_price=0.0,
+        )
+
+    # Ensure the missing type exists for a different day and should not count.
+    PriceAnalytics.objects.create(
+        day_number=6,
+        object_type=missing_type,
+        lowest_price_displayed=0.0,
+        max_price_displayed=0.0,
+        average_price_displayed=0.0,
+        lowest_price=0.0,
+        max_price=0.0,
+        average_price=0.0,
+    )
+
+    assert simulation.can_change_step_price_stats() is False

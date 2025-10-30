@@ -11,7 +11,7 @@ from capitalism.models import (
     HumanAnalytics,
     Object,
     Simulation,
-    Transaction,
+    Transaction, PriceAnalytics,
 )
 
 
@@ -61,6 +61,7 @@ class SettingView:
             Human.objects.all().delete()
             Object.objects.all().delete()
             HumanAnalytics.objects.all().delete()
+            PriceAnalytics.objects.all().delete()
             Transaction.objects.all().delete()
             Simulation.objects.all().delete()
             simulation = Simulation.objects.create()
