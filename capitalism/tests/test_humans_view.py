@@ -111,6 +111,8 @@ def test_human_detail_view_exposes_objects(logged_client):
     sale_entry = next(obj for obj in objects if obj.id == sale_obj.id)
     assert sale_entry.in_sale is True
     assert sale_entry.price == 9.5
+    desired = response.context["desired_object_prices"]
+    assert any(item["type"] == ObjectType.BREAD for item in desired)
 
 
 @pytest.mark.django_db
@@ -189,3 +191,59 @@ def test_human_detail_view_add_object(logged_client):
     assert human.owned_objects.filter(type=ObjectType.ORE).count() == 2
     messages = list(response.context.get("messages", []))
     assert any("ajout" in message.message.lower() for message in messages)
+
+
+@pytest.mark.django_db
+def test_human_detail_view_updates_object_price(logged_client):
+    human = Human.objects.create(
+        name="Pricer",
+        job=Job.MINER,
+        dead=False,
+        step=SimulationStep.SELLING,
+    )
+    obj = human.owned_objects.create(type=ObjectType.ORE, price=5.0)
+
+    response = logged_client.post(
+        reverse("capitalism:human_detail", args=[human.id]),
+        {
+            "action": "update_price",
+            "object_id": str(obj.id),
+            "price": "7.25",
+        },
+        follow=True,
+    )
+
+    assert response.status_code == 200
+    obj.refresh_from_db()
+    assert obj.price == pytest.approx(7.25)
+    assert obj.in_sale is True
+    messages = list(response.context.get("messages", []))
+    assert any("mis à jour" in message.message.lower() for message in messages)
+
+
+@pytest.mark.django_db
+def test_human_detail_view_can_clear_object_price(logged_client):
+    human = Human.objects.create(
+        name="Cleaner",
+        job=Job.MINER,
+        dead=False,
+        step=SimulationStep.SELLING,
+    )
+    obj = human.owned_objects.create(type=ObjectType.ORE, price=5.0)
+
+    response = logged_client.post(
+        reverse("capitalism:human_detail", args=[human.id]),
+        {
+            "action": "update_price",
+            "object_id": str(obj.id),
+            "price": "",
+        },
+        follow=True,
+    )
+
+    assert response.status_code == 200
+    obj.refresh_from_db()
+    assert obj.price is None
+    assert obj.in_sale is False
+    messages = list(response.context.get("messages", []))
+    assert any("supprimé" in message.message.lower() for message in messages)

@@ -41,6 +41,17 @@ def test_input_and_need_takes_highest_value(service):
 
 
 @pytest.mark.django_db
+def test_input_price_drops_but_consumption_value_remains(service):
+    human = Human.objects.create(job=Job.TOOLMAKER, step=SimulationStep.PRODUCTION)
+    for _ in range(5):
+        human.owned_objects.create(type=ObjectType.WOOD)
+
+    price = service.estimate_price(human, ObjectType.WOOD)
+
+    assert pytest.approx(price, rel=1e-3) == 0.333
+
+
+@pytest.mark.django_db
 def test_object_without_need_or_input_has_zero_value(service):
     human = Human.objects.create(job=Job.MINER, step=SimulationStep.PRODUCTION)
 

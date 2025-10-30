@@ -1,3 +1,5 @@
+import random
+
 from django.contrib import admin
 from django.db import models
 from capitalism.constants.simulation_step import (
@@ -200,6 +202,13 @@ class Simulation(models.Model):
         return self.next_step()
 
     def finish_current_step_buying(self):
+        buyers = list(
+            Human.objects.filter(dead=False, step=SimulationStep.BUYING).order_by("id")
+        )
+        random.shuffle(buyers)
+        for human in buyers:
+            human.perform_current_step()
+
         return self.next_step()
 
     def finish_current_step_consumption(self):

@@ -5,6 +5,7 @@ from typing import Optional, Type
 from capitalism.constants import BASE_NEEDS
 from capitalism.constants.jobs import Job as JobEnum
 from capitalism.constants.object_type import ObjectType
+from capitalism.services.job_target import JobTargetService
 from capitalism.services.jobs import (
     Baker,
     Farmer,
@@ -42,7 +43,8 @@ class HumanBuyingPriceValuationService:
 
         base_price = 0.0
         if self._is_input_for_job(job_cls, object_type):
-            base_price = max(base_price, self._input_driven_price(job_cls, object_type))
+            if not self._has_more_than_two_days_stock(human, job_cls, object_type):
+                base_price = max(base_price, self._input_driven_price(human, job_cls, object_type))
 
         if self._is_consumption_need(object_type):
             base_price = max(base_price, self._consumption_price(human, object_type))
@@ -57,7 +59,7 @@ class HumanBuyingPriceValuationService:
     def _is_input_for_job(self, job_cls: Type[Job], object_type: str) -> bool:
         return any(resource_type == object_type for resource_type, _ in job_cls.get_input())
 
-    def _input_driven_price(self, job_cls: Type[Job], object_type: str) -> float:
+    def _input_driven_price(self, human, job_cls: Type[Job], object_type: str) -> float:
         total_input_cost = 0.0
         input_quantity = 0
         for resource_type, qty in job_cls.get_input():
@@ -113,3 +115,10 @@ class HumanBuyingPriceValuationService:
         except GlobalPriceReferenceService.PriceNotFound:
             return 0.0
         return unit_price * qty
+
+    def _has_more_than_two_days_stock(self, human, job_cls: Type[Job], object_type: str) -> bool:
+        target_quantity = JobTargetService.compute_target_quantity(job_cls, object_type)
+        if target_quantity <= 0:
+            return False
+        owned_quantity = human.owned_objects.filter(type=object_type).count()
+        return owned_quantity > target_quantity

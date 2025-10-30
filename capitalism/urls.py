@@ -6,6 +6,7 @@ from capitalism.views.humans import HumansView
 from capitalism.views.objects import ObjectsView
 from capitalism.views.human_analytics import HumanAnalyticsView
 from capitalism.views.price_analytics import PriceAnalyticsView
+from capitalism.views.transactions import TransactionsView
 
 app_name = "capitalism"
 
@@ -17,4 +18,5 @@ urlpatterns = [
     path("objects/", ObjectsView.home, name="objects"),
     path("human-analytics/", HumanAnalyticsView.home, name="human_analytics"),
     path("price-analytics/", PriceAnalyticsView.home, name="price_analytics"),
+    path("transactions/", TransactionsView.home, name="transactions"),
 ]

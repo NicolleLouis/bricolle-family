@@ -153,6 +153,28 @@ def test_perform_selling_resets_inventory_and_lists_sellable_objects():
 
 
 @pytest.mark.django_db
+def test_perform_selling_rounds_price_to_two_decimals(monkeypatch):
+    human = Human.objects.create(step=SimulationStep.SELLING, job=Job.MINER)
+    ore = human.owned_objects.create(type=ObjectType.ORE, price=0, in_sale=False)
+
+    def fake_estimate_price(self, _human, _type):
+        return 5.6789
+
+    monkeypatch.setattr(
+        HumanSellingPriceValuationService,
+        "estimate_price",
+        fake_estimate_price,
+    )
+
+    human.perform_current_step()
+    human.refresh_from_db()
+    ore.refresh_from_db()
+
+    assert ore.in_sale is True
+    assert ore.price == pytest.approx(5.68)
+
+
+@pytest.mark.django_db
 def test_use_basic_need_consumes_items_and_resets_counter():
     human = Human.objects.create(time_since_need_fulfilled=3, time_without_full_needs=5)
     Object.objects.create(owner=human, type=ObjectType.WOOD)
@@ -191,6 +213,26 @@ def test_perform_consumption_advances_step():
 
     assert human.step == SimulationStep.DEATH
     assert human.time_since_need_fulfilled == 0
+
+
+@pytest.mark.django_db
+def test_perform_buying_advances_step_and_transfers_objects():
+    buyer = Human.objects.create(step=SimulationStep.BUYING, money=30)
+    seller = Human.objects.create(money=0)
+    offer = seller.owned_objects.create(type=ObjectType.BREAD, price=8, in_sale=True)
+
+    buyer.perform_current_step()
+
+    buyer.refresh_from_db()
+    seller.refresh_from_db()
+    offer.refresh_from_db()
+
+    assert buyer.step == SimulationStep.CONSUMPTION
+    assert buyer.money == 22
+    assert seller.money == 8
+    assert offer.owner == buyer
+    assert offer.in_sale is False
+    assert offer.price is None
 
 
 @pytest.mark.django_db

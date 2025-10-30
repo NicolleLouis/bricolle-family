@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from decimal import Decimal, ROUND_HALF_UP
 from typing import TYPE_CHECKING, Iterable, List
 
 from capitalism.constants.simulation_step import SimulationStep
@@ -36,9 +37,14 @@ class HumanSellingService:
             price = self.valuation_service.estimate_price(self.human, obj.type)
             if price is None:
                 continue
-            obj.price = price
+            obj.price = self._format_price(price)
             obj.in_sale = True
             obj.save(update_fields=["price", "in_sale"])
 
     def _advance_step(self) -> SimulationStep:
         return self.human.next_step()
+
+    @staticmethod
+    def _format_price(price: float) -> float:
+        decimal_price = Decimal(str(price)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        return float(decimal_price)

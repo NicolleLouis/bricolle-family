@@ -122,6 +122,46 @@ def test_finish_price_stats_records_price_analytics_and_advances_humans():
 
 
 @pytest.mark.django_db
+def test_finish_buying_runs_humans_in_random_order(monkeypatch):
+    simulation = Simulation.objects.create(step=SimulationStep.BUYING)
+    humans = [
+        Human.objects.create(step=SimulationStep.BUYING, money=100),
+        Human.objects.create(step=SimulationStep.BUYING, money=120),
+        Human.objects.create(step=SimulationStep.BUYING, money=80),
+    ]
+
+    shuffle_calls = []
+
+    def fake_shuffle(seq):
+        shuffle_calls.append([human.id for human in seq])
+        seq.reverse()
+
+    monkeypatch.setattr("capitalism.models.simulation.random.shuffle", fake_shuffle)
+
+    call_order = []
+    original_perform = Human.perform_current_step
+
+    def tracking_perform(self):
+        call_order.append(self.id)
+        return original_perform(self)
+
+    monkeypatch.setattr(Human, "perform_current_step", tracking_perform)
+
+    result = simulation.finish_current_step_buying()
+
+    simulation.refresh_from_db()
+    for human in humans:
+        human.refresh_from_db()
+        assert human.step == SimulationStep.CONSUMPTION
+
+    expected_ids = [human.id for human in humans]
+    assert shuffle_calls == [expected_ids]
+    assert call_order == list(reversed(expected_ids))
+    assert result == SimulationStep.CONSUMPTION
+    assert simulation.step == SimulationStep.CONSUMPTION
+
+
+@pytest.mark.django_db
 def test_can_change_step_price_stats_returns_true_when_all_object_types_present():
     simulation = Simulation.objects.create(step=SimulationStep.PRICE_STATS, day_number=2)
 

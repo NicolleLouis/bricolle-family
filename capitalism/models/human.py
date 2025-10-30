@@ -8,7 +8,7 @@ from capitalism.constants.simulation_step import (
     DEFAULT_STEP_SEQUENCE,
 )
 from capitalism.services.production.service import ProductionService
-from capitalism.services import HumanSellingService
+from capitalism.services import HumanBuyingService, HumanSellingService
 
 
 class Human(models.Model):
@@ -58,7 +58,7 @@ class Human(models.Model):
         choices=Job.choices,
         default=Job.MINER,
     )
-    money = models.IntegerField(default=150)
+    money = models.FloatField(default=150.0)
     time_since_need_fulfilled = models.IntegerField(default=0)
     time_without_full_needs = models.IntegerField(default=0)
     dead = models.BooleanField(default=False)
@@ -124,7 +124,7 @@ class Human(models.Model):
         return self.next_step()
 
     def perform_buying(self):
-        return self.next_step()
+        return HumanBuyingService(self).run()
 
     def perform_consumption(self):
         self.use_basic_need()

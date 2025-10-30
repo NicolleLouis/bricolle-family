@@ -13,7 +13,7 @@
 
     <div class="row g-4">
         <div class="col-lg-5">
-            <div class="card h-100">
+            <div class="card">
                 <div class="card-header">
                     Profile
                 </div>
@@ -42,6 +42,36 @@
                             {% endif %}
                         </dd>
                     </dl>
+                </div>
+            </div>
+            <div class="card mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Buying intentions</span>
+                    <span class="badge bg-primary">{{ desired_object_prices|length }}</span>
+                </div>
+                <div class="card-body p-0">
+                    {% if desired_object_prices %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Object</th>
+                                    <th scope="col" class="text-end">Desired price</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for desire in desired_object_prices %}
+                                    <tr>
+                                        <td>{{ desire.label }}</td>
+                                        <td class="text-end">{{ desire.price|floatformat:2 }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted p-3 mb-0">No buying intentions recorded.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -82,13 +112,22 @@
                                                 {% endif %}
                                             </td>
                                             <td class="text-end">
-                                                <form method="post" action="{% url 'capitalism:human_detail' human.id %}" class="d-inline">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="action" value="delete_objects">
-                                                    <input type="hidden" name="object_type" value="{{ obj.type }}">
-                                                    <input type="hidden" name="quantity" value="1">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>
-                                                </form>
+                                                <div class="d-flex flex-column gap-2 align-items-end">
+                                                    <form method="post" action="{% url 'capitalism:human_detail' human.id %}" class="d-flex gap-2 align-items-center">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="update_price">
+                                                        <input type="hidden" name="object_id" value="{{ obj.id }}">
+                                                        <input type="number" name="price" step="0.01" min="0" class="form-control form-control-sm w-auto" value="{{ obj.price|default_if_none:'' }}">
+                                                        <button type="submit" class="btn btn-sm btn-outline-primary">Mettre à jour</button>
+                                                    </form>
+                                                    <form method="post" action="{% url 'capitalism:human_detail' human.id %}" class="d-inline">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="delete_objects">
+                                                        <input type="hidden" name="object_type" value="{{ obj.type }}">
+                                                        <input type="hidden" name="quantity" value="1">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>
+                                                    </form>
+                                                </div>
                                             </td>
                                         </tr>
                                     {% endfor %}

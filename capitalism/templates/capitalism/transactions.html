@@ -1,0 +1,51 @@
+{% extends "capitalism/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Transactions</h1>
+</div>
+
+<form method="get" class="row gy-2 gx-3 align-items-center mb-4">
+    <div class="col-auto">
+        <label class="visually-hidden" for="objectTypeFilter">Object type</label>
+        <select name="object_type" id="objectTypeFilter" class="form-select">
+            <option value="">All object types</option>
+            {% for choice, label in object_types %}
+                <option value="{{ choice }}" {% if selected_object_type == choice %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Object</th>
+            <th scope="col">Price</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for transaction in transactions %}
+            <tr>
+                <th scope="row">{{ transaction.id }}</th>
+                <td>{{ transaction.get_object_type_display }}</td>
+                <td>{{ transaction.price }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="3" class="text-center text-muted py-4">
+                    No transactions recorded yet.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

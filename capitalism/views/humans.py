@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from capitalism.constants.jobs import Job
 from capitalism.constants.object_type import ObjectType
 from capitalism.models import Human, Simulation, Object
+from capitalism.services import HumanBuyingPriceValuationService
 
 
 class HumansView:
@@ -101,13 +102,18 @@ class HumansView:
             if action == "add_objects":
                 HumansView._handle_object_add(request, human)
                 return redirect("capitalism:human_detail", human_id=human.id)
+            if action == "update_price":
+                HumansView._handle_object_price_update(request, human)
+                return redirect("capitalism:human_detail", human_id=human.id)
 
         objects = human.owned_objects.order_by("type", "id")
+        desired_prices = HumansView._desired_purchase_prices(human)
 
         context = {
             "human": human,
             "objects": objects,
             "object_types": ObjectType.choices,
+            "desired_object_prices": desired_prices,
         }
 
         return render(request, HumansView.detail_template_name, context)
@@ -198,3 +204,58 @@ class HumansView:
 
         label = valid_types.get(object_type, object_type)
         return quantity, label
+
+    @staticmethod
+    def _handle_object_price_update(request, human):
+        object_id = request.POST.get("object_id")
+        price_raw = request.POST.get("price")
+
+        if not object_id or not object_id.isdigit():
+            messages.error(request, "Objet invalide.")
+            return
+
+        obj = human.owned_objects.filter(id=int(object_id)).first()
+        if obj is None:
+            messages.error(request, "Objet introuvable pour ce human.")
+            return
+
+        if price_raw in (None, "", "null"):
+            obj.price = None
+            obj.in_sale = False
+            obj.save(update_fields=["price", "in_sale"])
+            messages.success(request, "Le prix de l'objet a été supprimé.")
+            return
+
+        try:
+            price = float(price_raw)
+        except (TypeError, ValueError):
+            messages.error(request, "Le prix doit être un nombre.")
+            return
+
+        if price < 0:
+            messages.error(request, "Le prix doit être positif.")
+            return
+
+        formatted_price = round(price + 1e-12, 2)
+        obj.price = formatted_price
+        obj.in_sale = True
+        obj.save(update_fields=["price", "in_sale"])
+        messages.success(request, "Le prix de l'objet a été mis à jour.")
+
+    @staticmethod
+    def _desired_purchase_prices(human):
+        valuation_service = HumanBuyingPriceValuationService()
+        desired_prices = []
+
+        for object_type, label in ObjectType.choices:
+            price = valuation_service.estimate_price(human, object_type)
+            if price and price > 0:
+                desired_prices.append(
+                    {
+                        "type": object_type,
+                        "label": label,
+                        "price": float(price),
+                    }
+                )
+
+        return desired_prices
