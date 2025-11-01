@@ -1,7 +1,8 @@
 import pytest
 
 from capitalism.constants.simulation_step import SimulationStep
-from capitalism.models import Simulation, Human, PriceAnalytics
+from capitalism.models import Simulation, Human, PriceAnalytics, HumanAnalytics
+from capitalism.constants.jobs import Job
 from capitalism.constants.object_type import ObjectType
 
 
@@ -30,7 +31,14 @@ def test_simulation_next_step_cycles_through_sequence():
                 "lowest_price": 0.0,
                 "max_price": 0.0,
                 "average_price": 0.0,
+                "transaction_number": 0,
             },
+        )
+    for job, _label in Job.choices:
+        HumanAnalytics.objects.update_or_create(
+            day_number=simulation.day_number,
+            job=job,
+            defaults={"number_alive": 0},
         )
     next_step = simulation.next_step()
     assert next_step == SimulationStep.BUYING
@@ -41,6 +49,13 @@ def test_simulation_next_step_cycles_through_sequence():
     for _ in range(5):
         next_step = simulation._next_step_value()
         Human.objects.update(step=next_step.value if hasattr(next_step, "value") else next_step)
+        if simulation.step == SimulationStep.ANALYTICS:
+            for job, _label in Job.choices:
+                HumanAnalytics.objects.update_or_create(
+                    day_number=simulation.day_number,
+                    job=job,
+                    defaults={"number_alive": 0},
+                )
         simulation.next_step()
 
     assert simulation.step == SimulationStep.START_OF_DAY
@@ -67,7 +82,15 @@ def test_run_complete_day_advances_day():
                         "lowest_price": 0.0,
                         "max_price": 0.0,
                         "average_price": 0.0,
+                        "transaction_number": 0,
                     },
+                )
+        if simulation.step == SimulationStep.ANALYTICS:
+            for job, _label in HumanAnalytics.job.field.choices:  # type: ignore[attr-defined]
+                HumanAnalytics.objects.update_or_create(
+                    day_number=simulation.day_number,
+                    job=job,
+                    defaults={"number_alive": 0},
                 )
         simulation.next_step()
 
@@ -85,7 +108,15 @@ def test_run_complete_day_advances_day():
                     "lowest_price": 0.0,
                     "max_price": 0.0,
                     "average_price": 0.0,
+                    "transaction_number": 0,
                 },
+            )
+    if simulation.step == SimulationStep.ANALYTICS:
+        for job, _label in Job.choices:
+            HumanAnalytics.objects.update_or_create(
+                day_number=simulation.day_number,
+                job=job,
+                defaults={"number_alive": 0},
             )
     simulation.next_step()
 

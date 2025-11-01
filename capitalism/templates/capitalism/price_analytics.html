@@ -39,9 +39,13 @@
                         <thead>
                             <tr>
                                 <th scope="col">Jour</th>
-                                <th scope="col" class="text-end">Prix min</th>
-                                <th scope="col" class="text-end">Prix moyen</th>
-                                <th scope="col" class="text-end">Prix max</th>
+                                <th scope="col" class="text-end">Prix proposé min</th>
+                                <th scope="col" class="text-end">Prix proposé moyen</th>
+                                <th scope="col" class="text-end">Prix proposé max</th>
+                                <th scope="col" class="text-end">Prix accepté min</th>
+                                <th scope="col" class="text-end">Prix accepté moyen</th>
+                                <th scope="col" class="text-end">Prix accepté max</th>
+                                <th scope="col" class="text-end">Transactions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -51,6 +55,10 @@
                                     <td class="text-end">{{ entry.lowest_price_displayed|floatformat:2 }}</td>
                                     <td class="text-end">{{ entry.average_price_displayed|floatformat:2 }}</td>
                                     <td class="text-end">{{ entry.max_price_displayed|floatformat:2 }}</td>
+                                    <td class="text-end">{{ entry.lowest_price|floatformat:2 }}</td>
+                                    <td class="text-end">{{ entry.average_price|floatformat:2 }}</td>
+                                    <td class="text-end">{{ entry.max_price|floatformat:2 }}</td>
+                                    <td class="text-end">{{ entry.transaction_number }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>

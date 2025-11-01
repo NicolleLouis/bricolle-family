@@ -16,6 +16,8 @@ class HumanAnalytics(models.Model):
     lowest_money = models.IntegerField(default=0)
     max_money = models.IntegerField(default=0)
     new_joiner = models.IntegerField(default=0)
+    dead_number = models.IntegerField(default=0)
+    average_age = models.FloatField(default=0.0)
 
     def __str__(self):
         return f"{self.get_job_display()} analytics for day {self.day_number}"
@@ -32,5 +34,7 @@ class HumanAnalyticsAdmin(admin.ModelAdmin):
         "lowest_money",
         "max_money",
         "new_joiner",
+        "dead_number",
+        "average_age",
     )
     list_filter = ("job",)

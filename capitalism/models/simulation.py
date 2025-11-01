@@ -7,6 +7,8 @@ from capitalism.constants.simulation_step import (
     DEFAULT_STEP_SEQUENCE,
 )
 from capitalism.models import Human
+from capitalism.services.human_analytics import HumanAnalyticsRecorderService
+from capitalism.services.pricing import TransactionPriceAnalyticsService
 
 
 class Simulation(models.Model):
@@ -164,7 +166,15 @@ class Simulation(models.Model):
         return True
 
     def can_change_step_analytics(self):
-        return True
+        from capitalism.constants.jobs import Job
+        from capitalism.models import HumanAnalytics, Transaction
+
+        day_number = self.day_number
+        recorded_jobs = set(
+            HumanAnalytics.objects.filter(day_number=day_number).values_list("job", flat=True)
+        )
+        expected_jobs = {choice for choice, _label in Job.choices}
+        return expected_jobs.issubset(recorded_jobs) and not Transaction.objects.exists()
 
     def can_change_step_end_of_day(self):
         return True
@@ -212,12 +222,27 @@ class Simulation(models.Model):
         return self.next_step()
 
     def finish_current_step_consumption(self):
+        consumers = Human.objects.filter(dead=False, step=SimulationStep.CONSUMPTION)
+        for human in consumers:
+            human.perform_current_step()
+
         return self.next_step()
 
     def finish_current_step_death(self):
+        humans = Human.objects.filter(dead=False, step=SimulationStep.DEATH)
+        for human in humans:
+            human.perform_current_step()
+
         return self.next_step()
 
     def finish_current_step_analytics(self):
+        HumanAnalyticsRecorderService(day_number=self.day_number).run()
+        TransactionPriceAnalyticsService(day_number=self.day_number).run()
+
+        humans = Human.objects.filter(dead=False, step=SimulationStep.ANALYTICS)
+        for human in humans:
+            human.perform_current_step()
+
         return self.next_step()
 
     def finish_current_step_end_of_day(self):

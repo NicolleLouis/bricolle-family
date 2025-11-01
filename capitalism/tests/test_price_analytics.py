@@ -15,6 +15,7 @@ def test_price_analytics_creation():
         lowest_price=1,
         max_price=4,
         average_price=2.5,
+        transaction_number=7,
     )
 
     assert analytics.day_number == 5
@@ -25,3 +26,4 @@ def test_price_analytics_creation():
     assert analytics.lowest_price == 1
     assert analytics.max_price == 4
     assert analytics.average_price == 2.5
+    assert analytics.transaction_number == 7

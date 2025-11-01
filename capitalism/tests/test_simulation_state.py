@@ -4,7 +4,14 @@ from capitalism.constants.simulation_step import (
     SimulationStep,
     DEFAULT_STEP_SEQUENCE,
 )
-from capitalism.models import Simulation, Human, PriceAnalytics
+from capitalism.models import (
+    Simulation,
+    Human,
+    PriceAnalytics,
+    HumanAnalytics,
+    Transaction,
+)
+from capitalism.constants.jobs import Job
 from capitalism.constants.object_type import ObjectType
 
 
@@ -122,6 +129,82 @@ def test_finish_price_stats_records_price_analytics_and_advances_humans():
 
 
 @pytest.mark.django_db
+def test_finish_analytics_records_human_stats_and_advances_humans(monkeypatch):
+    simulation = Simulation.objects.create(step=SimulationStep.ANALYTICS, day_number=8)
+    human = Human.objects.create(step=SimulationStep.ANALYTICS)
+
+    recorder_calls = []
+
+    class DummyRecorder:
+        def __init__(self, *, day_number):
+            recorder_calls.append(day_number)
+
+        def run(self):
+            recorder_calls.append("run")
+
+    monkeypatch.setattr(
+        "capitalism.models.simulation.HumanAnalyticsRecorderService",
+        DummyRecorder,
+    )
+
+    for job, _label in Job.choices:
+        HumanAnalytics.objects.create(day_number=8, job=job)
+
+    result = simulation.finish_current_step_analytics()
+
+    simulation.refresh_from_db()
+    human.refresh_from_db()
+
+    assert recorder_calls == [8, "run"]
+    assert result == SimulationStep.END_OF_DAY
+    assert simulation.step == SimulationStep.END_OF_DAY
+    assert human.step == SimulationStep.END_OF_DAY
+
+
+@pytest.mark.django_db
+def test_finish_analytics_updates_price_analytics_with_transactions():
+    simulation = Simulation.objects.create(step=SimulationStep.ANALYTICS, day_number=9)
+    human = Human.objects.create(
+        step=SimulationStep.ANALYTICS,
+        job=Job.MINER,
+        money=120.0,
+        age=35,
+    )
+
+    for object_type, _label in ObjectType.choices:
+        PriceAnalytics.objects.create(
+            day_number=9,
+            object_type=object_type,
+            lowest_price_displayed=0.0,
+            max_price_displayed=0.0,
+            average_price_displayed=0.0,
+            lowest_price=0.0,
+            max_price=0.0,
+            average_price=0.0,
+            transaction_number=0,
+        )
+
+    Transaction.objects.create(object_type=ObjectType.WOOD, price=10.0)
+    Transaction.objects.create(object_type=ObjectType.WOOD, price=25.0)
+    Transaction.objects.create(object_type=ObjectType.WOOD, price=40.0)
+
+    result = simulation.finish_current_step_analytics()
+
+    simulation.refresh_from_db()
+    human.refresh_from_db()
+
+    wood_stats = PriceAnalytics.objects.get(day_number=9, object_type=ObjectType.WOOD)
+    assert wood_stats.lowest_price == pytest.approx(10.0)
+    assert wood_stats.max_price == pytest.approx(40.0)
+    assert wood_stats.average_price == pytest.approx(25.0)
+    assert wood_stats.transaction_number == 3
+    assert not Transaction.objects.filter(object_type=ObjectType.WOOD).exists()
+    assert result == SimulationStep.END_OF_DAY
+    assert simulation.step == SimulationStep.END_OF_DAY
+    assert human.step == SimulationStep.END_OF_DAY
+
+
+@pytest.mark.django_db
 def test_finish_buying_runs_humans_in_random_order(monkeypatch):
     simulation = Simulation.objects.create(step=SimulationStep.BUYING)
     humans = [
@@ -175,6 +258,7 @@ def test_can_change_step_price_stats_returns_true_when_all_object_types_present(
             lowest_price=0.0,
             max_price=0.0,
             average_price=0.0,
+            transaction_number=0,
         )
 
     assert simulation.can_change_step_price_stats() is True
@@ -197,6 +281,7 @@ def test_can_change_step_price_stats_returns_false_when_object_type_missing():
             lowest_price=0.0,
             max_price=0.0,
             average_price=0.0,
+            transaction_number=0,
         )
 
     # Ensure the missing type exists for a different day and should not count.
@@ -209,6 +294,43 @@ def test_can_change_step_price_stats_returns_false_when_object_type_missing():
         lowest_price=0.0,
         max_price=0.0,
         average_price=0.0,
+        transaction_number=0,
     )
 
     assert simulation.can_change_step_price_stats() is False
+
+
+@pytest.mark.django_db
+def test_can_change_step_analytics_returns_true_when_all_jobs_present():
+    simulation = Simulation.objects.create(step=SimulationStep.ANALYTICS, day_number=6)
+
+    for job, _label in Job.choices:
+        HumanAnalytics.objects.create(day_number=6, job=job)
+
+    assert not Transaction.objects.exists()
+    assert simulation.can_change_step_analytics() is True
+
+
+@pytest.mark.django_db
+def test_can_change_step_analytics_returns_false_when_job_missing():
+    simulation = Simulation.objects.create(step=SimulationStep.ANALYTICS, day_number=11)
+
+    missing_job = Job.choices[-1][0]
+    for job, _label in Job.choices:
+        if job == missing_job:
+            continue
+        HumanAnalytics.objects.create(day_number=11, job=job)
+
+    assert simulation.can_change_step_analytics() is False
+
+
+@pytest.mark.django_db
+def test_can_change_step_analytics_returns_false_when_transactions_remaining():
+    simulation = Simulation.objects.create(step=SimulationStep.ANALYTICS, day_number=13)
+
+    for job, _label in Job.choices:
+        HumanAnalytics.objects.create(day_number=13, job=job)
+
+    Transaction.objects.create(object_type=ObjectType.WOOD, price=15.0)
+
+    assert simulation.can_change_step_analytics() is False

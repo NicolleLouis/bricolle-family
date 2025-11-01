@@ -76,6 +76,7 @@ class HumanBuyingService:
 
     @staticmethod
     def _credit_seller(seller: "Human", amount: float) -> None:
+        seller.refresh_from_db(fields=["money"])
         seller.money = HumanBuyingService._round_money(seller.money + amount)
         seller.save(update_fields=["money"])
 

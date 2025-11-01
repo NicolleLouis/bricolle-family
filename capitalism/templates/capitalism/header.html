@@ -2,6 +2,7 @@
 {% url 'capitalism:humans' as humans_url %}
 {% url 'capitalism:settings' as settings_url %}
 {% url 'capitalism:objects' as objects_url %}
+{% url 'capitalism:human_repartition' as human_repartition_url %}
 {% url 'capitalism:human_analytics' as human_analytics_url %}
 {% url 'capitalism:price_analytics' as price_analytics_url %}
 {% url 'capitalism:transactions' as transactions_url %}
@@ -21,7 +22,10 @@
                     <a class="nav-link{% if request.path == humans_url %} active{% endif %}" href="{{ humans_url }}">Humans</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link{% if request.path == objects_url %} active{% endif %}" href="{{ objects_url }}">Objects</a>
+                    <a class="nav-link{% if request.path == objects_url %} active{% endif %}" href="{{ objects_url }}">Object Repartition</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link{% if request.path == human_repartition_url %} active{% endif %}" href="{{ human_repartition_url }}">Human Repartition</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link{% if request.path == human_analytics_url %} active{% endif %}" href="{{ human_analytics_url }}">Human Analytics</a>

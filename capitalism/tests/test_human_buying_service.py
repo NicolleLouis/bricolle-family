@@ -78,3 +78,35 @@ def test_buying_service_skips_unaffordable_or_overpriced_objects():
     assert expensive.price == 8
     assert overpriced.price == 3
     assert Transaction.objects.count() == 0
+
+
+class _FixedPriceValuation:
+    def __init__(self, price_map: dict[str, float]):
+        self.price_map = price_map
+
+    def estimate_price(self, _human, object_type: str) -> float:
+        return self.price_map.get(object_type, 0.0)
+
+
+@pytest.mark.django_db
+def test_seller_receives_payment_for_every_transaction():
+    seller = Human.objects.create(money=150)
+    buyer = Human.objects.create(step=SimulationStep.BUYING, money=150)
+
+    for _ in range(10):
+        seller.owned_objects.create(
+            type=ObjectType.WHEAT,
+            price=0.84,
+            in_sale=True,
+        )
+
+    valuation = _FixedPriceValuation({ObjectType.WHEAT: 1.0})
+
+    HumanBuyingService(buyer, valuation_service=valuation).run()
+
+    seller.refresh_from_db()
+    buyer.refresh_from_db()
+
+    assert buyer.money == pytest.approx(150 - 0.84 * 10, rel=1e-6)
+    assert seller.money == pytest.approx(150 + 0.84 * 10, rel=1e-6)
+    assert Transaction.objects.filter(object_type=ObjectType.WHEAT).count() == 10

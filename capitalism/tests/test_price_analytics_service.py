@@ -22,11 +22,19 @@ def test_price_analytics_recorder_populates_all_object_types():
     assert wood_stats.lowest_price_displayed == pytest.approx(5.0)
     assert wood_stats.max_price_displayed == pytest.approx(15.0)
     assert wood_stats.average_price_displayed == pytest.approx(10.0)
+    assert wood_stats.lowest_price == pytest.approx(0.0)
+    assert wood_stats.max_price == pytest.approx(0.0)
+    assert wood_stats.average_price == pytest.approx(0.0)
+    assert wood_stats.transaction_number == 0
 
     bread_stats = analytics.get(object_type=ObjectType.BREAD)
     assert bread_stats.lowest_price_displayed == pytest.approx(0.0)
     assert bread_stats.max_price_displayed == pytest.approx(0.0)
     assert bread_stats.average_price_displayed == pytest.approx(0.0)
+    assert bread_stats.lowest_price == pytest.approx(0.0)
+    assert bread_stats.max_price == pytest.approx(0.0)
+    assert bread_stats.average_price == pytest.approx(0.0)
+    assert bread_stats.transaction_number == 0
 
 
 @pytest.mark.django_db
@@ -42,3 +50,7 @@ def test_price_analytics_recorder_ignores_unsuitable_objects():
     assert ore_stats.lowest_price_displayed == pytest.approx(8.0)
     assert ore_stats.max_price_displayed == pytest.approx(8.0)
     assert ore_stats.average_price_displayed == pytest.approx(8.0)
+    assert ore_stats.lowest_price == pytest.approx(0.0)
+    assert ore_stats.max_price == pytest.approx(0.0)
+    assert ore_stats.average_price == pytest.approx(0.0)
+    assert ore_stats.transaction_number == 0

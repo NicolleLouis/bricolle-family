@@ -16,6 +16,7 @@ class PriceAnalytics(models.Model):
     lowest_price = models.FloatField()
     max_price = models.FloatField()
     average_price = models.FloatField()
+    transaction_number = models.IntegerField(default=0)
 
     class Meta:
         unique_together = ("day_number", "object_type")
