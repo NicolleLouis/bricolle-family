@@ -75,7 +75,7 @@ class MarketPerceivedPriceUpdateService:
                 weighted_sum += float(analytics.average_price) * self.WEIGHT_AVERAGE_PRICE
                 total_weight += self.WEIGHT_AVERAGE_PRICE
             avg_displayed = getattr(analytics, "average_price_displayed", None)
-            if avg_displayed is not None:
+            if avg_displayed is not None and avg_displayed != 0:
                 weighted_sum += float(avg_displayed) * self.WEIGHT_DISPLAYED_AVERAGE
                 total_weight += self.WEIGHT_DISPLAYED_AVERAGE
 
