@@ -249,3 +249,15 @@ def test_perform_death_moves_to_analytics_when_threshold_exceeded():
 
     assert human.step == SimulationStep.ANALYTICS
     assert human.dead is True
+
+
+@pytest.mark.django_db
+def test_has_recently_fulfilled_basic_needs_property():
+    newborn = Human.objects.create(age=0, time_since_need_fulfilled=0)
+    assert newborn.has_recently_fulfilled_basic_needs is None
+
+    satisfied = Human.objects.create(age=2, time_since_need_fulfilled=0)
+    assert satisfied.has_recently_fulfilled_basic_needs is True
+
+    deprived = Human.objects.create(age=3, time_since_need_fulfilled=4)
+    assert deprived.has_recently_fulfilled_basic_needs is False

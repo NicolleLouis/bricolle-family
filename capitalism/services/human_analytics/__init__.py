@@ -1,4 +1,5 @@
 from .service import HumanJobAnalyticsService
 from .recorder import HumanAnalyticsRecorderService
+from .needs_chart import HumanNeedsSatisfactionChartService
 
-__all__ = ["HumanJobAnalyticsService", "HumanAnalyticsRecorderService"]
+__all__ = ["HumanJobAnalyticsService", "HumanAnalyticsRecorderService", "HumanNeedsSatisfactionChartService"]

@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from typing import Dict, List
 
-from django.db.models import Avg, Count, Max, Min
+from django.db.models import Count
 
 from capitalism.constants.object_type import ObjectType
+from capitalism.models import MarketPerceivedPrice
 from capitalism.models.object import Object
 
 
@@ -16,19 +17,14 @@ class ObjectInventoryStatisticsService:
         return self._build_results(aggregates)
 
     def _collect_aggregates(self) -> Dict[str, Dict[str, object]]:
-        queryset = (
-            Object.objects.values("type")
-            .annotate(
-                quantity=Count("id"),
-                min_price=Min("price"),
-                avg_price=Avg("price"),
-                max_price=Max("price"),
-            )
-        )
+        queryset = Object.objects.values("type").annotate(quantity=Count("id"))
         return {row["type"]: row for row in queryset}
 
     def _build_results(self, aggregates: Dict[str, Dict[str, object]]) -> List[Dict[str, object]]:
         results: List[Dict[str, object]] = []
+        perceived_map = {
+            entry.object: entry.perceived_price for entry in MarketPerceivedPrice.objects.all()
+        }
         for object_type, label in ObjectType.choices:
             row = aggregates.get(object_type)
             results.append(
@@ -36,9 +32,7 @@ class ObjectInventoryStatisticsService:
                     "type": object_type,
                     "label": label,
                     "quantity": row["quantity"] if row else 0,
-                    "min_price": row["min_price"] if row else None,
-                    "avg_price": row["avg_price"] if row else None,
-                    "max_price": row["max_price"] if row else None,
+                    "perceived_price": perceived_map.get(object_type),
                 }
             )
         return results

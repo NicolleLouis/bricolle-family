@@ -1,12 +1,16 @@
 import pytest
 
 from capitalism.constants.object_type import ObjectType
-from capitalism.models import Human
+from capitalism.models import Human, MarketPerceivedPrice
 from capitalism.services.object_statistics import ObjectInventoryStatisticsService
+from capitalism.services.pricing import MarketPerceivedPriceResetService
 
 
 @pytest.mark.django_db
-def test_object_inventory_statistics_computes_counts_and_prices():
+def test_object_inventory_statistics_reports_quantity_and_perceived_price():
+    MarketPerceivedPriceResetService(day_number=0).reset()
+    MarketPerceivedPrice.objects.filter(object=ObjectType.WHEAT).update(perceived_price=3.5)
+
     human = Human.objects.create(name="Stats Owner")
     human.owned_objects.create(type=ObjectType.WHEAT, price=2.0, in_sale=True)
     human.owned_objects.create(type=ObjectType.WHEAT, price=4.0, in_sale=False)
@@ -17,17 +21,12 @@ def test_object_inventory_statistics_computes_counts_and_prices():
 
     wheat_stats = stats_map[ObjectType.WHEAT]
     assert wheat_stats["quantity"] == 2
-    assert wheat_stats["min_price"] == pytest.approx(2.0)
-    assert wheat_stats["avg_price"] == pytest.approx(3.0)
-    assert wheat_stats["max_price"] == pytest.approx(4.0)
+    assert wheat_stats["perceived_price"] == pytest.approx(3.5)
 
     bread_stats = stats_map[ObjectType.BREAD]
     assert bread_stats["quantity"] == 1
-    assert bread_stats["min_price"] is None
-    assert bread_stats["avg_price"] is None
-    assert bread_stats["max_price"] is None
+    assert bread_stats["perceived_price"] == pytest.approx(7.0)
 
-    # Ensure types without objects report zero
     axe_stats = stats_map[ObjectType.AXE]
     assert axe_stats["quantity"] == 0
-    assert axe_stats["min_price"] is None
+    assert axe_stats["perceived_price"] == pytest.approx(100.0)

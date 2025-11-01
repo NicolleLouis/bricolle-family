@@ -141,7 +141,14 @@ class Human(models.Model):
         self.age_a_day()
         return self.next_step()
 
-
+    @property
+    def has_recently_fulfilled_basic_needs(self):
+        """Return tri-state status for recent basic-need satisfaction."""
+        if self.age == 0:
+            return None
+        if self.time_since_need_fulfilled > 0:
+            return False
+        return True
 
 @admin.register(Human)
 class HumanAdmin(admin.ModelAdmin):

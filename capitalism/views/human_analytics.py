@@ -2,7 +2,10 @@ from django.shortcuts import render
 
 from capitalism.constants.jobs import Job
 from capitalism.models import HumanAnalytics
-from capitalism.services.human_analytics import HumanJobAnalyticsService
+from capitalism.services.human_analytics import (
+    HumanJobAnalyticsService,
+    HumanNeedsSatisfactionChartService,
+)
 
 
 class HumanRepartitionView:
@@ -11,7 +14,8 @@ class HumanRepartitionView:
     @staticmethod
     def home(request):
         stats = HumanJobAnalyticsService().run()
-        context = {"stats": stats}
+        needs_chart = HumanNeedsSatisfactionChartService().render()
+        context = {"stats": stats, "needs_chart": needs_chart}
         return render(request, HumanRepartitionView.template_name, context)
 
 

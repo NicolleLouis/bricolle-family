@@ -10,9 +10,11 @@ from capitalism.models import (
     PriceAnalytics,
     HumanAnalytics,
     Transaction,
+    MarketPerceivedPrice,
 )
 from capitalism.constants.jobs import Job
 from capitalism.constants.object_type import ObjectType
+from capitalism.services.pricing import MarketPerceivedPriceResetService
 
 
 def test_sequence_order_matches_spec():
@@ -207,6 +209,8 @@ def test_finish_analytics_updates_price_analytics_with_transactions():
 @pytest.mark.django_db
 def test_finish_end_of_day_deletes_dead_and_ages_survivors():
     simulation = Simulation.objects.create(step=SimulationStep.END_OF_DAY, day_number=12)
+    MarketPerceivedPriceResetService(day_number=12).reset()
+    previous_day = simulation.day_number
     alive = Human.objects.create(step=SimulationStep.END_OF_DAY, age=30, dead=False)
     dead = Human.objects.create(step=SimulationStep.END_OF_DAY, age=60, dead=True)
 
@@ -235,6 +239,7 @@ def test_finish_end_of_day_deletes_dead_and_ages_survivors():
     alive_item.refresh_from_db()
     assert alive_item.in_sale is False
     assert alive_item.price is None
+    assert MarketPerceivedPrice.objects.filter(updated_at=previous_day).count() == len(ObjectType.choices)
 
 
 @pytest.mark.django_db

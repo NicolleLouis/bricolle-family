@@ -24,8 +24,8 @@ def logged_client(client, user):
 
 @pytest.mark.django_db
 def test_human_repartition_view_returns_job_stats(logged_client):
-    Human.objects.create(job=Job.FARMER, money=80)
-    Human.objects.create(job=Job.FARMER, money=120)
+    Human.objects.create(job=Job.FARMER, money=80, age=2, time_since_need_fulfilled=0)
+    Human.objects.create(job=Job.FARMER, money=120, age=3, time_since_need_fulfilled=1)
 
     response = logged_client.get(reverse("capitalism:human_repartition"))
 
@@ -34,6 +34,8 @@ def test_human_repartition_view_returns_job_stats(logged_client):
     farmer_stats = stats[Job.FARMER]
     assert farmer_stats["count"] == 2
     assert farmer_stats["max_money"] == pytest.approx(120)
+    assert response.context["needs_chart"]
+    assert "Needs" in response.context["needs_chart"]
 
 
 @pytest.mark.django_db

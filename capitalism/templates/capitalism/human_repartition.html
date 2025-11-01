@@ -8,6 +8,23 @@
         </div>
     </div>
 
+    <div class="card mb-4">
+        <div class="card-header">
+            Basic Needs Satisfaction
+        </div>
+        <div class="card-body">
+            {% if needs_chart %}
+                <div class="overflow-auto">
+                    {{ needs_chart|safe }}
+                </div>
+            {% else %}
+                <p class="text-muted mb-0">
+                    Aucune donnée disponible tant qu'aucun humain n'a terminé une journée complète.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
     <div class="card">
         <div class="card-header">
             Job Breakdown

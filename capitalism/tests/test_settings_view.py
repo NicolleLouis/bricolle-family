@@ -6,10 +6,12 @@ from capitalism.constants.object_type import ObjectType
 from capitalism.models import (
     Human,
     HumanAnalytics,
+    MarketPerceivedPrice,
     Object,
     Simulation,
     Transaction,
 )
+from capitalism.services.pricing import GlobalPriceReferenceService
 
 
 @pytest.fixture
@@ -43,6 +45,7 @@ def test_reset_simulation_clears_data(logged_client):
     Object.objects.create(owner=human)
     HumanAnalytics.objects.create()
     Transaction.objects.create(object_type=ObjectType.ORE, price=10)
+    MarketPerceivedPrice.objects.create(updated_at=99, object=ObjectType.ORE, perceived_price=42.0)
 
     response = logged_client.post(
         reverse("capitalism:settings"),
@@ -56,6 +59,15 @@ def test_reset_simulation_clears_data(logged_client):
     assert Object.objects.count() == 0
     assert HumanAnalytics.objects.count() == 0
     assert Transaction.objects.count() == 0
+    assert MarketPerceivedPrice.objects.count() == len(ObjectType.choices)
+
+    reference = GlobalPriceReferenceService()
+    for object_type, _label in ObjectType.choices:
+        perceived = MarketPerceivedPrice.objects.get(object=object_type)
+        assert perceived.updated_at == 0
+        assert perceived.perceived_price == pytest.approx(
+            reference.get_reference_price(object_type)
+        )
 
 
 @pytest.mark.django_db

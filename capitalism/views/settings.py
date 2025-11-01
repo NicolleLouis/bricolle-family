@@ -6,13 +6,8 @@ from capitalism.services.human_factory import HumanFactory
 
 from capitalism.constants.jobs import Job
 from capitalism.constants.simulation_step import SimulationStep
-from capitalism.models import (
-    Human,
-    HumanAnalytics,
-    Object,
-    Simulation,
-    Transaction, PriceAnalytics,
-)
+from capitalism.models import Human, HumanAnalytics, Object, PriceAnalytics, Simulation, Transaction
+from capitalism.services.pricing import MarketPerceivedPriceResetService
 
 
 class SettingView:
@@ -65,6 +60,7 @@ class SettingView:
             Transaction.objects.all().delete()
             Simulation.objects.all().delete()
             simulation = Simulation.objects.create()
+            MarketPerceivedPriceResetService(day_number=simulation.day_number).reset()
 
         messages.warning(
             request,
