@@ -113,6 +113,8 @@ def test_human_detail_view_exposes_objects(logged_client):
     assert sale_entry.price == 9.5
     desired = response.context["desired_object_prices"]
     assert any(item["type"] == ObjectType.BREAD for item in desired)
+    selling = response.context["selling_object_prices"]
+    assert any(item["type"] == ObjectType.BREAD for item in selling)
 
 
 @pytest.mark.django_db

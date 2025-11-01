@@ -1,36 +1,40 @@
 import pytest
 
-from capitalism.constants.simulation_step import SimulationStep
 from capitalism.models import Human, Simulation
+from capitalism.constants.jobs import Job
+from capitalism.constants.simulation_step import SimulationStep
 from capitalism.services.dashboard import DashboardService
 
 
 @pytest.mark.django_db
-def test_macro_overview_without_simulation():
-    Human.objects.create()
+def test_macro_overview_includes_total_money_without_simulation():
+    Human.objects.bulk_create(
+        [
+            Human(job=Job.BAKER, money=25, dead=False),
+            Human(job=Job.MINER, money=30, dead=False),
+            Human(job=Job.FARMER, money=10, dead=True),
+        ]
+    )
 
-    info = DashboardService().macro_overview()
+    data = DashboardService().macro_overview()
 
-    assert info["has_simulation"] is False
-    assert info["day_number"] is None
-    assert info["step"] is None
-    assert info["step_label"] is None
-    assert info["alive_humans"] == 1
+    assert data["has_simulation"] is False
+    assert data["alive_humans"] == 2
+    assert data["total_money"] == pytest.approx(55.0)
 
 
 @pytest.mark.django_db
-def test_macro_overview_with_simulation():
-    simulation = Simulation.objects.create(
-        day_number=4,
-        step=SimulationStep.CONSUMPTION,
+def test_macro_overview_total_money_with_simulation():
+    simulation = Simulation.objects.create(step=SimulationStep.START_OF_DAY, day_number=3)
+    Human.objects.bulk_create(
+        [
+            Human(job=Job.BAKER, money=40, dead=False),
+            Human(job=Job.MINER, money=12.5, dead=False),
+        ]
     )
-    Human.objects.create(dead=False)
-    Human.objects.create(dead=True)
 
-    info = DashboardService().macro_overview()
+    data = DashboardService().macro_overview()
 
-    assert info["has_simulation"] is True
-    assert info["day_number"] == 4
-    assert info["step"] == simulation.step
-    assert info["step_label"] == SimulationStep.CONSUMPTION.label
-    assert info["alive_humans"] == 1
+    assert data["has_simulation"] is True
+    assert data["day_number"] == simulation.day_number
+    assert data["total_money"] == pytest.approx(52.5)

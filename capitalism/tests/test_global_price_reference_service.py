@@ -8,9 +8,9 @@ def test_reference_prices_known_objects():
     service = GlobalPriceReferenceService()
     assert service.get_reference_price(ObjectType.WHEAT) == 1.0
     assert service.get_reference_price(ObjectType.WOOD) == 2.0
-    assert service.get_reference_price(ObjectType.BREAD) == 10.0
+    assert service.get_reference_price(ObjectType.BREAD) == 7.0
     assert service.get_reference_price(ObjectType.FLOUR) == 4.0
-    assert service.get_reference_price(ObjectType.ORE) == 25.0
+    assert service.get_reference_price(ObjectType.ORE) == 10.0
     assert service.get_reference_price(ObjectType.AXE) == 100.0
 
 

@@ -74,8 +74,68 @@
                     {% endif %}
                 </div>
             </div>
+            <div class="card mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Selling intentions</span>
+                    <span class="badge bg-primary">{{ selling_object_prices|length }}</span>
+                </div>
+                <div class="card-body p-0">
+                    {% if selling_object_prices %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Object</th>
+                                    <th scope="col" class="text-end">Target price</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for desire in selling_object_prices %}
+                                    <tr>
+                                        <td>{{ desire.label }}</td>
+                                        <td class="text-end">{{ desire.price|floatformat:2 }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted p-3 mb-0">No selling intentions recorded.</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
         <div class="col-lg-7">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Object Repartition</span>
+                    <span class="badge bg-primary">{{ object_repartition|length }}</span>
+                </div>
+                <div class="card-body p-0">
+                    {% if object_repartition %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Type</th>
+                                        <th scope="col" class="text-end">Quantity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in object_repartition %}
+                                        <tr>
+                                            <td>{{ row.label }}</td>
+                                            <td class="text-end">{{ row.quantity }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted p-3 mb-0">No objects owned.</p>
+                    {% endif %}
+                </div>
+            </div>
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>Owned Objects</span>

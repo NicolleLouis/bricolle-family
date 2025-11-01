@@ -107,9 +107,6 @@ class Simulation(models.Model):
                 return self.finish_current_step_end_of_day()
         return self.step
 
-    def run_complete_day(self):
-        return
-
     # Helpers -------------------------------------------------
     def _validate_human_steps(self):
         from capitalism.models import Human
@@ -246,7 +243,25 @@ class Simulation(models.Model):
         return self.next_step()
 
     def finish_current_step_end_of_day(self):
+        from capitalism.models import Human, Object
+
+        Human.objects.filter(dead=True).delete()
+
+        Object.objects.update(price=None, in_sale=False)
+
+        survivors = Human.objects.filter(dead=False, step=SimulationStep.END_OF_DAY)
+        for human in survivors:
+            human.perform_current_step()
+
         return self.next_step()
+
+    def next_day(self):
+        for _ in range(len(self.STEP_SEQUENCE)):
+            new_step = self.finish_current_step()
+            if new_step == SimulationStep.START_OF_DAY:
+                return new_step
+
+        return SimulationStep(self.step)
 
 
 @admin.register(Simulation)

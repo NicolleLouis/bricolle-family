@@ -5,7 +5,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from capitalism.constants.jobs import Job
 from capitalism.constants.object_type import ObjectType
 from capitalism.models import Human, Simulation, Object
-from capitalism.services import HumanBuyingPriceValuationService
+from capitalism.services import (
+    HumanBuyingPriceValuationService,
+    HumanSellingPriceValuationService,
+)
+from capitalism.services.object_statistics.repartition import (
+    HumanObjectRepartitionService,
+)
 
 
 class HumansView:
@@ -108,12 +114,16 @@ class HumansView:
 
         objects = human.owned_objects.order_by("type", "id")
         desired_prices = HumansView._desired_purchase_prices(human)
+        desired_selling = HumansView._desired_selling_prices(human)
+        object_repartition = HumansView._object_repartition(human)
 
         context = {
             "human": human,
             "objects": objects,
             "object_types": ObjectType.choices,
             "desired_object_prices": desired_prices,
+            "selling_object_prices": desired_selling,
+            "object_repartition": object_repartition,
         }
 
         return render(request, HumansView.detail_template_name, context)
@@ -259,3 +269,26 @@ class HumansView:
                 )
 
         return desired_prices
+
+    @staticmethod
+    def _desired_selling_prices(human):
+        valuation_service = HumanSellingPriceValuationService()
+        selling_prices = []
+
+        for object_type, label in ObjectType.choices:
+            price = valuation_service.estimate_price(human, object_type)
+            if price and price > 0:
+                selling_prices.append(
+                    {
+                        "type": object_type,
+                        "label": label,
+                        "price": float(price),
+                    }
+                )
+
+        return selling_prices
+
+    @staticmethod
+    def _object_repartition(human):
+        service = HumanObjectRepartitionService(human_id=human.id)
+        return service.run()

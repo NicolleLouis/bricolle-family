@@ -205,6 +205,128 @@ def test_finish_analytics_updates_price_analytics_with_transactions():
 
 
 @pytest.mark.django_db
+def test_finish_end_of_day_deletes_dead_and_ages_survivors():
+    simulation = Simulation.objects.create(step=SimulationStep.END_OF_DAY, day_number=12)
+    alive = Human.objects.create(step=SimulationStep.END_OF_DAY, age=30, dead=False)
+    dead = Human.objects.create(step=SimulationStep.END_OF_DAY, age=60, dead=True)
+
+    alive_item = alive.owned_objects.create(
+        type=ObjectType.WOOD,
+        price=15.0,
+        in_sale=True,
+    )
+    dead.owned_objects.create(
+        type=ObjectType.WOOD,
+        price=20.0,
+        in_sale=True,
+    )
+
+    result = simulation.finish_current_step_end_of_day()
+
+    simulation.refresh_from_db()
+    alive.refresh_from_db()
+
+    assert result == SimulationStep.START_OF_DAY
+    assert simulation.step == SimulationStep.START_OF_DAY
+    assert simulation.day_number == 13
+    assert not Human.objects.filter(id=dead.id).exists()
+    assert alive.age == 31
+    assert alive.step == SimulationStep.START_OF_DAY
+    alive_item.refresh_from_db()
+    assert alive_item.in_sale is False
+    assert alive_item.price is None
+
+
+@pytest.mark.django_db
+def test_next_day_runs_full_cycle_when_requirements_met():
+    simulation = Simulation.objects.create(step=SimulationStep.START_OF_DAY, day_number=2)
+
+    for object_type, _label in ObjectType.choices:
+        PriceAnalytics.objects.create(
+            day_number=2,
+            object_type=object_type,
+            lowest_price_displayed=0.0,
+            max_price_displayed=0.0,
+            average_price_displayed=0.0,
+            lowest_price=0.0,
+            max_price=0.0,
+            average_price=0.0,
+            transaction_number=0,
+        )
+
+    for job, _label in Job.choices:
+        HumanAnalytics.objects.create(
+            day_number=2,
+            job=job,
+            number_alive=0,
+            dead_number=0,
+            average_money=0.0,
+            lowest_money=0,
+            max_money=0,
+            average_age=0.0,
+            new_joiner=0,
+        )
+
+    result = simulation.next_day()
+
+    simulation.refresh_from_db()
+
+    assert result == SimulationStep.START_OF_DAY
+    assert simulation.step == SimulationStep.START_OF_DAY
+    assert simulation.day_number == 3
+
+
+@pytest.mark.django_db
+def test_next_day_consumes_transactions_during_cycle():
+    blocked_day = 57
+    Human.objects.all().delete()
+    Transaction.objects.all().delete()
+
+    for object_type, _label in ObjectType.choices:
+        PriceAnalytics.objects.update_or_create(
+            day_number=blocked_day,
+            object_type=object_type,
+            defaults={
+                "lowest_price_displayed": 1.0,
+                "max_price_displayed": 2.0,
+                "average_price_displayed": 1.5,
+                "lowest_price": 1.0,
+                "max_price": 2.0,
+                "average_price": 1.5,
+                "transaction_number": 0,
+            },
+        )
+
+    for job, _label in Job.choices:
+        HumanAnalytics.objects.update_or_create(
+            day_number=blocked_day,
+            job=job,
+            defaults={
+                "number_alive": 1,
+                "dead_number": 0,
+                "average_money": 0.0,
+                "lowest_money": 0,
+                "max_money": 0,
+                "new_joiner": 0,
+                "average_age": 0.0,
+            },
+        )
+
+    Transaction.objects.create(object_type=ObjectType.WOOD, price=10.0)
+
+    simulation = Simulation.objects.create(step=SimulationStep.START_OF_DAY, day_number=blocked_day)
+
+    assert Transaction.objects.exists() is True
+
+    simulation.next_day()
+
+    simulation.refresh_from_db()
+    assert simulation.step == SimulationStep.START_OF_DAY
+    assert simulation.day_number == blocked_day + 1
+    assert Transaction.objects.exists() is False
+
+
+@pytest.mark.django_db
 def test_finish_buying_runs_humans_in_random_order(monkeypatch):
     simulation = Simulation.objects.create(step=SimulationStep.BUYING)
     humans = [

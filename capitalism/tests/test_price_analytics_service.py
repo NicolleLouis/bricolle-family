@@ -3,7 +3,10 @@ import pytest
 from capitalism.constants.object_type import ObjectType
 from capitalism.constants.simulation_step import SimulationStep
 from capitalism.models import Human, PriceAnalytics
-from capitalism.services.pricing import PriceAnalyticsRecorderService
+from capitalism.services.pricing import (
+    PriceAnalyticsRecorderService,
+    TransactionPriceAnalyticsService,
+)
 
 
 @pytest.mark.django_db
@@ -54,3 +57,29 @@ def test_price_analytics_recorder_ignores_unsuitable_objects():
     assert ore_stats.max_price == pytest.approx(0.0)
     assert ore_stats.average_price == pytest.approx(0.0)
     assert ore_stats.transaction_number == 0
+
+
+@pytest.mark.django_db
+def test_transaction_service_resets_snapshot_when_no_transactions():
+    analytics = PriceAnalytics.objects.create(
+        day_number=4,
+        object_type=ObjectType.BREAD,
+        lowest_price_displayed=12.0,
+        max_price_displayed=20.0,
+        average_price_displayed=16.0,
+        lowest_price=8.0,
+        max_price=9.0,
+        average_price=8.5,
+        transaction_number=5,
+    )
+
+    TransactionPriceAnalyticsService(day_number=4).run()
+
+    analytics.refresh_from_db()
+    assert analytics.lowest_price_displayed == pytest.approx(12.0)
+    assert analytics.max_price_displayed == pytest.approx(20.0)
+    assert analytics.average_price_displayed == pytest.approx(16.0)
+    assert analytics.lowest_price == pytest.approx(0.0)
+    assert analytics.max_price == pytest.approx(0.0)
+    assert analytics.average_price == pytest.approx(0.0)
+    assert analytics.transaction_number == 0

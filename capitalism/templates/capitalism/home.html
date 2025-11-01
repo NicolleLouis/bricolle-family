@@ -23,19 +23,29 @@
                     Aucune simulation disponible. Lancez une simulation pour voir sa progression.
                 </p>
             {% endif %}
-            <p class="mb-0">
-                <strong>Humains en vie :</strong> {{ macro_info.alive_humans }}
-            </p>
+                <p class="mb-0">
+                    <strong>Humains en vie :</strong> {{ macro_info.alive_humans }}
+                </p>
+                <p class="mb-0">
+                    <strong>Richesse totale :</strong> {{ macro_info.total_money|floatformat:2 }} €
+                </p>
+            </div>
         </div>
-    </div>
 
     <div class="card mx-auto mt-4" style="max-width: 480px;">
         <div class="card-body">
-            <form method="post" action="">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="next_step">
-                <button type="submit" class="btn btn-primary w-100">Next Step</button>
-            </form>
+            <div class="d-grid gap-3">
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="next_day">
+                    <button type="submit" class="btn btn-primary w-100">Next Day</button>
+                </form>
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="next_step">
+                    <button type="submit" class="btn btn-outline-secondary w-100">Next Step</button>
+                </form>
+            </div>
         </div>
     </div>
 {% endblock %}

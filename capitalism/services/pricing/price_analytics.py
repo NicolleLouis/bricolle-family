@@ -96,9 +96,13 @@ class TransactionPriceAnalyticsService:
 
     def run(self) -> None:
         aggregates = self._collect_transaction_aggregates()
-        for object_type, snapshot in aggregates.items():
-            self._apply_snapshot(object_type=object_type, snapshot=snapshot)
-            self.transaction_model.objects.filter(object_type=object_type).delete()
+        for object_type, _label in ObjectType.choices:
+            snapshot = aggregates.get(object_type)
+            if snapshot:
+                self._apply_snapshot(object_type=object_type, snapshot=snapshot)
+                self.transaction_model.objects.filter(object_type=object_type).delete()
+            else:
+                self._reset_snapshot(object_type=object_type)
 
     def _collect_transaction_aggregates(self) -> Dict[str, _TransactionSnapshot]:
         queryset: QuerySet = (
@@ -148,4 +152,28 @@ class TransactionPriceAnalyticsService:
                     "average_price",
                     "transaction_number",
                 ]
+            )
+
+    def _reset_snapshot(self, *, object_type: str) -> None:
+        updated = self.price_analytics_model.objects.filter(
+            day_number=self.day_number,
+            object_type=object_type,
+        ).update(
+            lowest_price=0.0,
+            max_price=0.0,
+            average_price=0.0,
+            transaction_number=0,
+        )
+
+        if not updated:
+            self.price_analytics_model.objects.create(
+                day_number=self.day_number,
+                object_type=object_type,
+                lowest_price_displayed=0.0,
+                max_price_displayed=0.0,
+                average_price_displayed=0.0,
+                lowest_price=0.0,
+                max_price=0.0,
+                average_price=0.0,
+                transaction_number=0,
             )

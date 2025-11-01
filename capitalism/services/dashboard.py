@@ -1,5 +1,7 @@
 from typing import Any, Dict
 
+from django.db import models
+
 from capitalism.models import Human, Simulation
 
 
@@ -8,7 +10,11 @@ class DashboardService:
 
     def macro_overview(self) -> Dict[str, Any]:
         simulation = Simulation.objects.order_by("id").first()
-        alive_humans = Human.objects.filter(dead=False).count()
+        alive_humans_qs = Human.objects.filter(dead=False)
+        alive_humans = alive_humans_qs.count()
+        total_money = alive_humans_qs.aggregate(total=models.Sum("money"))[
+            "total"
+        ] or 0.0
 
         if simulation is None:
             return {
@@ -17,6 +23,7 @@ class DashboardService:
                 "step": None,
                 "step_label": None,
                 "alive_humans": alive_humans,
+                "total_money": total_money,
             }
 
         return {
@@ -25,4 +32,5 @@ class DashboardService:
             "step": simulation.step,
             "step_label": simulation.get_step_display(),
             "alive_humans": alive_humans,
+            "total_money": total_money,
         }

@@ -217,9 +217,11 @@ def test_perform_consumption_advances_step():
 
 @pytest.mark.django_db
 def test_perform_buying_advances_step_and_transfers_objects():
-    buyer = Human.objects.create(step=SimulationStep.BUYING, money=30)
+    bread_price = 1
+    initial_money = 30
+    buyer = Human.objects.create(step=SimulationStep.BUYING, money=initial_money)
     seller = Human.objects.create(money=0)
-    offer = seller.owned_objects.create(type=ObjectType.BREAD, price=8, in_sale=True)
+    offer = seller.owned_objects.create(type=ObjectType.BREAD, price=bread_price, in_sale=True)
 
     buyer.perform_current_step()
 
@@ -228,8 +230,8 @@ def test_perform_buying_advances_step_and_transfers_objects():
     offer.refresh_from_db()
 
     assert buyer.step == SimulationStep.CONSUMPTION
-    assert buyer.money == 22
-    assert seller.money == 8
+    assert buyer.money == initial_money - bread_price
+    assert seller.money == bread_price
     assert offer.owner == buyer
     assert offer.in_sale is False
     assert offer.price is None

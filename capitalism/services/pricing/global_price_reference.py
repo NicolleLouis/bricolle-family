@@ -12,13 +12,13 @@ class GlobalPriceReferenceService:
     _PRICE_MAP: Dict[str, float] = {
         ObjectType.WHEAT: 1.0,
         ObjectType.WOOD: 2.0,
-        ObjectType.BREAD: 10.0,
+        ObjectType.BREAD: 7.0,
         ObjectType.FLOUR: 4.0,
         ObjectType.SCYTHE: 100.0,
         ObjectType.AXE: 100.0,
         ObjectType.PICKAXE: 100.0,
         ObjectType.SPATULA: 100.0,
-        ObjectType.ORE: 25.0,
+        ObjectType.ORE: 10.0,
     }
 
     def get_reference_price(self, object_type: str) -> float:

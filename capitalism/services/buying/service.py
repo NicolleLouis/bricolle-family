@@ -36,10 +36,6 @@ class HumanBuyingService:
         return self.human.next_step()
 
     def _buy_affordable_objects(self, object_type: str) -> None:
-        max_price = self.valuation_service.estimate_price(self.human, object_type)
-        if max_price <= 0:
-            return
-
         queryset = (
             self.object_model.objects.select_related("owner")
             .filter(
@@ -47,14 +43,19 @@ class HumanBuyingService:
                 in_sale=True,
                 price__isnull=False,
                 price__gt=0,
-                price__lte=max_price,
             )
             .exclude(owner=self.human)
             .order_by("price", "id")
         )
 
         for obj in queryset:
+            max_price = self.valuation_service.estimate_price(self.human, object_type)
+            if max_price <= 0:
+                break
+
             price = float(obj.price or 0)
+            if price > max_price:
+                break
             if self.human.money < price:
                 break
             self._process_purchase(obj, price)

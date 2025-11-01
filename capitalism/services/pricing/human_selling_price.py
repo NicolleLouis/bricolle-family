@@ -3,8 +3,7 @@ from __future__ import annotations
 from typing import Optional, Type
 
 from capitalism.constants.jobs import Job as JobEnum
-from capitalism.constants.object_type import ObjectType
-from capitalism.services.job_target import JobTargetService
+from capitalism.services.job_capacity import JobCapacityService
 from capitalism.services.jobs import (
     Baker,
     Farmer,
@@ -16,15 +15,14 @@ from capitalism.services.jobs import (
 from capitalism.services.jobs.base import Job
 
 from .global_price_reference import GlobalPriceReferenceService
+from .production_time_cost import time_cost_per_unit
 
 
 class HumanSellingPriceValuationService:
     """Estimate the selling price a human is willing to ask for a produced object."""
 
-    TIME_COST_PER_HOUR = 1.2
     MARKUP_BASE = 0.2
-    STOCK_SENSITIVITY = 0.05
-
+    STOCK_EFFECT= 0.2
     HUMAN_JOB_MAPPING = {
         JobEnum.MINER: Miner,
         JobEnum.LUMBERJACK: Lumberjack,
@@ -46,10 +44,9 @@ class HumanSellingPriceValuationService:
             return None
 
         unit_cost = self._compute_unit_cost(human, job_cls)
-        markup = self._base_markup()
-        stock_adjustment = self._stock_adjustment(human, job_cls, object_type)
-
-        raw_price = unit_cost * (1 + markup + stock_adjustment)
+        markup = self.MARKUP_BASE
+        stock_effect = self._stock_effect(human, job_cls, object_type)
+        raw_price = unit_cost * (1 + markup - stock_effect)
         return max(0.01, raw_price)
 
     def _human_job_class(self, human) -> Optional[Type[Job]]:
@@ -61,19 +58,9 @@ class HumanSellingPriceValuationService:
         return any(resource_type == object_type for resource_type, _ in job_cls.get_output())
 
     def _compute_unit_cost(self, human, job_cls: Type[Job]) -> float:
-        time_cost = self._time_cost_per_unit(human, job_cls)
+        time_cost = time_cost_per_unit(human, job_cls)
         input_cost = self._input_cost_per_unit(job_cls)
         return time_cost + input_cost
-
-    def _time_cost_per_unit(self, human, job_cls: Type[Job]) -> float:
-        duration_minutes = job_cls.DURATION_MIN
-        if job_cls.requires_tool() and self._human_has_tool(human, job_cls.TOOL):
-            efficiency = job_cls.TOOL_EFFICIENCY or 1
-            if efficiency > 0:
-                duration_minutes = duration_minutes / efficiency
-
-        hours = duration_minutes / 60
-        return hours * self.TIME_COST_PER_HOUR
 
     def _input_cost_per_unit(self, job_cls: Type[Job]) -> float:
         total_cost = 0.0
@@ -84,16 +71,33 @@ class HumanSellingPriceValuationService:
             total_cost += unit_price * quantity
         return total_cost
 
-    def _base_markup(self) -> float:
-        return self.MARKUP_BASE
+    def _stock_effect(self, human, job_cls: Type[Job], object_type: str) -> float:
+        n_days = self._equivalent_stock_days(human, job_cls, object_type)
+        return min(n_days * self.STOCK_EFFECT, 1.0)
 
-    def _stock_adjustment(self, human, job_cls: Type[Job], object_type: str) -> float:
-        target_quantity = JobTargetService.compute_target_quantity(job_cls, object_type)
-        current_quantity = human.owned_objects.filter(type=object_type).count()
-        return self.STOCK_SENSITIVITY * (target_quantity - current_quantity)
+    def _equivalent_stock_days(self, human, job_cls: Type[Job], object_type: str) -> float:
+        daily_output = self._daily_output_capacity(human, job_cls, object_type)
+        if daily_output <= 0:
+            return 0.0
+        owned_quantity = human.owned_objects.filter(type=object_type).count()
+        return owned_quantity / daily_output
 
-    @staticmethod
-    def _human_has_tool(human, tool_type: Optional[str]) -> bool:
-        if tool_type is None:
-            return False
-        return human.owned_objects.filter(type=tool_type).exists()
+    def _daily_output_capacity(self, human, job_cls: Type[Job], object_type: str) -> float:
+        per_cycle_quantity = 0
+        for resource_type, quantity in job_cls.get_output():
+            if resource_type == object_type:
+                per_cycle_quantity = quantity
+                break
+        if per_cycle_quantity <= 0:
+            return 0.0
+
+        without_tool, with_tool = JobCapacityService.compute_daily_capacity(job_cls)
+        if job_cls.requires_tool() and job_cls.TOOL is not None:
+            has_tool = human.owned_objects.filter(type=job_cls.TOOL).exists()
+            actions_per_day = with_tool if has_tool else without_tool
+        else:
+            actions_per_day = without_tool
+
+        if actions_per_day <= 0:
+            return 0.0
+        return per_cycle_quantity * actions_per_day
