@@ -7,3 +7,4 @@ class Character(models.TextChoices):
     PYGMALIEN = "PYGMALIEN", "Pygmalien"
     STELLE = "STELLE", "Stelle"
     VANESSA = "VANESSA", "Vanessa"
+    JULES = "JULES", "Jules"
