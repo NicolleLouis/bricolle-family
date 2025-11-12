@@ -14,31 +14,53 @@
         </div>
     </form>
 
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Champion</th>
-            <th>Faction</th>
-            <th>Matches</th>
-            <th>Wins</th>
-            <th>Win %</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for stat in stats %}
-            <tr>
-                <td>{{ stat.champion.name }}</td>
-                <td>{{ stat.champion.faction }}</td>
-                <td>{{ stat.match_number }}</td>
-                <td>{{ stat.win_number }}</td>
-                <td>{{ stat.win_ratio }}</td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="5" class="text-center">No meta data available.</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    {% if faction_chart %}
+        <div class="card mb-4">
+            <div class="card-header">
+                Faction representation
+            </div>
+            <div class="card-body">
+                <div class="overflow-auto">
+                    {{ faction_chart|safe }}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header">
+            Champion details
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive mb-0">
+                <table class="table table-striped mb-0">
+                    <thead>
+                    <tr>
+                        <th>Champion</th>
+                        <th>Faction</th>
+                        <th>Matches</th>
+                        <th>Wins</th>
+                        <th>Win %</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for stat in stats %}
+                        <tr>
+                            <td>{{ stat.champion.name }}</td>
+                            <td>{{ stat.champion.faction }}</td>
+                            <td>{{ stat.match_number }}</td>
+                            <td>{{ stat.win_number }}</td>
+                            <td>{{ stat.win_ratio }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No meta data available.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -2,10 +2,10 @@ from altered.constants.faction import Faction
 
 
 FACTION_COLORS: dict[str, str] = {
-    Faction.MUNA.value: "#d4edda",   # Green
-    Faction.BRAVOS.value: "#f8d7da",  # Red
-    Faction.AXIOM.value: "#e0c9a6",   # Brown
-    Faction.YZMIR.value: "#e2d9f3",   # Purple
-    Faction.LYRA.value: "#fce4ec",    # Pink
-    Faction.ORDIS.value: "#d1ecf1",   # Light Blue
+    Faction.AXIOM.value: "#B34F2B",   # Warm terracotta
+    Faction.BRAVOS.value: "#E31D3B",  # Vivid crimson
+    Faction.LYRA.value: "#EE3F8C",    # Bright magenta
+    Faction.MUNA.value: "#0B7F43",    # Deep emerald
+    Faction.ORDIS.value: "#009BC6",   # Aqua blue
+    Faction.YZMIR.value: "#1C6FD6",   # Royal blue
 }
