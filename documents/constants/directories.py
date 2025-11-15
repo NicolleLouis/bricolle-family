@@ -9,7 +9,5 @@ class Directories(models.TextChoices):
     CIVILIZATION7 = "civilization_7", "Civilization 7"
     FINANCE_SIMULATOR = "finance", "Finance Simulator"
     CAPITALISM = "capitalism", "Capitalism"
-    SILKSONG = "silksong", "Silksong"
     RUNETERRA = "runeterra", "Runeterra"
     SPEEDRUN = "speedrun", "Speedrun"
-    SPORT = "sport", "Sport"
