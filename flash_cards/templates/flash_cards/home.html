@@ -50,6 +50,13 @@
                         </div>
                     </form>
 
+                    {% if answered and question.explanation %}
+                        <div class="alert alert-info mt-4">
+                            <h2 class="h6 text-uppercase text-muted mb-2">Explication</h2>
+                            <p class="mb-0">{{ question.explanation|linebreaksbr }}</p>
+                        </div>
+                    {% endif %}
+
                     {% if answered %}
                         <div class="alert mt-4 {% if is_correct %}alert-success{% else %}alert-danger{% endif %}">
                             {% if is_correct %}

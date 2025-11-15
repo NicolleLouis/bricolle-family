@@ -14,13 +14,20 @@ class QuestionForm(forms.ModelForm):
 
     class Meta:
         model = Question
-        fields = ["category", "text"]
+        fields = ["category", "text", "explanation"]
         widgets = {
             "text": forms.Textarea(
                 attrs={
                     "rows": 4,
                     "class": "form-control",
                     "placeholder": "Entrez la question…",
+                }
+            ),
+            "explanation": forms.Textarea(
+                attrs={
+                    "rows": 3,
+                    "class": "form-control",
+                    "placeholder": "Ajoutez une explication détaillée (optionnel)…",
                 }
             ),
         }

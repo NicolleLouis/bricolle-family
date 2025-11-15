@@ -7,6 +7,7 @@ from flash_cards.models.category import Category
 class Question(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="questions")
     text = models.TextField()
+    explanation = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_answer = models.DateTimeField(null=True, blank=True)
     answer_number = models.PositiveIntegerField(default=0)

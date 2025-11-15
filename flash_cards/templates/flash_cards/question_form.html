@@ -33,6 +33,13 @@
         {{ form.text }}
         {{ form.text.errors }}
     </div>
+    <div class="mb-4">
+        <label class="form-label" for="{{ form.explanation.id_for_label }}">
+            Explication <span class="text-muted">(optionnel)</span>
+        </label>
+        {{ form.explanation }}
+        {{ form.explanation.errors }}
+    </div>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="h5 mb-0">Réponses</h2>
