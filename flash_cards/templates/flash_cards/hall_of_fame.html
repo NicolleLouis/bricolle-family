@@ -1,0 +1,66 @@
+{% extends "flash_cards/base.html" %}
+
+{% block title %}Hall Of Fame - Flash Cards{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">Hall Of Fame</h1>
+        <p class="text-muted mb-0">Les 10 questions les plus difficiles à mémoriser.</p>
+    </div>
+</div>
+
+<form method="get" class="row g-3 align-items-end mb-4">
+    <div class="col-sm-6 col-md-4 col-lg-3">
+        <label class="form-label" for="category">Catégorie</label>
+        <select class="form-select" name="category" id="category" onchange="this.form.submit()">
+            <option value="">Toutes les catégories</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}" {% if selected_category == category.id %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto d-none d-sm-block">
+        <button type="submit" class="btn btn-primary">Filtrer</button>
+    </div>
+</form>
+
+{% if entries %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Question</th>
+                <th scope="col" style="min-width: 260px;">Taux de réussite</th>
+                <th scope="col">Réponses fausses</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for entry in entries %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ entry.question.text|linebreaksbr }}</td>
+                    <td>
+                        <div class="progress" style="height: 1.25rem;">
+                            <div class="progress-bar fw-semibold" role="progressbar"
+                                 style="width: {{ entry.success_percentage }}%; background-color: {{ entry.success_color }};"
+                                 aria-valuenow="{{ entry.success_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                {{ entry.success_percentage }}%
+                            </div>
+                        </div>
+                    </td>
+                    <td class="fw-semibold">{{ entry.failure_count }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-info mb-0">
+        Pas assez de réponses pour calculer un classement. Continue d&apos;alimenter les cartes !
+    </div>
+{% endif %}
+{% endblock %}

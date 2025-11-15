@@ -213,3 +213,51 @@ def test_home_limits_negatives_when_less_than_three(client, user, monkeypatch):
 
     context = response.context[-1]
     assert len(context["answers"]) == 2
+
+
+@pytest.mark.django_db
+def test_hall_of_fame_view_lists_questions(client, user):
+    category = Category.objects.create(name="Culture")
+    Question.objects.create(
+        category=category,
+        text="Quelle est la capitale de la France ?",
+        answer_number=10,
+        positive_answer_number=2,
+        negative_answer_number=8,
+    )
+
+    client.force_login(user)
+    response = client.get(reverse("flash_cards:hall_of_fame"))
+
+    assert response.status_code == 200
+    assert b"Hall Of Fame" in response.content
+    assert b"capitale de la France" in response.content
+
+
+@pytest.mark.django_db
+def test_hall_of_fame_view_filters_by_category(client, user):
+    culture = Category.objects.create(name="Culture")
+    science = Category.objects.create(name="Science")
+    Question.objects.create(
+        category=culture,
+        text="Question culture",
+        answer_number=10,
+        positive_answer_number=2,
+        negative_answer_number=8,
+    )
+    Question.objects.create(
+        category=science,
+        text="Question science",
+        answer_number=10,
+        positive_answer_number=5,
+        negative_answer_number=5,
+    )
+
+    client.force_login(user)
+    response = client.get(
+        reverse("flash_cards:hall_of_fame"), {"category": str(culture.id)}
+    )
+
+    assert response.status_code == 200
+    assert b"Question culture" in response.content
+    assert b"Question science" not in response.content

@@ -54,7 +54,7 @@
                 {% for question in questions %}
                     <tr class="{% if not question.is_valid %}table-danger{% endif %}">
                         <td class="align-middle">{{ question.category.name }}</td>
-                        <td class="align-middle">{{ question.text }}</td>
+                        <td class="align-middle">{{ question.text|truncatechars:120 }}</td>
                         <td class="align-middle text-center">{{ question.answer_count }}</td>
                         <td class="align-middle text-end">
                             <a class="btn btn-sm btn-outline-secondary"
