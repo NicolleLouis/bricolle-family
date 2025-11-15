@@ -1,0 +1,129 @@
+{% extends "flash_cards/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-uppercase text-muted mb-1">Configuration</p>
+        <h1 class="h3 mb-0">
+            {% if question %}Modifier la question{% else %}Ajouter une question{% endif %}
+        </h1>
+    </div>
+    <a class="btn btn-outline-secondary" href="{% url 'flash_cards:settings' %}">Retour</a>
+</div>
+
+<form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+    <div class="mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <label class="form-label mb-0" for="{{ form.category.id_for_label }}">Catégorie</label>
+            <a class="small text-decoration-none" href="{% url 'flash_cards:categories' %}" target="_blank">
+                Gérer les catégories
+            </a>
+        </div>
+        {{ form.category }}
+        {{ form.category.errors }}
+    </div>
+    <div class="mb-4">
+        <label class="form-label" for="{{ form.text.id_for_label }}">Question</label>
+        {{ form.text }}
+        {{ form.text.errors }}
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 mb-0">Réponses</h2>
+        <button type="button" class="btn btn-outline-primary" id="add-answer-btn">Ajouter une réponse</button>
+    </div>
+
+    {{ formset.management_form }}
+    {% for hidden in formset.hidden_fields %}
+        {{ hidden }}
+    {% endfor %}
+
+    <div id="answers-container" data-prefix="{{ formset.prefix }}">
+        {% for answer_form in formset %}
+            <div class="card mb-3 answer-form">
+                <div class="card-body">
+                    {% for hidden in answer_form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-8">
+                            <label class="form-label" for="{{ answer_form.text.id_for_label }}">Réponse</label>
+                            {{ answer_form.text }}
+                            {{ answer_form.text.errors }}
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-check mt-4">
+                                {{ answer_form.is_correct }}
+                                <label class="form-check-label" for="{{ answer_form.is_correct.id_for_label }}">
+                                    Correcte
+                                </label>
+                            </div>
+                            {{ answer_form.is_correct.errors }}
+                        </div>
+                        <div class="col-md-1 text-end">
+                            {% if answer_form.instance.pk %}
+                                <label class="form-check-label text-danger small" for="{{ answer_form.DELETE.id_for_label }}">
+                                    Supprimer
+                                </label>
+                                {{ answer_form.DELETE }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if formset.non_form_errors %}
+        <div class="alert alert-danger">
+            {{ formset.non_form_errors }}
+        </div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
+</form>
+
+<script id="answer-empty-form" type="text/template">
+    <div class="card mb-3 answer-form">
+        <div class="card-body">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-8">
+                    <label class="form-label" for="id_{{ formset.prefix }}-__prefix__-text">Réponse</label>
+                    <input type="text" name="{{ formset.prefix }}-__prefix__-text" class="form-control" placeholder="Réponse" id="id_{{ formset.prefix }}-__prefix__-text">
+                </div>
+                <div class="col-md-3">
+                    <div class="form-check mt-4">
+                        <input type="checkbox" name="{{ formset.prefix }}-__prefix__-is_correct" class="form-check-input" id="id_{{ formset.prefix }}-__prefix__-is_correct">
+                        <label class="form-check-label" for="id_{{ formset.prefix }}-__prefix__-is_correct">Correcte</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script>
+    (() => {
+        const container = document.getElementById('answers-container');
+        const addBtn = document.getElementById('add-answer-btn');
+        const prefix = container.dataset.prefix;
+        const totalFormsInput = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+        const template = document.getElementById('answer-empty-form').innerHTML.trim();
+
+        addBtn.addEventListener('click', () => {
+            const formIndex = parseInt(totalFormsInput.value, 10);
+            const newFormHtml = template.replace(/__prefix__/g, formIndex);
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = newFormHtml;
+            container.appendChild(wrapper.firstElementChild);
+            totalFormsInput.value = formIndex + 1;
+        });
+    })();
+</script>
+{% endblock %}

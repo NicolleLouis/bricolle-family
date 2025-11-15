@@ -1,0 +1,86 @@
+{% extends "flash_cards/base.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <p class="text-uppercase text-muted mb-1">Configuration</p>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Questions</h1>
+        <a class="btn btn-sm btn-primary" href="{% url 'flash_cards:question_create' %}">Ajouter une question</a>
+    </div>
+    <form class="row g-2" method="get">
+        <div class="col-12 col-md-4">
+            <input type="search" class="form-control" name="q" placeholder="Rechercher une question"
+                   value="{{ query }}">
+        </div>
+        <div class="col-12 col-md-3">
+            <select name="category" class="form-select">
+                <option value="">Toutes les catégories</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if cat.id|stringformat:"s" == category_id %}selected{% endif %}>
+                        {{ cat.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12 col-md-3">
+            <select name="validity" class="form-select">
+                <option value="">Toutes les questions</option>
+                <option value="valid" {% if validity == "valid" %}selected{% endif %}>Questions valides</option>
+                <option value="invalid" {% if validity == "invalid" %}selected{% endif %}>Questions non valides</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-2 d-flex gap-2">
+            <button class="btn btn-outline-secondary w-100" type="submit">Filtrer</button>
+            {% if query or category_id or validity %}
+                <a class="btn btn-outline-secondary w-100" href="{% url 'flash_cards:settings' %}">Réinitialiser</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Catégorie</th>
+                        <th scope="col">Question</th>
+                        <th scope="col" class="text-center">Réponses</th>
+                        <th scope="col" class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for question in questions %}
+                    <tr class="{% if not question.is_valid %}table-danger{% endif %}">
+                        <td class="align-middle">{{ question.category.name }}</td>
+                        <td class="align-middle">{{ question.text }}</td>
+                        <td class="align-middle text-center">{{ question.answer_count }}</td>
+                        <td class="align-middle text-end">
+                            <a class="btn btn-sm btn-outline-secondary"
+                               href="{% url 'flash_cards:question_edit' question.id %}">
+                                Modifier
+                            </a>
+                            <form method="post" action="{% url 'flash_cards:question_delete' question.id %}"
+                                  class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Supprimer cette question ?');">
+                                    Supprimer
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">
+                            Aucune question pour le moment.
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
