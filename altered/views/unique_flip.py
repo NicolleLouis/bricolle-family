@@ -111,6 +111,27 @@ def _handle_post(request, status, purchase_form):
             flip.save_price(form.cleaned_data['current_price'])
             return redirect(request.path + f'?status={status}'), purchase_form
 
+    if 'update_price' in request.POST:
+        flip = get_object_or_404(UniqueFlip, id=request.POST.get('flip_id'))
+        if flip.advised_price is not None:
+            flip.save_price(flip.advised_price)
+        return redirect(request.path + f'?status={status}'), purchase_form
+
+    if 'update_all_prices' in request.POST:
+        flips = UniqueFlip.objects.filter(
+            sold_at__isnull=True,
+            in_use=False,
+            advised_price__isnull=False,
+        ).prefetch_related('prices')
+        for flip in flips:
+            current_price = flip.current_price
+            if current_price is None:
+                continue
+            if current_price == flip.advised_price:
+                continue
+            flip.save_price(flip.advised_price)
+        return redirect(request.path + f'?status={status}'), purchase_form
+
     return None, purchase_form
 
 

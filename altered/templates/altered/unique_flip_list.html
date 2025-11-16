@@ -102,6 +102,17 @@
                 <button type="submit" class="btn btn-primary">Filtrer</button>
             </div>
         </form>
+        {% if status != 'sold' %}
+            <div class="d-flex justify-content-end mb-3">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="update_all_prices" value="1">
+                    <button type="submit" class="btn btn-warning">
+                        Update all price
+                    </button>
+                </form>
+            </div>
+        {% endif %}
 
         <table class="table table-striped">
             <thead>
@@ -205,6 +216,14 @@
                                     </div>
                                 </div>
                             </div>
+                            {% if flip.advised_price and flip.current_price != flip.advised_price %}
+                                <form method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="update_price" value="1">
+                                    <input type="hidden" name="flip_id" value="{{ flip.id }}">
+                                    <button type="submit" class="btn btn-sm btn-warning me-1">Update price</button>
+                                </form>
+                            {% endif %}
                             <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal"
                                     data-bs-target="#sellModal{{ flip.id }}">Vendre
                             </button>
@@ -221,7 +240,15 @@
                                             <input type="hidden" name="sell" value="1">
                                             <input type="hidden" name="flip_id" value="{{ flip.id }}">
                                             <div class="modal-body">
-                                                {{ sell_form.sold_price }}
+                                                <label for="id_sold_price_{{ flip.id }}" class="form-label">
+                                                    Prix de vente
+                                                </label>
+                                                <input type="number"
+                                                       name="sold_price"
+                                                       id="id_sold_price_{{ flip.id }}"
+                                                       step="0.01"
+                                                       class="form-control"
+                                                       value="{{ flip.current_price|default_if_none:'' }}">
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
