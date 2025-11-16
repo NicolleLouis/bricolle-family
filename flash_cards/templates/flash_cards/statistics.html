@@ -1,0 +1,90 @@
+{% extends "flash_cards/base.html" %}
+
+{% block title %}Statistiques · Flash Cards{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-1">Statistiques</h1>
+        <p class="text-muted mb-0">Visualisez l'évolution de vos questions.</p>
+    </div>
+    <a href="{% url 'flash_cards:home' %}" class="btn btn-outline-primary">Retourner aux cartes</a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h2 class="h5">Répartition par nombre d'essais</h2>
+        <p class="text-muted">Ce graphique montre combien de questions ont été posées un certain nombre de fois.</p>
+        {% if attempt_distribution_chart %}
+            <div class="chart-container">
+                {{ attempt_distribution_chart|safe }}
+            </div>
+        {% else %}
+            <p class="text-muted fst-italic mb-0">Aucune donnée suffisante pour le moment.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+                <h2 class="h5 mb-1">Taux de réussite par question</h2>
+                <p class="text-muted mb-0">Chaque point représente une question. L'axe horizontal indique le nombre d'essais, l'axe vertical le taux de réussite.</p>
+            </div>
+            {% if performance_trend_accuracy is not None %}
+                <div class="text-end">
+                    <div class="small text-muted">Précision de la tendance</div>
+                    <div class="fw-semibold">{{ performance_trend_accuracy }}&nbsp;%</div>
+                </div>
+            {% endif %}
+        </div>
+        {% if performance_chart %}
+            <div class="chart-container">
+                {{ performance_chart|safe }}
+            </div>
+        {% else %}
+            <p class="text-muted fst-italic mb-0">Pas assez de questions répondue au moins une fois pour afficher ce graphique.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card shadow-sm mt-4">
+    <div class="card-body">
+        <h2 class="h5 mb-3">Catégories les plus fiables</h2>
+        {% if category_leaderboard %}
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                    <tr>
+                        <th scope="col">Catégorie</th>
+                        <th scope="col">Taux de réussite moyen</th>
+                        <th scope="col">Questions suivies</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for entry in category_leaderboard %}
+                        <tr>
+                            <td class="fw-semibold">
+                                {% if entry.medal == "gold" %}
+                                    <span class="badge bg-warning text-dark me-2">🥇</span>
+                                {% elif entry.medal == "silver" %}
+                                    <span class="badge bg-secondary me-2">🥈</span>
+                                {% elif entry.medal == "bronze" %}
+                                    <span class="badge text-dark me-2" style="background-color:#cd7f32;">🥉</span>
+                                {% endif %}
+                                {{ entry.name }}
+                            </td>
+                            <td>{{ entry.success_rate }}&nbsp;%</td>
+                            <td>{{ entry.question_count }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted mb-0">Aucune catégorie n'a encore suffisamment de réponses pour être classée.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

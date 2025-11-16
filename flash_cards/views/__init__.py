@@ -6,6 +6,7 @@ from .settings import (
     question_json_form,
     settings,
 )
+from .statistics import statistics
 
 __all__ = [
     "home",
@@ -14,4 +15,5 @@ __all__ = [
     "question_json_form",
     "question_delete",
     "categories",
+    "statistics",
 ]

@@ -10,11 +10,13 @@ from flash_cards.views.settings import (
     question_json_form,
     settings,
 )
+from flash_cards.views.statistics import statistics
 
 app_name = "flash_cards"
 
 urlpatterns = [
     path("", home, name="home"),
+    path("statistics/", statistics, name="statistics"),
     path("hall-of-fame/", hall_of_fame, name="hall_of_fame"),
     path("settings/", settings, name="settings"),
     path("categories/", categories, name="categories"),

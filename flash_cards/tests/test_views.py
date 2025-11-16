@@ -443,3 +443,47 @@ def test_hall_of_fame_view_filters_by_category(client, user):
     assert response.status_code == 200
     assert b"Question culture" in response.content
     assert b"Question science" not in response.content
+
+
+@pytest.mark.django_db
+def test_statistics_view_renders_chart(client, user, monkeypatch):
+    class DummyService:
+        def render(self_inner):
+            return "<div>chart</div>"
+
+    class DummyPerformanceService:
+        def render(self_inner):
+            return "<div>scatter</div>", 87.5
+
+    class DummyLeaderboardService:
+        def top_categories(self_inner):
+            return [
+                {"name": "Culture", "success_rate": 80.0, "question_count": 5, "medal": "gold"}
+            ]
+
+    stats_module = importlib.import_module("flash_cards.views.statistics")
+    monkeypatch.setattr(
+        stats_module,
+        "QuestionAttemptDistributionChartService",
+        lambda: DummyService(),
+    )
+    monkeypatch.setattr(
+        stats_module,
+        "QuestionPerformanceScatterChartService",
+        lambda: DummyPerformanceService(),
+    )
+    monkeypatch.setattr(
+        stats_module,
+        "CategoryPerformanceLeaderboardService",
+        lambda: DummyLeaderboardService(),
+    )
+
+    client.force_login(user)
+    response = client.get(reverse("flash_cards:statistics"))
+
+    assert response.status_code == 200
+    assert response.context["attempt_distribution_chart"] == "<div>chart</div>"
+    assert response.context["performance_chart"] == "<div>scatter</div>"
+    assert response.context["performance_trend_accuracy"] == 87.5
+    assert response.context["category_leaderboard"][0]["name"] == "Culture"
+    assert b"Statistiques" in response.content
