@@ -1,0 +1,50 @@
+{% extends "flash_cards/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <p class="text-uppercase text-muted mb-1">Configuration</p>
+        <h1 class="h3 mb-0">Ajouter une question par JSON</h1>
+    </div>
+    <a class="btn btn-outline-secondary" href="{% url 'flash_cards:settings' %}">Retour</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="mb-3">
+                <label class="form-label" for="{{ form.payload.id_for_label }}">
+                    {{ form.payload.label }}
+                </label>
+                {{ form.payload }}
+                {% if form.payload.help_text %}
+                    <div class="form-text">{{ form.payload.help_text }}</div>
+                {% endif %}
+                {% for error in form.payload.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <p class="text-muted">
+                Le format accepté correspond exactement à celui de l'API <code>/flash_cards/api/questions/</code>.
+                Vous pouvez renseigner un <code>category_id</code> existant ou indiquer <code>category</code> pour créer une nouvelle catégorie.
+            </p>
+
+            <div class="mb-4">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-semibold">Exemple</span>
+                    <span class="badge text-bg-light">JSON</span>
+                </div>
+                <pre class="bg-light border rounded mt-2 p-3"><code>{{ json_example }}</code></pre>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Créer la question</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

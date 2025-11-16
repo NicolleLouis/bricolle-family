@@ -5,7 +5,12 @@
     <p class="text-uppercase text-muted mb-1">Configuration</p>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h3 mb-0">Questions</h1>
-        <a class="btn btn-sm btn-primary" href="{% url 'flash_cards:question_create' %}">Ajouter une question</a>
+        <div class="btn-group">
+            <a class="btn btn-sm btn-primary" href="{% url 'flash_cards:question_create' %}">Ajouter une question</a>
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'flash_cards:question_create_json' %}">
+                Ajouter par JSON
+            </a>
+        </div>
     </div>
     <form class="row g-2" method="get">
         <div class="col-12 col-md-4">

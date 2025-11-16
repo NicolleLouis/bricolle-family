@@ -1,3 +1,5 @@
+import json
+
 from django import forms
 from django.forms import BaseInlineFormSet, inlineformset_factory
 
@@ -65,3 +67,39 @@ AnswerFormSet = inlineformset_factory(
         "is_correct": forms.CheckboxInput(attrs={"class": "form-check-input"}),
     },
 )
+
+
+class JsonQuestionForm(forms.Form):
+    payload = forms.CharField(
+        widget=forms.Textarea(
+            attrs={
+                "rows": 14,
+                "class": "form-control font-monospace",
+                "placeholder": '{\n  "question": "...",\n  "category": "...",\n  "positive_answers": ["..."],\n  "negative_answers": ["..."]\n}',
+            }
+        ),
+        label="Contenu JSON",
+        help_text="Utilisez le même format que l'API /flash_cards/api/questions/.",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._parsed_payload: dict | None = None
+
+    def clean(self):
+        cleaned_data = super().clean()
+        payload_text = cleaned_data.get("payload")
+        if not payload_text:
+            return cleaned_data
+        try:
+            parsed = json.loads(payload_text)
+        except json.JSONDecodeError as exc:
+            raise forms.ValidationError(f"JSON invalide : {exc.msg}") from exc
+        if not isinstance(parsed, dict):
+            raise forms.ValidationError("Le JSON doit représenter un objet.")
+        self._parsed_payload = parsed
+        return cleaned_data
+
+    @property
+    def parsed_payload(self) -> dict | None:
+        return self._parsed_payload

@@ -3,7 +3,15 @@ from .settings import (
     categories,
     question_delete,
     question_form,
+    question_json_form,
     settings,
 )
 
-__all__ = ["home", "settings", "question_form", "question_delete", "categories"]
+__all__ = [
+    "home",
+    "settings",
+    "question_form",
+    "question_json_form",
+    "question_delete",
+    "categories",
+]

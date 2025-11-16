@@ -17,7 +17,13 @@ DEBUG = config("DEBUG", default=True)
 ENV = config("ENV", default="local")
 FLASH_CARDS_MCP_TOKEN = config("FLASH_CARDS_MCP_TOKEN", default="")
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "51.178.41.140", "bricolle-family.fr"]
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "51.178.41.140",
+    "bricolle-family.fr",
+    "www.bricolle-family.fr",
+]
 
 INSTALLED_APPS = [
     "bootstrap5",
@@ -114,6 +120,15 @@ TIME_ZONE = "Europe/Paris"
 USE_I18N = True
 
 USE_TZ = False
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://bricolle-family.fr",
+    "https://www.bricolle-family.fr",
+]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = ENV == "production"
+SESSION_COOKIE_SECURE = ENV == "production"
+CSRF_COOKIE_SECURE = ENV == "production"
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]

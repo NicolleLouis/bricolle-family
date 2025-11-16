@@ -64,6 +64,47 @@ def test_question_creation_flow(client, user):
 
 
 @pytest.mark.django_db
+def test_question_creation_from_json(client, user):
+    category = Category.objects.create(name="Culture")
+    client.force_login(user)
+
+    response = client.post(
+        reverse("flash_cards:question_create_json"),
+        {
+            "payload": json.dumps(
+                {
+                    "category_id": category.id,
+                    "question": "Quelle est la capitale de l'Allemagne ?",
+                    "context": "Chapitre Europe",
+                    "positive_answers": ["Berlin"],
+                    "negative_answers": ["Munich"],
+                }
+            )
+        },
+    )
+
+    assert response.status_code == 302
+    question = Question.objects.get()
+    assert question.text.startswith("Quelle est la capitale de l'Allemagne")
+
+
+@pytest.mark.django_db
+def test_question_creation_from_json_invalid_payload(client, user):
+    client.force_login(user)
+
+    response = client.post(
+        reverse("flash_cards:question_create_json"),
+        {
+            "payload": "{invalid json]",
+        },
+    )
+
+    assert response.status_code == 200
+    assert b"JSON invalide" in response.content
+    assert Question.objects.count() == 0
+
+
+@pytest.mark.django_db
 def test_delete_question(client, user):
     category = Category.objects.create(name="Geo")
     question = Question.objects.create(category=category, text="Capital of Spain ?")

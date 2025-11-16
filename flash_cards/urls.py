@@ -7,6 +7,7 @@ from flash_cards.views.settings import (
     categories,
     question_delete,
     question_form,
+    question_json_form,
     settings,
 )
 
@@ -18,6 +19,7 @@ urlpatterns = [
     path("settings/", settings, name="settings"),
     path("categories/", categories, name="categories"),
     path("questions/add/", question_form, name="question_create"),
+    path("questions/add/json/", question_json_form, name="question_create_json"),
     path("questions/<int:question_id>/edit/", question_form, name="question_edit"),
     path("questions/<int:question_id>/delete/", question_delete, name="question_delete"),
     path("api/questions/", create_question, name="api_question_create"),
