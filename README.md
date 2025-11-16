@@ -46,4 +46,4 @@ household, and you edit it during your shopping session.
 0 2 * * * /home/ubuntu/bricolle-family/backup_db.sh >> /home/ubuntu/bricolle-family/backup.log 2>&1
 0 1 * * * /usr/bin/docker exec bricolle_web python manage.py update_deck_version >> /home/ubuntu/altered.log 2>&1
 0 3 * * * /usr/bin/docker exec bricolle_web python manage.py compute_advised_price >> /home/ubuntu/altered.log 2>&1
-0 3,15 * * * /home/ubuntu/Custom_projects/bricolle-family/scripts/manage_certs.sh renew >> /var/log/certbot-renew.log 2>&1
+0 3,15 * * * /home/ubuntu/bricolle-family/scripts/manage_certs.sh renew >> /var/log/certbot-renew.log 2>&1
