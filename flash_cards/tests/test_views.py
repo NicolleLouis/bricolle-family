@@ -1,4 +1,5 @@
 import importlib
+import json
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -136,6 +137,146 @@ def test_categories_list_and_create(client, user):
     )
     assert create_response.status_code == 200
     assert Category.objects.filter(name="Science").exists()
+
+
+@pytest.mark.django_db
+def test_api_create_question(client, user):
+    category = Category.objects.create(name="Sciences")
+    client.force_login(user)
+
+    response = client.post(
+        reverse("flash_cards:api_question_create"),
+        data=json.dumps(
+            {
+                "category_id": category.id,
+                "question": "Quelle planète est la plus proche du soleil ?",
+                "context": "Chapitre 1",
+                "positive_answers": ["Mercure"],
+                "negative_answers": ["Venus", "Terre"],
+            }
+        ),
+        content_type="application/json",
+    )
+
+    assert response.status_code == 201
+    payload = response.json()
+    assert payload["category"]["name"] == "Sciences"
+    assert payload["question"].startswith("Quelle planète")
+    assert payload["positive_answers"] == ["Mercure"]
+    assert Question.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_api_create_question_creates_category_from_name(client, user):
+    client.force_login(user)
+
+    response = client.post(
+        reverse("flash_cards:api_question_create"),
+        data=json.dumps(
+            {
+                "category": "Nouvelles catégories",
+                "question": "Capital de l'Italie ?",
+                "context": None,
+                "positive_answers": ["Rome"],
+                "negative_answers": ["Milan"],
+            }
+        ),
+        content_type="application/json",
+    )
+
+    assert response.status_code == 201
+    assert Category.objects.filter(name="Nouvelles catégories").exists()
+
+
+@pytest.mark.django_db
+def test_api_create_question_with_token(client, settings):
+    settings.FLASH_CARDS_MCP_TOKEN = "secret"
+
+    response = client.post(
+        reverse("flash_cards:api_question_create"),
+        data=json.dumps(
+            {
+                "category": "Animaux",
+                "question": "Quel animal miaule ?",
+                "context": "niveau 1",
+                "positive_answers": ["Chat"],
+                "negative_answers": ["Chien"],
+            }
+        ),
+        content_type="application/json",
+        HTTP_X_MCP_TOKEN="secret",
+    )
+
+    assert response.status_code == 201
+    assert Question.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_api_create_question_validates_payload(client, user):
+    client.force_login(user)
+
+    response = client.post(
+        reverse("flash_cards:api_question_create"),
+        data=json.dumps(
+            {
+                "category": "",
+                "question": "",
+                "positive_answers": [],
+                "negative_answers": [],
+            }
+        ),
+        content_type="application/json",
+    )
+
+    assert response.status_code == 400
+    assert "error" in response.json()
+
+
+@pytest.mark.django_db
+def test_api_list_categories(client, user):
+    cat = Category.objects.create(name="Culture")
+    other = Category.objects.create(name="Maths")
+    Question.objects.create(category=cat, text="Capital de la France ?")
+    client.force_login(user)
+
+    response = client.get(reverse("flash_cards:api_categories"))
+
+    assert response.status_code == 200
+    data = response.json()["categories"]
+    assert len(data) == 2
+    culture_entry = next(item for item in data if item["name"] == "Culture")
+    assert culture_entry["question_count"] == 1
+
+
+@pytest.mark.django_db
+def test_api_list_categories_requires_auth(client):
+    response = client.get(reverse("flash_cards:api_categories"))
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_api_list_categories_accepts_token(client, settings):
+    settings.FLASH_CARDS_MCP_TOKEN = "super-token"
+    Category.objects.create(name="Culture")
+
+    response = client.get(
+        reverse("flash_cards:api_categories"),
+        HTTP_X_MCP_TOKEN="super-token",
+    )
+
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_api_categories_rejects_wrong_token(client, settings):
+    settings.FLASH_CARDS_MCP_TOKEN = "expected"
+
+    response = client.get(
+        reverse("flash_cards:api_categories"),
+        HTTP_X_MCP_TOKEN="other",
+    )
+
+    assert response.status_code == 403
 
 
 @pytest.mark.django_db

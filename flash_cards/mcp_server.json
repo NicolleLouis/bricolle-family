@@ -1,0 +1,127 @@
+{
+  "name": "flash_cards",
+  "description": "Expose les outils nécessaires pour automatiser la configuration des flash cards.",
+  "base_url": "http://localhost:8000/flash_cards/api",
+  "schema_version": "1.0",
+  "tools": [
+    {
+      "name": "create_question",
+      "method": "POST",
+      "path": "/questions/",
+      "description": "Ajoute une question avec son contexte et ses réponses positives/négatives.",
+      "input_schema": {
+        "type": "object",
+        "required": [
+          "question",
+          "positive_answers",
+          "negative_answers"
+        ],
+        "properties": {
+          "category_id": {
+            "type": "integer",
+            "description": "Identifiant d'une catégorie existante."
+          },
+          "category": {
+            "type": "string",
+            "description": "Nom de la catégorie à créer si category_id n'est pas fourni."
+          },
+          "question": {
+            "type": "string",
+            "description": "Intitulé de la question."
+          },
+          "context": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Contexte ou explication détaillée."
+          },
+          "positive_answers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Réponses considérées comme correctes."
+          },
+          "negative_answers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Réponses considérées comme incorrectes."
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "question": {
+            "type": "string"
+          },
+          "context": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "category": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "positive_answers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "negative_answers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "list_categories",
+      "method": "GET",
+      "path": "/categories/",
+      "description": "Retourne les catégories triées par nom avec le nombre de questions associées.",
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "question_count": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

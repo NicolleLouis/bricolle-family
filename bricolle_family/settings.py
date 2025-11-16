@@ -15,6 +15,7 @@ if not SECRET_KEY:
 
 DEBUG = config("DEBUG", default=True)
 ENV = config("ENV", default="local")
+FLASH_CARDS_MCP_TOKEN = config("FLASH_CARDS_MCP_TOKEN", default="")
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "51.178.41.140", "bricolle-family.fr"]
 
@@ -130,6 +131,10 @@ else:
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "login"
+LOGIN_EXEMPT_URLS = [
+    "flash_cards:api_question_create",
+    "flash_cards:api_categories",
+]
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"

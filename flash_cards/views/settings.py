@@ -19,7 +19,7 @@ def settings(request):
             positive_answers=Count("answers", filter=Q(answers__is_correct=True)),
             negative_answers=Count("answers", filter=Q(answers__is_correct=False)),
         )
-        .order_by("category__name", "text")
+        .order_by("-created_at")
     )
     if query:
         questions = questions.filter(text__icontains=query)
