@@ -29,6 +29,20 @@ ensure_bootstrap_cert() {
         -days 30 >/dev/null 2>&1
 }
 
+cleanup_legacy_cert() {
+    if [[ -d "${LE_DIR}/live/${DOMAIN}" || -d "${LE_DIR}/archive/${DOMAIN}" ]]; then
+        echo "🧹 Removing previous certificate material for ${DOMAIN}..."
+        rm -rf \
+            "${LE_DIR}/live/${DOMAIN}" \
+            "${LE_DIR}/archive/${DOMAIN}" \
+            "${LE_DIR}/renewal/${DOMAIN}.conf" \
+            "${LE_DIR}/renewal/${DOMAIN//./_}.conf" \
+            "${LE_DIR}/csr" \
+            "${LE_DIR}/keys"
+        mkdir -p "${LE_DIR}/renewal"
+    fi
+}
+
 reload_nginx() {
     docker compose exec nginx nginx -s reload >/dev/null 2>&1 || true
 }
@@ -39,7 +53,7 @@ case "${COMMAND}" in
         echo "✅ Bootstrap certificate ready at ${LIVE_DIR}."
         ;;
     init)
-        ensure_bootstrap_cert
+        cleanup_legacy_cert
         if [[ -z "${EMAIL}" ]]; then
             echo "❌ Set CERTBOT_EMAIL before running init."
             exit 1
@@ -49,6 +63,7 @@ case "${COMMAND}" in
             --webroot -w /var/www/certbot \
             --agree-tos --no-eff-email \
             --email "${EMAIL}" \
+            --force-renewal \
             -d "${DOMAIN}" -d "www.${DOMAIN}"
         reload_nginx
         echo "✅ Certificate issued and nginx reloaded."

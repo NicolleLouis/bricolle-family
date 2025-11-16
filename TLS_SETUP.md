@@ -11,14 +11,14 @@ and `certbot` containers.
    export CERTBOT_EMAIL="you@example.com"
    export CERTBOT_DOMAIN="bricolle-family.fr"  # optional, defaults to this value
    ```
-2. Prepare placeholder keys so Nginx can start:
+2. Initiate certificate issuance (the script automatically removes any old
+   placeholder/self-signed files and creates temporary ones for nginx if
+   needed):
    ```bash
-   ./scripts/manage_certs.sh bootstrap
+   ./scripts/manage_certs.sh init
    ```
-   This generates a short-lived self-signed cert under
-   `certbot/letsencrypt/live/<domain>/`.
 3. Deploy the stack: `./deploy.sh`
-4. Issue the real certificate:
+4. (Optional) rerun `./scripts/manage_certs.sh init` if you change domains.
    ```bash
    ./scripts/manage_certs.sh init
    ```
