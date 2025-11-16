@@ -1,0 +1,125 @@
+openapi: 3.1.0
+info:
+  title: Flash Cards API
+  version: "1.0"
+servers:
+  - url: https://bricolle-family.fr/flash_cards/api
+components:
+  securitySchemes:
+    FlashCardsToken:
+      type: apiKey
+      in: header
+      name: X-MCP-TOKEN
+  schemas: {}
+paths:
+  /questions/:
+    post:
+      summary: Create a question with answers
+      operationId: createQuestion
+      security:
+        - FlashCardsToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - question
+                - positive_answers
+                - negative_answers
+              properties:
+                category_id:
+                  type: integer
+                  description: Existing category ID
+                category:
+                  type: string
+                  description: Category name used when category_id is missing
+                question:
+                  type: string
+                context:
+                  type: string
+                  nullable: true
+                positive_answers:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+                negative_answers:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+      responses:
+        "201":
+          description: Question created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  question:
+                    type: string
+                  context:
+                    type: string
+                    nullable: true
+                  category:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                  positive_answers:
+                    type: array
+                    items:
+                      type: string
+                  negative_answers:
+                    type: array
+                    items:
+                      type: string
+        "4XX":
+          description: Error payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /categories/:
+    get:
+      summary: List categories with question counts
+      operationId: listCategories
+      security:
+        - FlashCardsToken: []
+      responses:
+        "200":
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        question_count:
+                          type: integer
+        "403":
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
