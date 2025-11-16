@@ -18,7 +18,7 @@ class QuestionRetrievalService:
         self._strategies: Tuple[Tuple[Strategy, int], ...] = (
             (self._random_question, 1),
             (self._last_failed_question, 3),
-            (self._least_answered_question, 2),
+            (self._least_answered_question, 5),
             (self._oldest_last_answer_question, 2),
             (self._high_error_question, 3),
         )
