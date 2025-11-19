@@ -9,11 +9,10 @@
 Nginx caches the upstream IP (`172.18.0.4`) and occasionally loses the route after a container restart. When Gunicorn is restarted or the Docker network changes, nginx still targets the old IP and fails with `No route to host`.
 
 ## Resolution
-1. Restart the stack so nginx refreshes the service discovery information:
+1. Restart only nginx so it refreshes its upstream routing:
    ```bash
-   ./deploy.sh
+   docker compose restart nginx
    ```
-   (or `docker compose restart nginx web` on the server).
 
 2. Verify containers are healthy:
    ```bash
@@ -22,4 +21,4 @@ Nginx caches the upstream IP (`172.18.0.4`) and occasionally loses the route aft
    docker compose logs web
    ```
 
-After restarting, nginx reconnected to the updated `web` container IP and the 502 errors disappeared.
+After restarting nginx, it reconnected to the updated `web` container IP and the 502 errors disappeared.
