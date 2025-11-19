@@ -10,7 +10,60 @@ components:
       type: apiKey
       in: header
       name: X-MCP-TOKEN
-  schemas: {}
+  schemas:
+    QuestionInput:
+      type: object
+      required:
+        - question
+        - positive_answers
+        - negative_answers
+      properties:
+        category_id:
+          type: integer
+          description: Existing category ID
+        category:
+          type: string
+          description: Category name used when category_id is missing
+        question:
+          type: string
+        context:
+          type: string
+          nullable: true
+        positive_answers:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        negative_answers:
+          type: array
+          minItems: 1
+          items:
+            type: string
+    QuestionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        question:
+          type: string
+        context:
+          type: string
+          nullable: true
+        category:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+        positive_answers:
+          type: array
+          items:
+            type: string
+        negative_answers:
+          type: array
+          items:
+            type: string
 paths:
   /questions/:
     post:
@@ -23,63 +76,29 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - question
-                - positive_answers
-                - negative_answers
-              properties:
-                category_id:
-                  type: integer
-                  description: Existing category ID
-                category:
-                  type: string
-                  description: Category name used when category_id is missing
-                question:
-                  type: string
-                context:
-                  type: string
-                  nullable: true
-                positive_answers:
-                  type: array
+              oneOf:
+                - $ref: '#/components/schemas/QuestionInput'
+                - type: array
                   minItems: 1
                   items:
-                    type: string
-                negative_answers:
-                  type: array
-                  minItems: 1
-                  items:
-                    type: string
+                    $ref: '#/components/schemas/QuestionInput'
       responses:
         "201":
           description: Question created
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                  question:
-                    type: string
-                  context:
-                    type: string
-                    nullable: true
-                  category:
-                    type: object
+                oneOf:
+                  - $ref: '#/components/schemas/QuestionResponse'
+                  - type: object
                     properties:
-                      id:
+                      count:
                         type: integer
-                      name:
-                        type: string
-                  positive_answers:
-                    type: array
-                    items:
-                      type: string
-                  negative_answers:
-                    type: array
-                    items:
-                      type: string
+                        minimum: 1
+                      created:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/QuestionResponse'
         "4XX":
           description: Error payload
           content:

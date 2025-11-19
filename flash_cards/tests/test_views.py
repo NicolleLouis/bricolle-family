@@ -89,6 +89,40 @@ def test_question_creation_from_json(client, user):
 
 
 @pytest.mark.django_db
+def test_question_creation_from_json_batch(client, user):
+    category = Category.objects.create(name="Culture")
+    client.force_login(user)
+
+    response = client.post(
+        reverse("flash_cards:question_create_json"),
+        {
+            "payload": json.dumps(
+                [
+                    {
+                        "category_id": category.id,
+                        "question": "Quel fleuve traverse Paris ?",
+                        "context": "Géographie",
+                        "positive_answers": ["La Seine"],
+                        "negative_answers": ["Le Rhône"],
+                    },
+                    {
+                        "category": "Sciences",
+                        "question": "Quelle molécule compose l'eau ?",
+                        "context": "Chimie",
+                        "positive_answers": ["H2O"],
+                        "negative_answers": ["CO2"],
+                    },
+                ]
+            )
+        },
+    )
+
+    assert response.status_code == 302
+    assert Question.objects.count() == 2
+    assert Category.objects.filter(name="Sciences").exists()
+
+
+@pytest.mark.django_db
 def test_question_creation_from_json_invalid_payload(client, user):
     client.force_login(user)
 
@@ -205,6 +239,42 @@ def test_api_create_question(client, user):
     assert payload["question"].startswith("Quelle planète")
     assert payload["positive_answers"] == ["Mercure"]
     assert Question.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_api_create_question_accepts_array(client, user):
+    category = Category.objects.create(name="Sciences")
+    client.force_login(user)
+
+    response = client.post(
+        reverse("flash_cards:api_question_create"),
+        data=json.dumps(
+            [
+                {
+                    "category_id": category.id,
+                    "question": "Capital du Canada ?",
+                    "context": "Géo",
+                    "positive_answers": ["Ottawa"],
+                    "negative_answers": ["Toronto"],
+                },
+                {
+                    "category": "Sports",
+                    "question": "Combien de joueurs dans une équipe de basket ?",
+                    "context": None,
+                    "positive_answers": ["5"],
+                    "negative_answers": ["6"],
+                },
+            ]
+        ),
+        content_type="application/json",
+    )
+
+    assert response.status_code == 201
+    payload = response.json()
+    assert payload["count"] == 2
+    assert len(payload["created"]) == 2
+    assert any(item["category"]["name"] == "Sports" for item in payload["created"])
+    assert Question.objects.count() == 2
 
 
 @pytest.mark.django_db

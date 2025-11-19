@@ -1,8 +1,8 @@
 import json
+from typing import Any
 
 from django import forms
 from django.forms import BaseInlineFormSet, inlineformset_factory
-
 from flash_cards.models import Answer, Category, Question
 
 
@@ -79,12 +79,15 @@ class JsonQuestionForm(forms.Form):
             }
         ),
         label="Contenu JSON",
-        help_text="Utilisez le même format que l'API /flash_cards/api/questions/.",
+        help_text=(
+            "Utilisez le même format que l'API /flash_cards/api/questions/. "
+            "Vous pouvez fournir un objet unique ou un tableau d'objets."
+        ),
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._parsed_payload: dict | None = None
+        self._parsed_payloads: list[dict[str, Any]] = []
 
     def clean(self):
         cleaned_data = super().clean()
@@ -95,11 +98,33 @@ class JsonQuestionForm(forms.Form):
             parsed = json.loads(payload_text)
         except json.JSONDecodeError as exc:
             raise forms.ValidationError(f"JSON invalide : {exc.msg}") from exc
-        if not isinstance(parsed, dict):
-            raise forms.ValidationError("Le JSON doit représenter un objet.")
-        self._parsed_payload = parsed
+        if isinstance(parsed, dict):
+            payloads = [parsed]
+        elif isinstance(parsed, list):
+            if not parsed:
+                raise forms.ValidationError(
+                    "Le tableau JSON doit contenir au moins un objet."
+                )
+            invalid_index = next(
+                (idx for idx, item in enumerate(parsed, start=1) if not isinstance(item, dict)),
+                None,
+            )
+            if invalid_index is not None:
+                raise forms.ValidationError(
+                    f"Chaque élément du tableau doit être un objet JSON (entrée #{invalid_index})."
+                )
+            payloads = parsed
+        else:
+            raise forms.ValidationError(
+                "Le JSON doit représenter un objet ou un tableau d'objets."
+            )
+        self._parsed_payloads = payloads
         return cleaned_data
 
     @property
     def parsed_payload(self) -> dict | None:
-        return self._parsed_payload
+        return self._parsed_payloads[0] if self._parsed_payloads else None
+
+    @property
+    def parsed_payloads(self) -> list[dict[str, Any]]:
+        return self._parsed_payloads

@@ -4,7 +4,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <p class="text-uppercase text-muted mb-1">Configuration</p>
-        <h1 class="h3 mb-0">Ajouter une question par JSON</h1>
+        <h1 class="h3 mb-0">Ajouter des questions via JSON</h1>
     </div>
     <a class="btn btn-outline-secondary" href="{% url 'flash_cards:settings' %}">Retour</a>
 </div>
@@ -32,7 +32,8 @@
 
             <p class="text-muted">
                 Le format accepté correspond exactement à celui de l'API <code>/flash_cards/api/questions/</code>.
-                Vous pouvez renseigner un <code>category_id</code> existant ou indiquer <code>category</code> pour créer une nouvelle catégorie.
+                Vous pouvez envoyer un objet unique ou un tableau d'objets.
+                Fournissez un <code>category_id</code> existant ou renseignez <code>category</code> pour créer une nouvelle catégorie.
             </p>
 
             <div class="mb-4">
@@ -43,7 +44,7 @@
                 <pre class="bg-light border rounded mt-2 p-3"><code>{{ json_example }}</code></pre>
             </div>
 
-            <button type="submit" class="btn btn-primary">Créer la question</button>
+            <button type="submit" class="btn btn-primary">Créer depuis le JSON</button>
         </form>
     </div>
 </div>

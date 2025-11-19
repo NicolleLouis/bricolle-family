@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.db import transaction
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -7,13 +8,22 @@ from flash_cards.forms import AnswerFormSet, CategoryForm, QuestionForm, JsonQue
 from flash_cards.models import Category, Question
 from flash_cards.services import QuestionCreationError, QuestionCreationService
 
-JSON_EXAMPLE_PAYLOAD = """{
-  "category": "Culture générale",
-  "question": "Quelle est la capitale de la France ?",
-  "context": "Chapitre Géographie",
-  "positive_answers": ["Paris"],
-  "negative_answers": ["Lyon", "Marseille"]
-}"""
+JSON_EXAMPLE_PAYLOAD = """[
+  {
+    "category": "Culture générale",
+    "question": "Quelle est la capitale de la France ?",
+    "context": "Chapitre Géographie",
+    "positive_answers": ["Paris"],
+    "negative_answers": ["Lyon", "Marseille"]
+  },
+  {
+    "category": "Sciences",
+    "question": "Quelle planète est la plus proche du soleil ?",
+    "context": "Chapitre Astronomie",
+    "positive_answers": ["Mercure"],
+    "negative_answers": ["Venus", "Terre"]
+  }
+]"""
 
 
 def settings(request):
@@ -123,30 +133,55 @@ def question_json_form(request):
     if request.method == "POST":
         form = JsonQuestionForm(request.POST)
         if form.is_valid():
-            payload = form.parsed_payload or {}
-            positive_answers = payload.get("positive_answers") or []
-            negative_answers = payload.get("negative_answers") or []
-            if not isinstance(positive_answers, list):
-                form.add_error(None, "'positive_answers' doit être un tableau.")
-            elif not isinstance(negative_answers, list):
-                form.add_error(None, "'negative_answers' doit être un tableau.")
+            payloads = form.parsed_payloads
+            normalized_payloads: list[tuple[dict, list, list]] = []
+            error_message: str | None = None
+            for idx, payload in enumerate(payloads, start=1):
+                positive_answers = payload.get("positive_answers") or []
+                negative_answers = payload.get("negative_answers") or []
+                if not isinstance(positive_answers, list):
+                    error_message = f"Entrée #{idx} : 'positive_answers' doit être un tableau."
+                    break
+                if not isinstance(negative_answers, list):
+                    error_message = f"Entrée #{idx} : 'negative_answers' doit être un tableau."
+                    break
+                normalized_payloads.append((payload, positive_answers, negative_answers))
+
+            if error_message:
+                form.add_error(None, error_message)
             else:
                 service = QuestionCreationService()
                 try:
-                    service.create_question(
-                        text=payload.get("question", ""),
-                        category_id=payload.get("category_id"),
-                        category_name=payload.get("category"),
-                        context=payload.get("context"),
-                        positive_answers=positive_answers,
-                        negative_answers=negative_answers,
-                    )
-                except Category.DoesNotExist:
-                    form.add_error(None, "Catégorie introuvable.")
+                    with transaction.atomic():
+                        for idx, (payload, positive_answers, negative_answers) in enumerate(
+                            normalized_payloads, start=1
+                        ):
+                            try:
+                                service.create_question(
+                                    text=payload.get("question", ""),
+                                    category_id=payload.get("category_id"),
+                                    category_name=payload.get("category"),
+                                    context=payload.get("context"),
+                                    positive_answers=positive_answers,
+                                    negative_answers=negative_answers,
+                                )
+                            except Category.DoesNotExist as exc:
+                                raise QuestionCreationError(
+                                    f"Entrée #{idx} : Catégorie introuvable."
+                                ) from exc
+                            except QuestionCreationError as exc:
+                                raise QuestionCreationError(
+                                    f"Entrée #{idx} : {exc}"
+                                ) from exc
                 except QuestionCreationError as exc:
                     form.add_error(None, str(exc))
                 else:
-                    messages.success(request, "Question ajoutée à partir du JSON.")
+                    count = len(normalized_payloads)
+                    if count == 1:
+                        message = "Question ajoutée à partir du JSON."
+                    else:
+                        message = f"{count} questions ajoutées à partir du JSON."
+                    messages.success(request, message)
                     return redirect(reverse("flash_cards:settings"))
     else:
         form = JsonQuestionForm()
