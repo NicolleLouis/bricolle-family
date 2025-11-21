@@ -1,6 +1,8 @@
 import pytest
 
-from flash_cards.models import Answer, Category, Question
+from django.contrib.auth import get_user_model
+
+from flash_cards.models import Answer, Category, Question, QuestionResult
 
 
 @pytest.mark.django_db
@@ -41,3 +43,20 @@ def test_answer_defaults():
 
     assert answer.is_correct is False
     assert str(answer) == "4"
+
+
+@pytest.mark.django_db
+def test_question_result_defaults():
+    User = get_user_model()
+    user = User.objects.create_user(username="player")
+    category = Category.objects.create(name="Geo")
+    question = Question.objects.create(category=category, text="Capital ?")
+
+    result = QuestionResult.objects.create(user=user, question=question)
+
+    assert result.answer_number == 0
+    assert result.positive_answer_number == 0
+    assert result.negative_answer_number == 0
+    assert result.last_answer is None
+    assert result.last_answer_result is False
+    assert str(result) == f"{user} - {question}"

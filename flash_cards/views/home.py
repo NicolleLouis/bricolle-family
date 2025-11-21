@@ -2,36 +2,62 @@ import random
 from typing import List, Optional
 
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils import timezone
 
-from flash_cards.models import Answer, Question
-from flash_cards.services import QuestionRetrievalService
+from flash_cards.models import Answer, Question, ThemePreset, QuestionResult
+from flash_cards.services import QuestionRetrievalService, ThemePresetQuestionFilterService
 
 
 def home(request):
-    service = QuestionRetrievalService()
+    if not request.user.is_authenticated:
+        return render(
+            request,
+            "flash_cards/login_required.html",
+            {"login_url": reverse("login")},
+        )
+
+    presets = ThemePreset.objects.prefetch_related("categories").order_by("name")
+    preset = _get_selected_preset(request, presets)
+    base_queryset = Question.objects.all()
+    if preset:
+        base_queryset = ThemePresetQuestionFilterService(
+            preset=preset, queryset=base_queryset
+        ).filter_questions()
+    service = QuestionRetrievalService(queryset=base_queryset, user=request.user)
     if request.method == "POST":
         action = request.POST.get("action")
         if action == "next":
-            context = _prepare_question_context(service)
+            context = _prepare_question_context(service, presets, preset)
         else:
-            context = _handle_answer_submission(request, service)
+            context = _handle_answer_submission(request, service, presets, preset)
     else:
-        context = _prepare_question_context(service)
+        context = _prepare_question_context(service, presets, preset)
     return render(request, "flash_cards/home.html", context)
 
 
-def _handle_answer_submission(request, service):
+def _get_selected_preset(request, presets):
+    preset_id = request.POST.get("preset_id") or request.GET.get("preset")
+    if not preset_id:
+        return None
+    try:
+        preset_id_int = int(preset_id)
+    except (TypeError, ValueError):
+        return None
+    return next((p for p in presets if p.id == preset_id_int), None)
+
+
+def _handle_answer_submission(request, service, presets, preset):
     question_id = request.POST.get("question_id")
     answer_id = request.POST.get("answer_id")
     answers_order = request.POST.get("answers_order", "")
 
     if not question_id or not answer_id or not answers_order:
-        return _prepare_question_context(service)
+        return _prepare_question_context(service, presets, preset)
 
     question = Question.objects.prefetch_related("answers").filter(pk=question_id).first()
     if not question:
-        return _prepare_question_context(service)
+        return _prepare_question_context(service, presets, preset)
 
     order_ids = [
         value.strip()
@@ -43,20 +69,21 @@ def _handle_answer_submission(request, service):
     if not answers:
         answers = _select_answers(question)
         if not answers:
-            return _prepare_question_context(service)
+            return _prepare_question_context(service, presets, preset)
         order_ids = [str(answer.id) for answer in answers]
 
     answers_by_id = {str(answer.id): answer for answer in answers}
     selected_answer = answers_by_id.get(str(answer_id))
     if not selected_answer:
-        return _prepare_question_context(service)
+        return _prepare_question_context(service, presets, preset)
 
     correct_answer = next((answer for answer in answers if answer.is_correct), None)
     is_correct = bool(correct_answer and selected_answer.id == correct_answer.id)
     _update_question_stats(question, is_correct)
+    _update_user_result(request.user, question, is_correct)
 
     return {
-        **_base_context(),
+        **_base_context(presets, preset),
         "question": question,
         "answers": answers,
         "answers_order": ",".join(order_ids),
@@ -68,7 +95,7 @@ def _handle_answer_submission(request, service):
     }
 
 
-def _prepare_question_context(service):
+def _prepare_question_context(service, presets, preset):
     for _ in range(5):
         question = service.get_question()
         if not question:
@@ -76,12 +103,14 @@ def _prepare_question_context(service):
         answers = _select_answers(question)
         if answers:
             return {
-                **_base_context(),
+                **_base_context(presets, preset),
                 "question": question,
                 "answers": answers,
                 "answers_order": ",".join(str(answer.id) for answer in answers),
             }
-    return _base_context(message="Aucune question disponible pour le moment.")
+    return _base_context(
+        presets, preset, message="Aucune question disponible pour le moment."
+    )
 
 
 def _select_answers(question: Question) -> List[Answer]:
@@ -131,7 +160,37 @@ def _update_question_stats(question: Question, is_correct: bool) -> None:
     )
 
 
-def _base_context(message: Optional[str] = None):
+def _update_user_result(user, question: Question, is_correct: bool) -> None:
+    result, _ = QuestionResult.objects.get_or_create(
+        user=user,
+        question=question,
+        defaults={
+            "last_answer": timezone.now(),
+            "answer_number": 0,
+            "positive_answer_number": 0,
+            "negative_answer_number": 0,
+            "last_answer_result": is_correct,
+        },
+    )
+    result.answer_number += 1
+    if is_correct:
+        result.positive_answer_number += 1
+    else:
+        result.negative_answer_number += 1
+    result.last_answer_result = is_correct
+    result.last_answer = timezone.now()
+    result.save(
+        update_fields=[
+            "answer_number",
+            "positive_answer_number",
+            "negative_answer_number",
+            "last_answer_result",
+            "last_answer",
+        ]
+    )
+
+
+def _base_context(presets, preset: Optional[ThemePreset], message: Optional[str] = None):
     return {
         "question": None,
         "answers": [],
@@ -142,4 +201,7 @@ def _base_context(message: Optional[str] = None):
         "is_correct": None,
         "correct_answer_text": None,
         "message": message,
+        "presets": presets,
+        "selected_preset": preset,
+        "selected_preset_id": preset.id if preset else "",
     }

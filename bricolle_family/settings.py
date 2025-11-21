@@ -149,6 +149,7 @@ LOGIN_URL = "login"
 LOGIN_EXEMPT_URLS = [
     "flash_cards:api_question_create",
     "flash_cards:api_categories",
+    "flash_cards:home",
 ]
 
 MEDIA_URL = "/media/"

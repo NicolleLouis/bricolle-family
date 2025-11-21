@@ -1,0 +1,115 @@
+{% extends "flash_cards/base.html" %}
+
+{% block title %}Presets de thèmes{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-1">Presets de thèmes</h1>
+        <p class="text-muted mb-0">Enregistrez vos combinaisons de catégories préférées.</p>
+    </div>
+    {% if preset %}
+        <a class="btn btn-outline-secondary" href="{% url 'flash_cards:theme_presets' %}">Nouveau preset</a>
+    {% endif %}
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <strong>Liste des presets</strong>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nom</th>
+                                <th>Type</th>
+                                <th>Catégories</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in presets %}
+                                <tr>
+                                    <td class="fw-semibold">{{ item.name }}</td>
+                                    <td>
+                                        {% if item.is_exclusion %}
+                                            <span class="badge bg-danger text-white">Exclusion</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Inclusion</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-muted">
+                                        {% if item.categories.all %}
+                                            {{ item.categories.all|join:", " }}
+                                        {% else %}
+                                            <span class="text-muted">Aucune</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <a class="btn btn-sm btn-outline-primary"
+                                           href="{% url 'flash_cards:theme_preset_edit' item.id %}">
+                                            Modifier
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">
+                                        Aucun preset pour le moment.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                {% if preset %}
+                    <strong>Modifier le preset</strong>
+                {% else %}
+                    <strong>Créer un preset</strong>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">Nom</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-danger small">{{ form.name.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        {{ form.is_exclusion }}
+                        <label class="form-check-label" for="{{ form.is_exclusion.id_for_label }}">
+                            Exclure les catégories sélectionnées
+                        </label>
+                        {% if form.is_exclusion.errors %}
+                            <div class="text-danger small">{{ form.is_exclusion.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.categories.id_for_label }}" class="form-label">Catégories</label>
+                        {{ form.categories }}
+                        {% if form.categories.errors %}
+                            <div class="text-danger small">{{ form.categories.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        {% if preset %}Enregistrer{% else %}Créer{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

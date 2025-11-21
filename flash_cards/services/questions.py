@@ -1,20 +1,42 @@
 import random
 from typing import Callable, Tuple
 
-from django.db.models import ExpressionWrapper, F, FloatField
-from django.db.models.functions import TruncDate
+from django.db.models import ExpressionWrapper, F, FloatField, OuterRef, Subquery, Value
+from django.db.models.functions import Coalesce, TruncDate
 
-from flash_cards.models import Question
+from flash_cards.models import Question, QuestionResult
 
 
 Strategy = Callable[[], Question | None]
 
 
 class QuestionRetrievalService:
-    """Select a question using weighted strategies."""
+    """Select a question using weighted strategies based on per-user stats when provided."""
 
-    def __init__(self, queryset=None) -> None:
-        self.queryset = queryset or Question.objects.all()
+    def __init__(self, queryset=None, user=None) -> None:
+        self.user = user
+        self._answer_field = "answer_number" if user is None else "user_answer_number"
+        self._negative_field = (
+            "negative_answer_number"
+            if user is None
+            else "user_negative_answer_number"
+        )
+        self._positive_field = (
+            "positive_answer_number"
+            if user is None
+            else "user_positive_answer_number"
+        )
+        self._last_result_field = (
+            "last_answer_result" if user is None else "user_last_answer_result"
+        )
+        self._last_answer_field = (
+            "last_answer" if user is None else "user_last_answer"
+        )
+
+        base_queryset = queryset or Question.objects.all()
+        self.queryset = (
+            self._with_user_stats(base_queryset) if user else base_queryset
+        )
         self._strategies: Tuple[Tuple[Strategy, int], ...] = (
             (self._random_question, 1),
             (self._last_failed_question, 3),
@@ -44,33 +66,52 @@ class QuestionRetrievalService:
         return self.queryset.order_by("?").first()
 
     def _last_failed_question(self) -> Question | None:
-        return (
-            self.queryset.filter(answer_number__gt=0, last_answer_result=False)
-            .order_by("?")
-            .first()
-        )
+        conditions = {f"{self._answer_field}__gt": 0, self._last_result_field: False}
+        return self.queryset.filter(**conditions).order_by("?").first()
 
     def _least_answered_question(self) -> Question | None:
-        return (
-            self.queryset.order_by("answer_number", "?").first()
-        )
+        return self.queryset.order_by(self._answer_field, "?").first()
 
     def _oldest_last_answer_question(self) -> Question | None:
-        queryset = self.queryset.exclude(last_answer__isnull=True).annotate(
-            last_answer_day=TruncDate("last_answer")
+        queryset = self.queryset.exclude(**{f"{self._last_answer_field}__isnull": True}).annotate(
+            last_answer_day=TruncDate(self._last_answer_field)
         )
         return queryset.order_by("last_answer_day", "?").first()
 
     def _high_error_question(self) -> Question | None:
         threshold = random.random()
         queryset = (
-            self.queryset.filter(answer_number__gt=0)
+            self.queryset.filter(**{f"{self._answer_field}__gt": 0})
             .annotate(
                 calculated_error=ExpressionWrapper(
-                    F("negative_answer_number") * 1.0 / F("answer_number"),
+                    F(self._negative_field) * 1.0 / F(self._answer_field),
                     output_field=FloatField(),
                 )
             )
             .filter(calculated_error__gte=threshold)
         )
         return queryset.order_by("?").first()
+
+    def _with_user_stats(self, queryset):
+        if not self.user:
+            return queryset
+        result_subquery = QuestionResult.objects.filter(
+            user=self.user, question=OuterRef("pk")
+        )
+        return queryset.annotate(
+            user_answer_number=Coalesce(
+                Subquery(result_subquery.values("answer_number")[:1]), Value(0)
+            ),
+            user_positive_answer_number=Coalesce(
+                Subquery(result_subquery.values("positive_answer_number")[:1]),
+                Value(0),
+            ),
+            user_negative_answer_number=Coalesce(
+                Subquery(result_subquery.values("negative_answer_number")[:1]),
+                Value(0),
+            ),
+            user_last_answer_result=Coalesce(
+                Subquery(result_subquery.values("last_answer_result")[:1]), Value(False)
+            ),
+            user_last_answer=Subquery(result_subquery.values("last_answer")[:1]),
+        )

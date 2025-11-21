@@ -5,7 +5,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
-from flash_cards.models import Answer, Category, Question
+from flash_cards.models import Answer, Category, Question, ThemePreset, QuestionResult
 
 
 @pytest.fixture
@@ -212,6 +212,56 @@ def test_categories_list_and_create(client, user):
     )
     assert create_response.status_code == 200
     assert Category.objects.filter(name="Science").exists()
+
+
+@pytest.mark.django_db
+def test_theme_presets_list_and_create(client, user):
+    culture = Category.objects.create(name="Culture")
+    science = Category.objects.create(name="Science")
+    client.force_login(user)
+
+    response = client.get(reverse("flash_cards:theme_presets"))
+    assert response.status_code == 200
+
+    create_response = client.post(
+        reverse("flash_cards:theme_presets"),
+        {
+            "name": "Révisions",
+            "is_exclusion": "",
+            "categories": [culture.id, science.id],
+        },
+        follow=True,
+    )
+
+    assert create_response.status_code == 200
+    preset = ThemePreset.objects.get()
+    assert preset.name == "Révisions"
+    assert list(preset.categories.order_by("name")) == [culture, science]
+
+
+@pytest.mark.django_db
+def test_theme_preset_update(client, user):
+    culture = Category.objects.create(name="Culture")
+    science = Category.objects.create(name="Science")
+    preset = ThemePreset.objects.create(name="Soir", is_exclusion=True)
+    preset.categories.set([culture])
+    client.force_login(user)
+
+    response = client.post(
+        reverse("flash_cards:theme_preset_edit", args=[preset.id]),
+        {
+            "name": "Soirée",
+            "is_exclusion": "",
+            "categories": [science.id],
+        },
+        follow=True,
+    )
+
+    assert response.status_code == 200
+    preset.refresh_from_db()
+    assert preset.name == "Soirée"
+    assert preset.is_exclusion is False
+    assert list(preset.categories.all()) == [science]
 
 
 @pytest.mark.django_db
@@ -465,6 +515,118 @@ def test_home_limits_negatives_when_less_than_three(client, user, monkeypatch):
 
     context = response.context[-1]
     assert len(context["answers"]) == 2
+
+
+@pytest.mark.django_db
+def test_home_requires_login(client):
+    response = client.get(reverse("flash_cards:home"))
+
+    assert response.status_code == 200
+    assert b"Vous devez vous connecter" in response.content
+
+
+@pytest.mark.django_db
+def test_home_filters_with_inclusion_preset(client, user):
+    allowed = Category.objects.create(name="Allowed")
+    blocked = Category.objects.create(name="Blocked")
+    q1 = Question.objects.create(category=allowed, text="Question ok")
+    Question.objects.create(category=blocked, text="Question no")
+    Answer.objects.create(question=q1, text="Yes", is_correct=True)
+    Answer.objects.create(question=q1, text="No", is_correct=False)
+    preset = ThemePreset.objects.create(name="Only allowed", is_exclusion=False)
+    preset.categories.add(allowed)
+    client.force_login(user)
+
+    response = client.get(reverse("flash_cards:home"), {"preset": str(preset.id)})
+
+    assert response.status_code == 200
+    context = response.context[-1]
+    assert context["selected_preset_id"] == preset.id
+    assert context["question"].category_id == allowed.id
+
+
+@pytest.mark.django_db
+def test_home_preserves_preset_when_answering_and_next(client, user):
+    allowed = Category.objects.create(name="Allowed")
+    excluded = Category.objects.create(name="Excluded")
+    question = Question.objects.create(category=allowed, text="Allowed question")
+    correct = Answer.objects.create(question=question, text="Correct", is_correct=True)
+    wrong = Answer.objects.create(question=question, text="Wrong", is_correct=False)
+    excluded_question = Question.objects.create(category=excluded, text="Excluded question")
+    Answer.objects.create(question=excluded_question, text="Skip", is_correct=True)
+    Answer.objects.create(question=excluded_question, text="Skip wrong", is_correct=False)
+    preset = ThemePreset.objects.create(name="Exclude", is_exclusion=True)
+    preset.categories.add(excluded)
+    client.force_login(user)
+
+    initial_response = client.get(reverse("flash_cards:home"), {"preset": str(preset.id)})
+    assert initial_response.context["question"].category_id == allowed.id
+
+    answer_response = client.post(
+        reverse("flash_cards:home"),
+        {
+            "action": "answer",
+            "question_id": question.id,
+            "answers_order": f"{correct.id},{wrong.id}",
+            "answer_id": str(correct.id),
+            "preset_id": str(preset.id),
+        },
+    )
+
+    assert answer_response.status_code == 200
+    answer_context = answer_response.context[-1]
+    assert answer_context["selected_preset_id"] == preset.id
+    assert answer_context["answered"] is True
+
+    next_response = client.post(
+        reverse("flash_cards:home"),
+        {
+            "action": "next",
+            "preset_id": str(preset.id),
+        },
+    )
+
+    assert next_response.status_code == 200
+    next_context = next_response.context[-1]
+    assert next_context["selected_preset_id"] == preset.id
+    assert next_context["question"].category_id == allowed.id
+
+
+@pytest.mark.django_db
+def test_home_updates_user_question_result(client, user, monkeypatch):
+    category = Category.objects.create(name="Geo")
+    question = Question.objects.create(category=category, text="Capital ?")
+    correct = Answer.objects.create(question=question, text="Paris", is_correct=True)
+    wrong = Answer.objects.create(question=question, text="London", is_correct=False)
+
+    class DummyService:
+        def get_question(self_inner):
+            return question
+
+    home_module = importlib.import_module("flash_cards.views.home")
+    monkeypatch.setattr(
+        home_module,
+        "QuestionRetrievalService",
+        lambda queryset=None, user=None: DummyService(),
+    )
+
+    client.force_login(user)
+    response = client.post(
+        reverse("flash_cards:home"),
+        {
+            "action": "answer",
+            "question_id": question.id,
+            "answers_order": f"{correct.id},{wrong.id}",
+            "answer_id": str(correct.id),
+        },
+    )
+
+    assert response.status_code == 200
+    result = QuestionResult.objects.get(user=user, question=question)
+    assert result.answer_number == 1
+    assert result.positive_answer_number == 1
+    assert result.negative_answer_number == 0
+    assert result.last_answer_result is True
 
 
 @pytest.mark.django_db

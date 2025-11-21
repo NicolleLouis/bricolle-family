@@ -3,6 +3,25 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-8 col-xl-7">
+        <form method="get" class="card shadow-sm mb-4">
+            <div class="card-body d-flex flex-column flex-md-row align-items-md-center gap-3">
+                <div>
+                    <label for="presetSelect" class="form-label mb-1 fw-semibold">Preset de thèmes</label>
+                    <select id="presetSelect" name="preset" class="form-select">
+                        <option value="">Toutes les questions</option>
+                        {% for preset in presets %}
+                            <option value="{{ preset.id }}" {% if preset.id == selected_preset_id %}selected{% endif %}>
+                                {{ preset.name }} {% if preset.is_exclusion %}(exclusion){% else %}(inclusion){% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="ms-md-auto">
+                    <button type="submit" class="btn btn-outline-primary">Appliquer</button>
+                </div>
+            </div>
+        </form>
+
         {% if question %}
             <div class="card shadow-sm">
                 <div class="card-body">
@@ -21,6 +40,7 @@
                         <input type="hidden" name="action" value="answer">
                         <input type="hidden" name="question_id" value="{{ question.id }}">
                         <input type="hidden" name="answers_order" value="{{ answers_order }}">
+                        <input type="hidden" name="preset_id" value="{{ selected_preset_id }}">
 
                         <div class="row row-cols-1 {% if answers|length > 2 %}row-cols-md-2{% endif %} g-3">
                             {% for answer in answers %}
@@ -69,6 +89,7 @@
                         <form method="post" class="mt-3">
                             {% csrf_token %}
                             <input type="hidden" name="action" value="next">
+                            <input type="hidden" name="preset_id" value="{{ selected_preset_id }}">
                             <button type="submit" class="btn btn-primary w-100 w-md-auto">
                                 Next Question
                             </button>
@@ -83,6 +104,7 @@
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="next">
+                <input type="hidden" name="preset_id" value="{{ selected_preset_id }}">
                 <button type="submit" class="btn btn-primary">Recharger une question</button>
             </form>
         {% endif %}
