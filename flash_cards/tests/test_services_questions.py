@@ -19,6 +19,22 @@ def test_service_returns_random_question_when_only_random_strategy(monkeypatch):
     assert service.get_question() == question
 
 
+def test_strategy_picker_respects_weights(monkeypatch):
+    service = QuestionRetrievalService()
+    s1 = lambda: "first"
+    s2 = lambda: "second"
+    s3 = lambda: "third"
+    service._strategies = ((s1, 1), (s2, 3), (s3, 6))
+
+    thresholds = iter([0.0, 0.9, 1.01, 3.5, 4.1, 9.9])
+    monkeypatch.setattr(
+        "flash_cards.services.questions.random.uniform",
+        lambda low, high: next(thresholds),
+    )
+
+    assert [service._pick_strategy() for _ in range(6)] == [s1, s1, s2, s2, s3, s3]
+
+
 @pytest.mark.django_db
 def test_service_returns_last_failed_question(monkeypatch):
     category = Category.objects.create(name="History")
@@ -68,6 +84,25 @@ def test_service_least_answered_strategy():
     service._strategies = ((service._least_answered_question, 1),)
 
     assert service.get_question() == least
+
+
+@pytest.mark.django_db
+def test_service_prefers_unanswered_when_least_strategy_selected(monkeypatch):
+    category = Category.objects.create(name="Geography")
+    user = get_user_model().objects.create(username="player")
+    answered = Question.objects.create(category=category, text="Seen capital")
+    unseen = Question.objects.create(category=category, text="New capital")
+    QuestionResult.objects.create(user=user, question=answered, answer_number=3)
+
+    # Force the weighted picker into the _least_answered_question range.
+    monkeypatch.setattr(
+        "flash_cards.services.questions.random.uniform",
+        lambda low, high: 4.5,
+    )
+
+    service = QuestionRetrievalService(user=user)
+
+    assert service.get_question() == unseen
 
 
 @pytest.mark.django_db
