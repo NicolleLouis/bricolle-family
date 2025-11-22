@@ -11,7 +11,7 @@
                         <option value="">Toutes les questions</option>
                         {% for preset in presets %}
                             <option value="{{ preset.id }}" {% if preset.id == selected_preset_id %}selected{% endif %}>
-                                {{ preset.name }} {% if preset.is_exclusion %}(exclusion){% else %}(inclusion){% endif %}
+                                {{ preset.name }}
                             </option>
                         {% endfor %}
                     </select>
