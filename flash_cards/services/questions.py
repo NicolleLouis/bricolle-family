@@ -23,35 +23,23 @@ class QuestionRetrievalService:
     """Select a question using weighted strategies based on per-user stats when provided."""
 
     def __init__(self, queryset=None, user=None) -> None:
+        if user is None:
+            raise ValueError("QuestionRetrievalService requires an authenticated user.")
         self.user = user
-        self._answer_field = "answer_number" if user is None else "user_answer_number"
-        self._negative_field = (
-            "negative_answer_number"
-            if user is None
-            else "user_negative_answer_number"
-        )
-        self._positive_field = (
-            "positive_answer_number"
-            if user is None
-            else "user_positive_answer_number"
-        )
-        self._last_result_field = (
-            "last_answer_result" if user is None else "user_last_answer_result"
-        )
-        self._last_answer_field = (
-            "last_answer" if user is None else "user_last_answer"
-        )
+        self._answer_field = "user_answer_number"
+        self._negative_field = "user_negative_answer_number"
+        self._positive_field = "user_positive_answer_number"
+        self._last_result_field = "user_last_answer_result"
+        self._last_answer_field = "user_last_answer"
 
         base_queryset = queryset or Question.objects.all()
-        self.queryset = (
-            self._with_user_stats(base_queryset) if user else base_queryset
-        )
+        self.queryset = self._with_user_stats(base_queryset)
         self._strategies: Tuple[Tuple[Strategy, int], ...] = (
             (self._random_question, 1),
             (self._last_failed_question, 2),
             (self._least_answered_question, 5),
-            (self._oldest_last_answer_question, 1),
-            (self._high_error_question, 2),
+            (self._oldest_last_answer_question, 2),
+            (self._high_error_question, 1),
         )
 
     def get_question(self) -> Question | None:
@@ -129,8 +117,6 @@ class QuestionRetrievalService:
         )
 
     def _question_without_user_result(self) -> Question | None:
-        if not self.user:
-            return None
         queryset = self.queryset.annotate(
             has_user_result=Exists(
                 QuestionResult.objects.filter(user=self.user, question=OuterRef("pk"))

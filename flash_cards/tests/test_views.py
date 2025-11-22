@@ -452,7 +452,9 @@ def test_home_displays_question(client, user, monkeypatch):
             return question
 
     home_module = importlib.import_module("flash_cards.views.home")
-    monkeypatch.setattr(home_module, "QuestionRetrievalService", lambda: DummyService())
+    monkeypatch.setattr(
+        home_module, "QuestionRetrievalService", lambda *args, **kwargs: DummyService()
+    )
 
     client.force_login(user)
     response = client.get(reverse("flash_cards:home"))
@@ -473,7 +475,9 @@ def test_home_records_answer(client, user, monkeypatch):
             return question
 
     home_module = importlib.import_module("flash_cards.views.home")
-    monkeypatch.setattr(home_module, "QuestionRetrievalService", lambda: DummyService())
+    monkeypatch.setattr(
+        home_module, "QuestionRetrievalService", lambda *args, **kwargs: DummyService()
+    )
 
     client.force_login(user)
     response = client.post(
@@ -508,7 +512,9 @@ def test_home_limits_negatives_when_less_than_three(client, user, monkeypatch):
             return question
 
     home_module = importlib.import_module("flash_cards.views.home")
-    monkeypatch.setattr(home_module, "QuestionRetrievalService", lambda: DummyService())
+    monkeypatch.setattr(
+        home_module, "QuestionRetrievalService", lambda *args, **kwargs: DummyService()
+    )
 
     client.force_login(user)
     response = client.get(reverse("flash_cards:home"))

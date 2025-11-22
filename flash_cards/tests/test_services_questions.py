@@ -19,8 +19,10 @@ def test_service_returns_random_question_when_only_random_strategy(monkeypatch):
     assert service.get_question() == question
 
 
+@pytest.mark.django_db
 def test_strategy_picker_respects_weights(monkeypatch):
-    service = QuestionRetrievalService()
+    user = get_user_model().objects.create(username="player")
+    service = QuestionRetrievalService(user=user)
     s1 = lambda: "first"
     s2 = lambda: "second"
     s3 = lambda: "third"
@@ -33,6 +35,11 @@ def test_strategy_picker_respects_weights(monkeypatch):
     )
 
     assert [service._pick_strategy() for _ in range(6)] == [s1, s1, s2, s2, s3, s3]
+
+
+def test_service_requires_user():
+    with pytest.raises(ValueError):
+        QuestionRetrievalService()
 
 
 @pytest.mark.django_db
