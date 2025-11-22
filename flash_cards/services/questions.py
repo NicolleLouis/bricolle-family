@@ -1,7 +1,15 @@
 import random
 from typing import Callable, Tuple
 
-from django.db.models import ExpressionWrapper, F, FloatField, OuterRef, Subquery, Value
+from django.db.models import (
+    ExpressionWrapper,
+    F,
+    FloatField,
+    IntegerField,
+    OuterRef,
+    Subquery,
+    Value,
+)
 from django.db.models.functions import Coalesce, TruncDate
 
 from flash_cards.models import Question, QuestionResult
@@ -70,6 +78,10 @@ class QuestionRetrievalService:
         return self.queryset.filter(**conditions).order_by("?").first()
 
     def _least_answered_question(self) -> Question | None:
+        if self.user:
+            unseen = self.queryset.filter(user_answer_number__isnull=True)
+            if unseen.exists():
+                return unseen.order_by("?").first()
         return self.queryset.order_by(self._answer_field, "?").first()
 
     def _oldest_last_answer_question(self) -> Question | None:
@@ -99,8 +111,8 @@ class QuestionRetrievalService:
             user=self.user, question=OuterRef("pk")
         )
         return queryset.annotate(
-            user_answer_number=Coalesce(
-                Subquery(result_subquery.values("answer_number")[:1]), Value(0)
+            user_answer_number=Subquery(
+                result_subquery.values("answer_number")[:1], output_field=IntegerField()
             ),
             user_positive_answer_number=Coalesce(
                 Subquery(result_subquery.values("positive_answer_number")[:1]),
