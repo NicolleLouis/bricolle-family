@@ -27,7 +27,10 @@ def test_service_returns_last_failed_question(monkeypatch):
     QuestionResult.objects.create(
         user=user, question=failing, answer_number=1, last_answer_result=False
     )
-    Question.objects.create(category=category, text="Capital of Italy ?")
+    successful = Question.objects.create(category=category, text="Capital of Italy ?")
+    QuestionResult.objects.create(
+        user=user, question=successful, answer_number=1, last_answer_result=True
+    )
 
     service = QuestionRetrievalService(user=user)
     service._strategies = ((service._last_failed_question, 1),)
@@ -83,6 +86,7 @@ def test_service_oldest_last_answer_strategy():
         last_answer=timezone.now() - timedelta(days=5),
         answer_number=1,
     )
+    QuestionResult.objects.create(user=user, question=never, answer_number=0)
 
     service = QuestionRetrievalService(user=user)
     service._strategies = ((service._oldest_last_answer_question, 1),)

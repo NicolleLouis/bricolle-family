@@ -4,6 +4,7 @@ from typing import Callable, Tuple
 from django.db.models import (
     ExpressionWrapper,
     F,
+    Exists,
     FloatField,
     IntegerField,
     OuterRef,
@@ -78,10 +79,9 @@ class QuestionRetrievalService:
         return self.queryset.filter(**conditions).order_by("?").first()
 
     def _least_answered_question(self) -> Question | None:
-        if self.user:
-            unseen = self.queryset.filter(user_answer_number__isnull=True)
-            if unseen.exists():
-                return unseen.order_by("?").first()
+        unseen = self._question_without_user_result()
+        if unseen:
+            return unseen
         return self.queryset.order_by(self._answer_field, "?").first()
 
     def _oldest_last_answer_question(self) -> Question | None:
@@ -127,3 +127,13 @@ class QuestionRetrievalService:
             ),
             user_last_answer=Subquery(result_subquery.values("last_answer")[:1]),
         )
+
+    def _question_without_user_result(self) -> Question | None:
+        if not self.user:
+            return None
+        queryset = self.queryset.annotate(
+            has_user_result=Exists(
+                QuestionResult.objects.filter(user=self.user, question=OuterRef("pk"))
+            )
+        ).filter(has_user_result=False)
+        return queryset.order_by("?").first()
