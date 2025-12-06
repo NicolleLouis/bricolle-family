@@ -1,6 +1,8 @@
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic import RedirectView
+from django.templatetags.static import static as static_url
 
 from bricolle_family import settings
 from bricolle_family.views.login import Login
@@ -10,6 +12,7 @@ urlpatterns = [
     path("", SummaryView.home, name="home"),
     path("games", SummaryView.games, name="games"),
     path("more", SummaryView.more, name="more"),
+    path("favicon.ico", RedirectView.as_view(url=static_url("favicon.svg"), permanent=True)),
 
 
     path("admin/", admin.site.urls),
