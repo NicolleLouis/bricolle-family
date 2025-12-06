@@ -153,7 +153,7 @@ class CategoryPerformanceLeaderboardService:
     def __init__(self, queryset: QuerySet[Category] | None = None) -> None:
         self._queryset = queryset or Category.objects.all()
 
-    def top_categories(self, limit: int = 5) -> list[dict[str, object]]:
+    def top_categories(self, limit: int = 10) -> list[dict[str, object]]:
         categories = (
             self._queryset.filter(questions__answer_number__gt=0)
             .annotate(

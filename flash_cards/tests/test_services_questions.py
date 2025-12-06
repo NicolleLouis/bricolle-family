@@ -85,6 +85,7 @@ def test_service_least_answered_strategy():
     least = Question.objects.create(category=category, text="Capital 2")
     q3 = Question.objects.create(category=category, text="Capital 3")
     QuestionResult.objects.create(user=user, question=q1, answer_number=5)
+    QuestionResult.objects.create(user=user, question=least, answer_number=1)
     QuestionResult.objects.create(user=user, question=q3, answer_number=2)
 
     service = QuestionRetrievalService(user=user)
@@ -94,22 +95,32 @@ def test_service_least_answered_strategy():
 
 
 @pytest.mark.django_db
-def test_service_prefers_unanswered_when_least_strategy_selected(monkeypatch):
+def test_service_prioritizes_unanswered_before_strategy():
     category = Category.objects.create(name="Geography")
     user = get_user_model().objects.create(username="player")
     answered = Question.objects.create(category=category, text="Seen capital")
     unseen = Question.objects.create(category=category, text="New capital")
     QuestionResult.objects.create(user=user, question=answered, answer_number=3)
 
-    # Force the weighted picker into the _least_answered_question range.
-    monkeypatch.setattr(
-        "flash_cards.services.questions.random.uniform",
-        lambda low, high: 4.5,
-    )
-
     service = QuestionRetrievalService(user=user)
+    service._strategies = ((service._least_answered_question, 1),)
 
     assert service.get_question() == unseen
+
+
+@pytest.mark.django_db
+def test_service_prioritizes_questions_with_zero_answers():
+    category = Category.objects.create(name="Geography")
+    user = get_user_model().objects.create(username="player")
+    zero_answer = Question.objects.create(category=category, text="Never answered")
+    seen = Question.objects.create(category=category, text="Already answered")
+    QuestionResult.objects.create(user=user, question=zero_answer, answer_number=0)
+    QuestionResult.objects.create(user=user, question=seen, answer_number=2)
+
+    service = QuestionRetrievalService(user=user)
+    service._strategies = ((service._random_question, 1),)
+
+    assert service.get_question() == zero_answer
 
 
 @pytest.mark.django_db
@@ -118,7 +129,7 @@ def test_service_oldest_last_answer_strategy():
     user = get_user_model().objects.create(username="player")
     recent = Question.objects.create(category=category, text="Recent")
     oldest = Question.objects.create(category=category, text="Oldest")
-    never = Question.objects.create(category=category, text="Never")
+    another = Question.objects.create(category=category, text="Another")
     QuestionResult.objects.create(
         user=user, question=recent, last_answer=timezone.now(), answer_number=1
     )
@@ -128,7 +139,7 @@ def test_service_oldest_last_answer_strategy():
         last_answer=timezone.now() - timedelta(days=5),
         answer_number=1,
     )
-    QuestionResult.objects.create(user=user, question=never, answer_number=0)
+    QuestionResult.objects.create(user=user, question=another, answer_number=2)
 
     service = QuestionRetrievalService(user=user)
     service._strategies = ((service._oldest_last_answer_question, 1),)

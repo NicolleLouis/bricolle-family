@@ -8,6 +8,7 @@ from django.db.models import (
     FloatField,
     IntegerField,
     OuterRef,
+    Q,
     Subquery,
     Value,
 )
@@ -43,6 +44,9 @@ class QuestionRetrievalService:
         )
 
     def get_question(self) -> Question | None:
+        unanswered = self._unanswered_question()
+        if unanswered:
+            return unanswered
         strategy = self._pick_strategy()
         question = strategy()
         if question:
@@ -67,9 +71,6 @@ class QuestionRetrievalService:
         return self.queryset.filter(**conditions).order_by("?").first()
 
     def _least_answered_question(self) -> Question | None:
-        unseen = self._question_without_user_result()
-        if unseen:
-            return unseen
         return self.queryset.order_by(self._answer_field, "?").first()
 
     def _oldest_last_answer_question(self) -> Question | None:
@@ -116,10 +117,8 @@ class QuestionRetrievalService:
             user_last_answer=Subquery(result_subquery.values("last_answer")[:1]),
         )
 
-    def _question_without_user_result(self) -> Question | None:
-        queryset = self.queryset.annotate(
-            has_user_result=Exists(
-                QuestionResult.objects.filter(user=self.user, question=OuterRef("pk"))
-            )
-        ).filter(has_user_result=False)
-        return queryset.order_by("?").first()
+    def _unanswered_question(self) -> Question | None:
+        conditions = Q(**{f"{self._answer_field}__isnull": True}) | Q(
+            **{self._answer_field: 0}
+        )
+        return self.queryset.filter(conditions).order_by("?").first()
