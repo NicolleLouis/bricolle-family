@@ -15,6 +15,7 @@ if not SECRET_KEY:
 
 DEBUG = config("DEBUG", default=True)
 ENV = config("ENV", default="local")
+IS_PRODUCTION = str(ENV).lower() == "production"
 FLASH_CARDS_MCP_TOKEN = config("FLASH_CARDS_MCP_TOKEN", default="")
 
 ALLOWED_HOSTS = [
@@ -84,7 +85,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "bricolle_family.wsgi.application"
 
-if ENV == "production":
+if IS_PRODUCTION:
     DATABASES = {
         "default": dj_database_url.config(
             default=config("DATABASE_URL"), conn_max_age=600
@@ -126,15 +127,19 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.bricolle-family.fr",
 ]
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SECURE_SSL_REDIRECT = ENV == "production"
-SESSION_COOKIE_SECURE = ENV == "production"
-CSRF_COOKIE_SECURE = ENV == "production"
+SECURE_SSL_REDIRECT = IS_PRODUCTION
+SESSION_COOKIE_SECURE = IS_PRODUCTION
+CSRF_COOKIE_SECURE = IS_PRODUCTION
+SECURE_HSTS_SECONDS = 60 * 60 * 24 * 365 if IS_PRODUCTION else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = IS_PRODUCTION
+SECURE_HSTS_PRELOAD = IS_PRODUCTION
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-if ENV == "production":
+if IS_PRODUCTION:
     STORAGES["staticfiles"] = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
     }
