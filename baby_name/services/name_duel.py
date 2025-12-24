@@ -6,14 +6,34 @@ from baby_name.repositories.name import NameRepository
 
 
 class NameDuel:
-    def __init__(self, user):
+    def __init__(self, user, gender_filter: str = "all"):
         self.user = user
-        self.sex = random.choice([True, False])
+        self.sex = self._resolve_sex(user=user, gender_filter=gender_filter)
         self.random_duel = random.choice([True, False])
         self.rankable_names = NameRepository.get_all_rankables_per_user(
             sex=self.sex,
             user=user
         )
+
+    @classmethod
+    def _resolve_sex(cls, user, gender_filter: str) -> bool:
+        if gender_filter == "boys":
+            return False
+        if gender_filter == "girls":
+            return True
+        boys_count = NameRepository.get_all_rankables_per_user(
+            sex=False,
+            user=user
+        ).count()
+        girls_count = NameRepository.get_all_rankables_per_user(
+            sex=True,
+            user=user
+        ).count()
+        if boys_count < 2 <= girls_count:
+            return True
+        if girls_count < 2 <= boys_count:
+            return False
+        return random.choice([True, False])
 
     def get_names(self):
         if len(self.rankable_names) < 2:

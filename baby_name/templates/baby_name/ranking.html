@@ -1,9 +1,29 @@
 {% extends 'baby_name/base.html' %}
 {% block content %}
+<div class="container d-flex justify-content-center align-items-center mt-2 mb-3">
+    <form method="get" action="{% url 'baby_name:ranking' %}">
+        <button type="submit" name="gender" value="all"
+            class="btn btn-link filter-btn {% if gender_filter == 'all' %}selected{% endif %}">
+            All
+        </button>
+
+        <button type="submit" name="gender" value="boys"
+            class="btn btn-link filter-btn {% if gender_filter == 'boys' %}selected{% endif %}">
+            Boys
+        </button>
+
+        <button type="submit" name="gender" value="girls"
+            class="btn btn-link filter-btn {% if gender_filter == 'girls' %}selected{% endif %}">
+            Girls
+        </button>
+    </form>
+</div>
+
 <div class="duel-container">
     <form method="post" action="{% url 'baby_name:ranking_vote' %}" class="duel-card">
       {% csrf_token %}
       <input type="hidden" name="loser_id" value="{{ name_2.id }}">
+      <input type="hidden" name="gender" value="{{ gender_filter }}">
       <button type="submit" name="winner_id" value="{{ name_1.id }}" class="name-button name-text {% if name_1.sex %}girl{% else %}boy{% endif %}">
         {{ name_1.name }}
       </button>
@@ -12,6 +32,7 @@
     <form method="post" action="{% url 'baby_name:ranking_vote' %}" class="duel-card">
       {% csrf_token %}
       <input type="hidden" name="loser_id" value="{{ name_1.id }}">
+      <input type="hidden" name="gender" value="{{ gender_filter }}">
       <button type="submit" name="winner_id" value="{{ name_2.id }}" class="name-button name-text {% if name_2.sex %}girl{% else %}boy{% endif %}">
         {{ name_2.name }}
       </button>
