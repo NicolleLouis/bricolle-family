@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from decimal import Decimal, ROUND_HALF_UP
+import logging
 from typing import TYPE_CHECKING
 
 from django.apps import apps
@@ -12,6 +13,8 @@ from capitalism.services.pricing import HumanBuyingPriceValuationService
 
 if TYPE_CHECKING:
     from capitalism.models import Human, Object
+
+logger = logging.getLogger(__name__)
 
 
 class HumanBuyingService:
@@ -72,13 +75,33 @@ class HumanBuyingService:
             self._record_transaction(obj.type, price)
 
     def _debit_buyer(self, amount: float) -> None:
-        self.human.money = self._round_money(self.human.money - amount)
+        raw_value = self.human.money - amount
+        rounded_value = self._round_money(raw_value)
+        if rounded_value != raw_value:
+            logger.info(
+                "Money rounding (buyer): human_id=%s raw=%s rounded=%s amount=%s",
+                self.human.id,
+                raw_value,
+                rounded_value,
+                amount,
+            )
+        self.human.money = rounded_value
         self.human.save(update_fields=["money"])
 
     @staticmethod
     def _credit_seller(seller: "Human", amount: float) -> None:
         seller.refresh_from_db(fields=["money"])
-        seller.money = HumanBuyingService._round_money(seller.money + amount)
+        raw_value = seller.money + amount
+        rounded_value = HumanBuyingService._round_money(raw_value)
+        if rounded_value != raw_value:
+            logger.info(
+                "Money rounding (seller): human_id=%s raw=%s rounded=%s amount=%s",
+                seller.id,
+                raw_value,
+                rounded_value,
+                amount,
+            )
+        seller.money = rounded_value
         seller.save(update_fields=["money"])
 
     def _transfer_object(self, obj: "Object") -> None:

@@ -1,0 +1,1 @@
+"""Runeterra app tests."""

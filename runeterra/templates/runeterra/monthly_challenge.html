@@ -1,0 +1,90 @@
+{% extends 'runeterra/base.html' %}
+
+{% block title %}Monthly Challenge{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">Monthly Challenge</h1>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="reset">
+        <button type="submit" class="btn btn-danger">Reset Month</button>
+    </form>
+</div>
+
+<div class="mb-4">
+    <div class="btn-group flex-wrap" role="group" aria-label="Star power filter">
+        <a
+            class="btn btn-outline-primary {% if not selected_star_level %}active{% endif %}"
+            href="{% url 'runeterra:monthly_challenge' %}"
+        >
+            All ({{ total_available }})
+        </a>
+        {% for filter in star_filters %}
+            {% if filter.count == 0 %}
+                <span class="btn btn-outline-secondary disabled">
+                    {{ filter.star }} ⭐ ({{ filter.count }})
+                </span>
+            {% else %}
+                <a
+                    class="btn btn-outline-primary {% if selected_star_level == filter.star %}active{% endif %}"
+                    href="?star_level={{ filter.star }}"
+                >
+                    {{ filter.star }} ⭐ ({{ filter.count }})
+                </a>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+{% if spotlight %}
+<div class="card border-warning mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="card-title mb-1">Champion Spotlight</h5>
+            <p class="card-text mb-0">
+                {{ spotlight.name }} — {{ spotlight.star_level }} ⭐ — {{ spotlight.monthly_try_remaining }} tries left
+            </p>
+        </div>
+        <form method="post" class="m-0">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="consume">
+            <input type="hidden" name="champion_id" value="{{ spotlight.id }}">
+            <button type="submit" class="btn btn-sm btn-outline-primary">Consume try</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% if champions %}
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Champion</th>
+        <th>Monthly tries remaining</th>
+        <th>Stars ⭐</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for champion in champions %}
+    <tr>
+        <td>{{ champion.name }}</td>
+        <td>{{ champion.monthly_try_remaining }}</td>
+        <td>{{ champion.star_level }}</td>
+        <td class="text-end">
+            <form method="post" class="m-0">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="consume">
+                <input type="hidden" name="champion_id" value="{{ champion.id }}">
+                <button type="submit" class="btn btn-sm btn-outline-primary">Consume try</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No champions found.</p>
+{% endif %}
+{% endblock %}

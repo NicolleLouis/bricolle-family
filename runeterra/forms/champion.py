@@ -13,14 +13,18 @@ class ChampionForm(forms.ModelForm):
             "secondary_region",
             "star_level",
             "champion_level",
+            "monthly_try_remaining",
             "unlocked",
         ]
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control"}),
             "primary_region": forms.Select(attrs={"class": "form-select"}),
             "secondary_region": forms.Select(attrs={"class": "form-select"}),
-            "star_level": forms.NumberInput(attrs={"class": "form-control", "min": 0, "max": 6}),
+            "star_level": forms.NumberInput(attrs={"class": "form-control", "min": 0, "max": 7}),
             "champion_level": forms.NumberInput(attrs={"class": "form-control", "min": 0, "max": 60}),
+            "monthly_try_remaining": forms.NumberInput(
+                attrs={"class": "form-control", "min": 0, "max": 3}
+            ),
             "unlocked": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
         labels = {
@@ -29,6 +33,6 @@ class ChampionForm(forms.ModelForm):
             "secondary_region": "Secondary region",
             "star_level": "Star level",
             "champion_level": "Level",
+            "monthly_try_remaining": "Monthly tries remaining",
             "unlocked": "Unlocked",
         }
-

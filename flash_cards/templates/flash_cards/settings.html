@@ -13,7 +13,7 @@
         </div>
     </div>
     <form class="row g-2" method="get">
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-3">
             <input type="search" class="form-control" name="q" placeholder="Rechercher une question"
                    value="{{ query }}">
         </div>
@@ -27,16 +27,25 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="col-12 col-md-3">
+        <div class="col-12 col-md-2">
             <select name="validity" class="form-select">
                 <option value="">Toutes les questions</option>
                 <option value="valid" {% if validity == "valid" %}selected{% endif %}>Questions valides</option>
                 <option value="invalid" {% if validity == "invalid" %}selected{% endif %}>Questions non valides</option>
             </select>
         </div>
+        <div class="col-12 col-md-2">
+            <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" name="needs_rework" id="needs_rework_filter"
+                       value="1" {% if needs_rework == "1" %}checked{% endif %}>
+                <label class="form-check-label" for="needs_rework_filter">
+                    A retravailler
+                </label>
+            </div>
+        </div>
         <div class="col-12 col-md-2 d-flex gap-2">
             <button class="btn btn-outline-secondary w-100" type="submit">Filtrer</button>
-            {% if query or category_id or validity %}
+            {% if query or category_id or validity or needs_rework %}
                 <a class="btn btn-outline-secondary w-100" href="{% url 'flash_cards:settings' %}">Réinitialiser</a>
             {% endif %}
         </div>

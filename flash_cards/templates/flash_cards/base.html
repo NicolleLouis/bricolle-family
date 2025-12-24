@@ -8,8 +8,30 @@
     {% load bootstrap5 %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
+    <style>
+        .flash-cards .quiz-answer,
+        .flash-cards .quiz-action {
+            border-radius: 0.75rem;
+            padding: 0.9rem 1rem;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .flash-cards .quiz-answer:hover:not(:disabled),
+        .flash-cards .quiz-action:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(15, 23, 42, 0.12);
+        }
+
+        .flash-cards .quiz-answer:disabled {
+            box-shadow: none;
+            opacity: 0.9;
+        }
+    </style>
 </head>
-<body>
+<body class="flash-cards">
 {% include "flash_cards/header.html" %}
 <div class="container py-4">
     {% block content %}{% endblock %}

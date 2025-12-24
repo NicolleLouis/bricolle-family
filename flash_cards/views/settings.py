@@ -30,6 +30,7 @@ def settings(request):
     query = request.GET.get("q", "").strip()
     category_id = request.GET.get("category", "").strip()
     validity = request.GET.get("validity", "").strip()
+    needs_rework = request.GET.get("needs_rework", "").strip()
     questions = (
         Question.objects.select_related("category")
         .prefetch_related("answers")
@@ -50,6 +51,8 @@ def settings(request):
         )
     elif validity == "valid":
         questions = questions.filter(positive_answers__gt=0, negative_answers__gt=0)
+    if needs_rework == "1":
+        questions = questions.filter(needs_rework=True)
 
     categories = Category.objects.order_by("name")
 
@@ -61,6 +64,7 @@ def settings(request):
             "query": query,
             "category_id": category_id,
             "validity": validity,
+            "needs_rework": needs_rework,
             "categories": categories,
         },
     )

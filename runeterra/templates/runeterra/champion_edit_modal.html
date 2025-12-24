@@ -31,11 +31,15 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="id_star_level_{{ champion.id }}">Star Level</label>
-                        <input type="number" min="0" max="6" class="form-control" id="id_star_level_{{ champion.id }}" name="star_level" value="{{ champion.star_level }}">
+                        <input type="number" min="0" max="7" class="form-control" id="id_star_level_{{ champion.id }}" name="star_level" value="{{ champion.star_level }}">
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="id_champion_level_{{ champion.id }}">Level</label>
                         <input type="number" min="0" max="60" class="form-control" id="id_champion_level_{{ champion.id }}" name="champion_level" value="{{ champion.champion_level }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="id_monthly_try_remaining_{{ champion.id }}">Monthly tries remaining</label>
+                        <input type="number" min="0" max="3" class="form-control" id="id_monthly_try_remaining_{{ champion.id }}" name="monthly_try_remaining" value="{{ champion.monthly_try_remaining }}">
                     </div>
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" id="id_unlocked_{{ champion.id }}" name="unlocked" {% if champion.unlocked %}checked{% endif %}>

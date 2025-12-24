@@ -39,6 +39,31 @@ components:
           minItems: 1
           items:
             type: string
+    QuestionUpdateInput:
+      type: object
+      description: Provide only the fields to update. If you send answers, include both positive_answers and negative_answers.
+      properties:
+        category_id:
+          type: integer
+          description: Existing category ID
+        category:
+          type: string
+          description: Category name used when category_id is missing
+        question:
+          type: string
+        context:
+          type: string
+          nullable: true
+        positive_answers:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        negative_answers:
+          type: array
+          minItems: 1
+          items:
+            type: string
     QuestionResponse:
       type: object
       properties:
@@ -135,6 +160,71 @@ paths:
                           type: integer
         "403":
           description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /questions/needs-rework/:
+    get:
+      summary: Get a random question flagged as needs_rework
+      operationId: getNeedsReworkQuestion
+      security:
+        - FlashCardsToken: []
+      responses:
+        "200":
+          description: Question flagged as needs_rework
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionResponse'
+        "404":
+          description: No needs_rework question available
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /questions/{question_id}/:
+    post:
+      summary: Update a question and reset needs_rework to false
+      operationId: updateQuestion
+      security:
+        - FlashCardsToken: []
+      parameters:
+        - name: question_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionUpdateInput'
+      responses:
+        "200":
+          description: Updated question
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionResponse'
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "404":
+          description: Question or category not found
           content:
             application/json:
               schema:

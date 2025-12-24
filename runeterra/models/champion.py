@@ -11,8 +11,12 @@ class Champion(models.Model):
     secondary_region = models.CharField(
         max_length=20, choices=Region.choices, blank=True, null=True
     )
-    star_level = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(6)])
+    star_level = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(7)])
     champion_level = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(60)])
+    monthly_try_remaining = models.IntegerField(
+        default=3,
+        validators=[MinValueValidator(0), MaxValueValidator(3)],
+    )
     unlocked = models.BooleanField(default=False)
     lvl30 = models.BooleanField(default=False)
 
@@ -30,10 +34,8 @@ class Champion(models.Model):
         return self.name
 
     @property
-    def effective_star_level(self):
-        if self.lvl30:
-            return self.star_level + 1
-        return self.star_level
+    def monthly_is_available(self):
+        return self.monthly_try_remaining > 0 and self.star_level >= 2
 
 
 @admin.register(Champion)
@@ -43,6 +45,7 @@ class ChampionAdmin(admin.ModelAdmin):
         "primary_region",
         "secondary_region",
         "star_level",
+        "monthly_try_remaining",
         "unlocked",
         "lvl30",
     )

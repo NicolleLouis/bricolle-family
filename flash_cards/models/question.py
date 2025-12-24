@@ -14,6 +14,7 @@ class Question(models.Model):
     last_answer_result = models.BooleanField(default=False)
     positive_answer_number = models.PositiveIntegerField(default=0)
     negative_answer_number = models.PositiveIntegerField(default=0)
+    needs_rework = models.BooleanField(default=False)
 
     class Meta:
         ordering = ("-created_at",)
@@ -49,8 +50,9 @@ class QuestionAdmin(admin.ModelAdmin):
         "positive_answer_number",
         "negative_answer_number",
         "last_answer_result",
+        "needs_rework",
     )
-    list_filter = ("category", "last_answer_result")
+    list_filter = ("category", "last_answer_result", "needs_rework")
     search_fields = ("text",)
 
     def short_text(self, obj: Question) -> str:

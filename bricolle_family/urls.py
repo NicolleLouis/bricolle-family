@@ -28,7 +28,6 @@ urlpatterns = [
     path("games_collection/", include("games_collection.urls")),
     path("documents/", include("documents.urls")),
     path("the_bazaar/", include("the_bazaar.urls")),
-    path("habit_tracker/", include("habit_tracker.urls")),
     path("capitalism/", include("capitalism.urls")),
 ]
 

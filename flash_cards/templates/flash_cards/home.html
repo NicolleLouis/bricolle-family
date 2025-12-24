@@ -86,14 +86,25 @@
                                 <strong>{{ correct_answer_text }}</strong>
                             {% endif %}
                         </div>
-                        <form method="post" class="mt-3">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="next">
-                            <input type="hidden" name="preset_id" value="{{ selected_preset_id }}">
-                            <button type="submit" class="btn btn-primary w-100 w-md-auto">
-                                Next Question
-                            </button>
-                        </form>
+                        <div class="d-flex flex-column flex-md-row gap-2 mt-3">
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="next">
+                                <input type="hidden" name="preset_id" value="{{ selected_preset_id }}">
+                                <button type="submit" class="btn btn-primary w-100 w-md-auto quiz-action">
+                                    Next Question
+                                </button>
+                            </form>
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="needs_rework">
+                                <input type="hidden" name="question_id" value="{{ question.id }}">
+                                <input type="hidden" name="preset_id" value="{{ selected_preset_id }}">
+                                <button type="submit" class="btn btn-outline-danger w-100 w-md-auto quiz-action">
+                                    Needs rework
+                                </button>
+                            </form>
+                        </div>
                     {% endif %}
                 </div>
             </div>

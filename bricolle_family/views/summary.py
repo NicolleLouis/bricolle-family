@@ -5,7 +5,7 @@ class SummaryView:
     def home(request):
         modules = [
             {"name": "Agathe", "url": "/agathe/", "color": "#e09cff"},
-            {"name": "Habit Tracker", "url": "/habit_tracker/", "color": "#1abc9c"},
+            {"name": "Flash Cards", "url": "/flash_cards/", "color": "#9b59b6"},
             {"name": "Games", "url": "/games", "color": "#ffbe5c"},
             {"name": "More...", "url": "/more", "color": "#3498db"},
         ]
@@ -29,7 +29,6 @@ class SummaryView:
             {"name": "Baby Name", "url": "/baby_name/", "color": "#ff6b6b"},
             {"name": "Finance Simulator", "url": "/finance_simulator/", "color": "#1abc9c"},
             {"name": "Documents", "url": "/documents/", "color": "#4A7F4C"},
-            {"name": "Flash Cards", "url": "/flash_cards/", "color": "#9b59b6"},
             {"name": "Capitalism", "url": "/capitalism/", "color": "#2ecc71"},
         ]
         return render(request, "bricolle_family/summary.html", {"modules": modules})

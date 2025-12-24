@@ -139,6 +139,29 @@ def test_question_creation_from_json_invalid_payload(client, user):
 
 
 @pytest.mark.django_db
+def test_mark_question_needs_rework_from_home(client, user):
+    category = Category.objects.create(name="Culture")
+    question = Question.objects.create(category=category, text="Capital of Italy ?")
+    next_question = Question.objects.create(category=category, text="Capital of Spain ?")
+    Answer.objects.create(question=question, text="Rome", is_correct=True)
+    Answer.objects.create(question=question, text="Milan", is_correct=False)
+    Answer.objects.create(question=next_question, text="Madrid", is_correct=True)
+    Answer.objects.create(question=next_question, text="Barcelona", is_correct=False)
+    client.force_login(user)
+
+    response = client.post(
+        reverse("flash_cards:home"),
+        {"action": "needs_rework", "question_id": question.id},
+    )
+
+    assert response.status_code == 200
+    question.refresh_from_db()
+    assert question.needs_rework is True
+    assert b"Capital of Spain" in response.content
+    assert b"Capital of Italy" not in response.content
+
+
+@pytest.mark.django_db
 def test_delete_question(client, user):
     category = Category.objects.create(name="Geo")
     question = Question.objects.create(category=category, text="Capital of Spain ?")
@@ -192,6 +215,27 @@ def test_settings_filter_questions(client, user):
     valid_content = valid_response.content
     assert b"Capital of France" in valid_content
     assert b"Capital of Spain" not in valid_content
+
+
+@pytest.mark.django_db
+def test_settings_filter_needs_rework(client, user):
+    category = Category.objects.create(name="Culture")
+    needs_rework_question = Question.objects.create(
+        category=category,
+        text="Capital of Italy ?",
+        needs_rework=True,
+    )
+    ok_question = Question.objects.create(category=category, text="Capital of Portugal ?")
+    Answer.objects.create(question=needs_rework_question, text="Rome", is_correct=True)
+    Answer.objects.create(question=ok_question, text="Lisbon", is_correct=True)
+    client.force_login(user)
+
+    response = client.get(reverse("flash_cards:settings"), {"needs_rework": "1"})
+
+    assert response.status_code == 200
+    content = response.content
+    assert b"Capital of Italy" in content
+    assert b"Capital of Portugal" not in content
 
 
 @pytest.mark.django_db
@@ -438,6 +482,64 @@ def test_api_categories_rejects_wrong_token(client, settings):
     )
 
     assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_api_get_needs_rework_question(client, settings):
+    settings.FLASH_CARDS_MCP_TOKEN = "secret"
+    category = Category.objects.create(name="Trivia")
+    question = Question.objects.create(
+        category=category, text="Capital of Italy ?", needs_rework=True
+    )
+    Answer.objects.create(question=question, text="Rome", is_correct=True)
+    Answer.objects.create(question=question, text="Milan", is_correct=False)
+
+    response = client.get(
+        reverse("flash_cards:api_question_needs_rework"),
+        HTTP_X_MCP_TOKEN="secret",
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["id"] == question.id
+    assert payload["question"] == "Capital of Italy ?"
+
+
+@pytest.mark.django_db
+def test_api_update_question_resets_needs_rework(client, settings):
+    settings.FLASH_CARDS_MCP_TOKEN = "secret"
+    category = Category.objects.create(name="Trivia")
+    question = Question.objects.create(
+        category=category, text="Capital of Italy ?", needs_rework=True
+    )
+    Answer.objects.create(question=question, text="Rome", is_correct=True)
+    Answer.objects.create(question=question, text="Milan", is_correct=False)
+
+    response = client.post(
+        reverse("flash_cards:api_question_update", args=[question.id]),
+        data=json.dumps(
+            {
+                "question": "Capitale de l'Italie ?",
+                "context": "Europe",
+                "positive_answers": ["Rome"],
+                "negative_answers": ["Venise"],
+            }
+        ),
+        content_type="application/json",
+        HTTP_X_MCP_TOKEN="secret",
+    )
+
+    assert response.status_code == 200
+    question.refresh_from_db()
+    assert question.needs_rework is False
+    assert question.text == "Capitale de l'Italie ?"
+    assert question.explanation == "Europe"
+    assert list(question.answers.filter(is_correct=True).values_list("text", flat=True)) == [
+        "Rome"
+    ]
+    assert list(question.answers.filter(is_correct=False).values_list("text", flat=True)) == [
+        "Venise"
+    ]
 
 
 @pytest.mark.django_db

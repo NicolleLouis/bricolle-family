@@ -24,14 +24,24 @@ def home(request):
         base_queryset = ThemePresetQuestionFilterService(
             preset=preset, queryset=base_queryset
         ).filter_questions()
-    service = QuestionRetrievalService(queryset=base_queryset, user=request.user)
     if request.method == "POST":
         action = request.POST.get("action")
         if action == "next":
+            service = QuestionRetrievalService(
+                queryset=base_queryset, user=request.user
+            )
             context = _prepare_question_context(service, presets, preset)
+        elif action == "needs_rework":
+            context = _handle_needs_rework(
+                request, base_queryset, presets, preset
+            )
         else:
+            service = QuestionRetrievalService(
+                queryset=base_queryset, user=request.user
+            )
             context = _handle_answer_submission(request, service, presets, preset)
     else:
+        service = QuestionRetrievalService(queryset=base_queryset, user=request.user)
         context = _prepare_question_context(service, presets, preset)
     return render(request, "flash_cards/home.html", context)
 
@@ -93,6 +103,26 @@ def _handle_answer_submission(request, service, presets, preset):
         "is_correct": is_correct,
         "correct_answer_text": correct_answer.text if correct_answer else None,
     }
+
+
+def _handle_needs_rework(request, base_queryset, presets, preset):
+    question_id = request.POST.get("question_id")
+    if not question_id:
+        service = QuestionRetrievalService(queryset=base_queryset, user=request.user)
+        return _prepare_question_context(service, presets, preset)
+
+    question = Question.objects.filter(pk=question_id).first()
+    if not question:
+        service = QuestionRetrievalService(queryset=base_queryset, user=request.user)
+        return _prepare_question_context(service, presets, preset)
+
+    if not question.needs_rework:
+        question.needs_rework = True
+        question.save(update_fields=["needs_rework"])
+
+    filtered_queryset = base_queryset.exclude(pk=question.id)
+    service = QuestionRetrievalService(queryset=filtered_queryset, user=request.user)
+    return _prepare_question_context(service, presets, preset)
 
 
 def _prepare_question_context(service, presets, preset):

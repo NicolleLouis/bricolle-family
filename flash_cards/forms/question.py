@@ -16,7 +16,7 @@ class QuestionForm(forms.ModelForm):
 
     class Meta:
         model = Question
-        fields = ["category", "text", "explanation"]
+        fields = ["category", "text", "explanation", "needs_rework"]
         widgets = {
             "text": forms.Textarea(
                 attrs={
@@ -32,6 +32,7 @@ class QuestionForm(forms.ModelForm):
                     "placeholder": "Ajoutez une explication détaillée (optionnel)…",
                 }
             ),
+            "needs_rework": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
 
 

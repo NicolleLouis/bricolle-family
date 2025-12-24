@@ -11,8 +11,13 @@ from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
-from flash_cards.models import Category
-from flash_cards.services import QuestionCreationError, QuestionCreationService
+from flash_cards.models import Category, Question
+from flash_cards.services import (
+    QuestionCreationError,
+    QuestionCreationService,
+    QuestionUpdateError,
+    QuestionUpdateService,
+)
 
 
 class BatchCreationError(Exception):
@@ -125,6 +130,81 @@ def list_categories(request: HttpRequest) -> JsonResponse:
         .values("id", "name", "question_count")
     )
     return JsonResponse({"categories": list(categories)})
+
+
+@require_GET
+@require_api_access
+def needs_rework_question(request: HttpRequest) -> JsonResponse:
+    question = (
+        Question.objects.filter(needs_rework=True)
+        .select_related("category")
+        .prefetch_related("answers")
+        .order_by("?")
+        .first()
+    )
+    if not question:
+        return _json_error("Aucune question à retravailler.", status=404)
+    return JsonResponse(_serialize_question(question))
+
+
+@csrf_exempt
+@require_POST
+@require_api_access
+def update_question(request: HttpRequest, question_id: int) -> JsonResponse:
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return _json_error("JSON invalide.")
+    if not isinstance(payload, dict):
+        return _json_error("Le JSON doit représenter un objet.")
+
+    question = Question.objects.filter(pk=question_id).first()
+    if not question:
+        return _json_error("Question introuvable.", status=404)
+
+    update_context = "context" in payload
+    update_answers = "positive_answers" in payload or "negative_answers" in payload
+    text = payload.get("question") if "question" in payload else None
+    context = payload.get("context") if update_context else None
+    category_id = payload.get("category_id") if "category_id" in payload else None
+    category_name = payload.get("category") if "category" in payload else None
+    positive_answers = (
+        payload.get("positive_answers") if "positive_answers" in payload else None
+    )
+    negative_answers = (
+        payload.get("negative_answers") if "negative_answers" in payload else None
+    )
+
+    if positive_answers is not None and not isinstance(positive_answers, list):
+        return _json_error("'positive_answers' doit être un tableau.")
+    if negative_answers is not None and not isinstance(negative_answers, list):
+        return _json_error("'negative_answers' doit être un tableau.")
+
+    service = QuestionUpdateService()
+    try:
+        question = service.update_question(
+            question=question,
+            text=text,
+            category_id=category_id,
+            category_name=category_name,
+            context=context,
+            positive_answers=positive_answers,
+            negative_answers=negative_answers,
+            update_context=update_context,
+            update_answers=update_answers,
+        )
+    except Category.DoesNotExist as exc:
+        return _json_error("Catégorie introuvable.", status=404)
+    except QuestionUpdateError as exc:
+        return _json_error(str(exc))
+
+    question.refresh_from_db()
+    question = (
+        Question.objects.select_related("category")
+        .prefetch_related("answers")
+        .get(pk=question.pk)
+    )
+    return JsonResponse(_serialize_question(question))
 
 
 def _serialize_question(question):

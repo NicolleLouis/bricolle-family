@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     "games_collection",
     "flash_cards",
     "civilization7",
-    "habit_tracker.apps.HabitTrackerConfig",
     "documents",
     "capitalism.apps.CapitalismConfig",
     "django.contrib.admin",
