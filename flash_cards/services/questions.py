@@ -37,10 +37,10 @@ class QuestionRetrievalService:
         self.queryset = self._with_user_stats(base_queryset)
         self._strategies: Tuple[Tuple[Strategy, int], ...] = (
             (self._random_question, 1),
-            (self._last_failed_question, 2),
-            (self._least_answered_question, 8),
-            (self._oldest_last_answer_question, 2),
-            (self._high_error_question, 1),
+            (self._last_failed_question, 3),
+            (self._least_answered_question, 3),
+            (self._oldest_last_answer_question, 3),
+            (self._high_error_question, 3),
         )
 
     def get_question(self) -> Question | None:
