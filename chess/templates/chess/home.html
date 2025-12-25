@@ -2,19 +2,93 @@
 {% load bootstrap5 %}
 
 {% block content %}
-<div class="p-4 bg-light rounded-3 mb-4">
-    <h1 class="mb-3">Analyses de parties</h1>
-    <p class="mb-0">Ajoutez vos parties et les lecons apprises depuis Lichess ou Chess.com.</p>
+<div class="p-4 bg-light rounded-3 mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+    <div>
+        <h1 class="mb-2">Analyses de parties</h1>
+        <p class="mb-0">Ajoutez vos parties et les lecons apprises depuis Lichess ou Chess.com.</p>
+    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createGameModal">
+        Ajouter une analyse
+    </button>
 </div>
 
+<form method="get" class="card shadow-sm mb-4">
+    <div class="card-body d-flex flex-column flex-md-row align-items-md-center gap-3">
+        <div>
+            <label for="openingSelect" class="form-label mb-1 fw-semibold">Ouverture</label>
+            <select id="openingSelect" name="opening" class="form-select">
+                <option value="">Toutes les ouvertures</option>
+                {% for opening in openings %}
+                    <option value="{{ opening.id }}" {% if opening.id|stringformat:"s" == selected_opening %}selected{% endif %}>
+                        {{ opening.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="colorSelect" class="form-label mb-1 fw-semibold">Couleur</label>
+            <select id="colorSelect" name="color" class="form-select">
+                <option value="">Toutes les couleurs</option>
+                <option value="white" {% if selected_color == "white" %}selected{% endif %}>Blanc</option>
+                <option value="black" {% if selected_color == "black" %}selected{% endif %}>Noir</option>
+            </select>
+        </div>
+        <div class="ms-md-auto">
+            <button type="submit" class="btn btn-outline-primary">Filtrer</button>
+            <a class="btn btn-outline-secondary ms-2" href="{% url 'chess:home' %}">Reinitialiser</a>
+        </div>
+    </div>
+</form>
+
+{% if games %}
 <div class="card shadow-sm">
     <div class="card-body">
-        <h2 class="h5 mb-3">Ajouter une analyse</h2>
-        <form method="post">
-            {% csrf_token %}
-            {% bootstrap_form form %}
-            <button type="submit" class="btn btn-primary">Enregistrer</button>
-        </form>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                <tr>
+                    <th>Ouverture</th>
+                    <th>Couleur</th>
+                    <th>Lien</th>
+                    <th>Lecons</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for game in games %}
+                <tr>
+                    <td>{{ game.opening.name }}</td>
+                    <td>{{ game.get_color_display }}</td>
+                    <td><a href="{{ game.url }}" target="_blank" rel="noopener noreferrer">Voir la partie</a></td>
+                    <td>{{ game.lessons|linebreaksbr }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">Aucune analyse pour le moment.</div>
+{% endif %}
+
+<div class="modal fade" id="createGameModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5">Ajouter une analyse</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <form method="post">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    {% bootstrap_form form %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

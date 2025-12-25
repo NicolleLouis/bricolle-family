@@ -1,0 +1,63 @@
+{% extends "chess/base.html" %}
+{% load bootstrap5 %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="mb-1">Ouvertures</h1>
+        <p class="text-muted mb-0">Gerer la liste et voir le nombre d'analyses.</p>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h2 class="h5 mb-3">Ajouter une ouverture</h2>
+        <form method="post" class="row g-3 align-items-end">
+            {% csrf_token %}
+            {% bootstrap_form create_form %}
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Ajouter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h2 class="h5 mb-3">Ouvertures existantes</h2>
+        {% if openings %}
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th class="text-center">Analyses</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in openings %}
+                        <tr>
+                            <td>
+                                <form method="post" class="d-flex align-items-center gap-2">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="opening_id" value="{{ item.opening.id }}">
+                                    <div class="flex-grow-1">
+                                        {% bootstrap_form item.form %}
+                                    </div>
+                                    <button type="submit" class="btn btn-outline-secondary">Mettre a jour</button>
+                                </form>
+                            </td>
+                            <td class="text-center">{{ item.opening.game_count }}</td>
+                            <td></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="mb-0">Aucune ouverture pour le moment.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
