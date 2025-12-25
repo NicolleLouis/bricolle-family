@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "flash_cards",
     "civilization7",
     "documents",
+    "chess",
     "capitalism.apps.CapitalismConfig",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -158,6 +159,7 @@ LOGIN_EXEMPT_URLS = [
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+CAPITALISM_TRANSACTIONS_LOG = BASE_DIR / "capitalism_transactions.log"
 
 if DEBUG:
     LOGGING = {
@@ -168,11 +170,20 @@ if DEBUG:
                 "format": "[{levelname}] {asctime} {name}: {message}",
                 "style": "{",
             },
+            "capitalism_file": {
+                "format": "[{levelname}] {asctime} {name}: {message}",
+                "style": "{",
+            },
         },
         "handlers": {
             "console": {
                 "class": "logging.StreamHandler",
                 "formatter": "console",
+            },
+            "capitalism_transactions": {
+                "class": "logging.FileHandler",
+                "filename": str(CAPITALISM_TRANSACTIONS_LOG),
+                "formatter": "capitalism_file",
             },
         },
         "loggers": {
@@ -187,6 +198,16 @@ if DEBUG:
             },
             "django.server": {
                 "handlers": ["console"],
+                "level": "INFO",
+                "propagate": False,
+            },
+            "capitalism.services.buying.service": {
+                "handlers": ["capitalism_transactions"],
+                "level": "INFO",
+                "propagate": False,
+            },
+            "capitalism.models.simulation": {
+                "handlers": ["capitalism_transactions"],
                 "level": "INFO",
                 "propagate": False,
             },

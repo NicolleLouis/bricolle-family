@@ -1,0 +1,20 @@
+{% extends "chess/base.html" %}
+{% load bootstrap5 %}
+
+{% block content %}
+<div class="p-4 bg-light rounded-3 mb-4">
+    <h1 class="mb-3">Analyses de parties</h1>
+    <p class="mb-0">Ajoutez vos parties et les lecons apprises depuis Lichess ou Chess.com.</p>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h2 class="h5 mb-3">Ajouter une analyse</h2>
+        <form method="post">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

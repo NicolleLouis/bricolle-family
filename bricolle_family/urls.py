@@ -29,6 +29,7 @@ urlpatterns = [
     path("documents/", include("documents.urls")),
     path("the_bazaar/", include("the_bazaar.urls")),
     path("capitalism/", include("capitalism.urls")),
+    path("chess/", include("chess.urls")),
 ]
 
 if settings.ENV == 'local':
