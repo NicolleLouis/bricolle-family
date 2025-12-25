@@ -5,7 +5,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from django.apps import apps
-from django.db import transaction
+from django.db import models, transaction
 
 from capitalism.constants.object_type import ObjectType
 from capitalism.constants.simulation_step import SimulationStep
@@ -69,10 +69,23 @@ class HumanBuyingService:
             return
 
         with transaction.atomic():
+            total_before = self._total_money()
             self._debit_buyer(price)
             self._credit_seller(seller, price)
             self._transfer_object(obj)
             self._record_transaction(obj.type, price)
+            total_after = self._total_money()
+            logger.info(
+                "Transaction: object=%s price=%.2f buyer_id=%s buyer_job=%s seller_id=%s seller_job=%s total_before=%.2f total_after=%.2f",
+                obj.type,
+                price,
+                self.human.id,
+                self.human.job,
+                seller.id,
+                seller.job,
+                total_before,
+                total_after,
+            )
 
     def _debit_buyer(self, amount: float) -> None:
         raw_value = self.human.money - amount
@@ -116,3 +129,9 @@ class HumanBuyingService:
     @staticmethod
     def _round_money(value: float) -> float:
         return float(Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+    @staticmethod
+    def _total_money() -> float:
+        human_model = apps.get_model("capitalism", "Human")
+        total = human_model.objects.aggregate(total=models.Sum("money"))["total"]
+        return float(total or 0.0)

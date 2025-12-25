@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
 from django.shortcuts import redirect, render
@@ -61,6 +62,10 @@ class SettingView:
             Simulation.objects.all().delete()
             simulation = Simulation.objects.create()
             MarketPerceivedPriceResetService(day_number=simulation.day_number).reset()
+            log_path = getattr(settings, "CAPITALISM_TRANSACTIONS_LOG", None)
+            if log_path:
+                with open(log_path, "w", encoding="utf-8") as log_file:
+                    log_file.write("")
 
         messages.warning(
             request,
