@@ -29,6 +29,7 @@ and delegate work. Every public service function requires matching tests. Every 
 public function as possible and private function to split the logic and have a readable file. Templates use Django block
 syntax; name them
 after their route (`baby_name/index.html`) and use Bootstrap-friendly markup (`django-bootstrap-v5`).
+Avoid variable names that are contractions or abbreviations; prefer full, descriptive names.
 
 ## Template & App Scaffolding
 

@@ -64,61 +64,67 @@ class HumanBuyingService:
             self._process_purchase(obj, price)
 
     def _process_purchase(self, obj: "Object", price: float) -> None:
-        seller = obj.owner
-        if seller is None:
-            return
-
         with transaction.atomic():
+            locked_object = (
+                self.object_model.objects.select_for_update()
+                .select_related("owner")
+                .get(id=obj.id)
+            )
+            seller = locked_object.owner
+            if seller is None:
+                return
+
+            human_model = apps.get_model("capitalism", "Human")
+            buyer = human_model.objects.select_for_update().get(id=self.human.id)
+            seller = human_model.objects.select_for_update().get(id=seller.id)
+
             total_before = self._total_money()
-            self._debit_buyer(price)
+            self._debit_buyer(buyer, price)
             self._credit_seller(seller, price)
-            self._transfer_object(obj)
-            self._record_transaction(obj.type, price)
+            self._transfer_object(locked_object, buyer)
+            self._record_transaction(locked_object.type, price)
             total_after = self._total_money()
             logger.info(
                 "Transaction: object=%s price=%.2f buyer_id=%s buyer_job=%s seller_id=%s seller_job=%s total_before=%.2f total_after=%.2f",
-                obj.type,
+                locked_object.type,
                 price,
-                self.human.id,
-                self.human.job,
+                buyer.id,
+                buyer.job,
                 seller.id,
                 seller.job,
                 total_before,
                 total_after,
             )
 
-    def _debit_buyer(self, amount: float) -> None:
-        raw_value = self.human.money - amount
+    def _debit_buyer(self, buyer: "Human", amount: float) -> None:
+        raw_value = buyer.money - amount
         rounded_value = self._round_money(raw_value)
         if rounded_value != raw_value:
             logger.info(
-                "Money rounding (buyer): human_id=%s raw=%s rounded=%s amount=%s",
-                self.human.id,
-                raw_value,
+                "Money rounding (buyer): human_id=%s rounded=%s amount=%s",
+                buyer.id,
                 rounded_value,
                 amount,
             )
-        self.human.money = rounded_value
-        self.human.save(update_fields=["money"])
+        buyer.money = rounded_value
+        buyer.save(update_fields=["money"])
 
     @staticmethod
     def _credit_seller(seller: "Human", amount: float) -> None:
-        seller.refresh_from_db(fields=["money"])
         raw_value = seller.money + amount
         rounded_value = HumanBuyingService._round_money(raw_value)
         if rounded_value != raw_value:
             logger.info(
-                "Money rounding (seller): human_id=%s raw=%s rounded=%s amount=%s",
+                "Money rounding (seller): human_id=%s rounded=%s amount=%s",
                 seller.id,
-                raw_value,
                 rounded_value,
                 amount,
             )
         seller.money = rounded_value
         seller.save(update_fields=["money"])
 
-    def _transfer_object(self, obj: "Object") -> None:
-        obj.owner = self.human
+    def _transfer_object(self, obj: "Object", buyer: "Human") -> None:
+        obj.owner = buyer
         obj.in_sale = False
         obj.price = None
         obj.save(update_fields=["owner", "in_sale", "price"])
