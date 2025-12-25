@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, Type
 
-from capitalism.constants import BASE_NEEDS
+from capitalism.constants import BASE_NEEDS, ObjectType
 from capitalism.constants.jobs import Job as JobEnum
 from capitalism.services.job_target import JobTargetService
 from capitalism.services.jobs import (
@@ -44,6 +44,19 @@ class HumanBuyingPriceValuationService:
 
     def __init__(self):
         self.price_reference = GlobalPriceReferenceService()
+        self._reference_prices = self._load_reference_prices()
+
+    def _load_reference_prices(self) -> dict[str, float]:
+        return {
+            object_type: self.price_reference.get_reference_price(object_type)
+            for object_type, _label in ObjectType.choices
+        }
+
+    def _reference_price(self, object_type: str) -> float:
+        return self._reference_prices.get(
+            object_type,
+            self.price_reference.get_reference_price(object_type),
+        )
 
     def estimate_price(self, human, object_type: str) -> float:
         job_cls = self._job_class(human)
@@ -87,7 +100,7 @@ class HumanBuyingPriceValuationService:
         if not self._is_consumption_need(object_type):
             return 0.0
 
-        base_value = self.price_reference.get_reference_price(object_type)
+        base_value = self._reference_price(object_type)
         survival_effect = self.SURVIVAL_EFFECT * getattr(human, "time_since_need_fulfilled", 0)
         base_value *= 1 + survival_effect
         need_per_day = self.CONSUMPTION_NEED_MAP.get(object_type, 0)
@@ -107,7 +120,7 @@ class HumanBuyingPriceValuationService:
         required_quantity = 0
 
         for resource_type, qty in job_cls.get_input():
-            unit_price = self.price_reference.get_reference_price(resource_type)
+            unit_price = self._reference_price(resource_type)
             if resource_type == object_type:
                 required_quantity += qty
             else:
@@ -131,7 +144,7 @@ class HumanBuyingPriceValuationService:
 
     def _output_market_value(self, resource_type: str, qty: int) -> float:
         try:
-            unit_price = self.price_reference.get_reference_price(resource_type)
+            unit_price = self._reference_price(resource_type)
         except GlobalPriceReferenceService.PriceNotFound:
             return 0.0
         return unit_price * qty

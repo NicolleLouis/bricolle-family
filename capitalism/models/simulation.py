@@ -1,4 +1,3 @@
-import logging
 import random
 
 from django.contrib import admin
@@ -10,8 +9,6 @@ from capitalism.constants.simulation_step import (
 from capitalism.models import Human
 from capitalism.services.human_analytics import HumanAnalyticsRecorderService
 from capitalism.services.pricing import TransactionPriceAnalyticsService
-
-logger = logging.getLogger(__name__)
 
 
 class Simulation(models.Model):
@@ -89,46 +86,29 @@ class Simulation(models.Model):
     def finish_current_step(self):
         self._validate_human_steps()
 
-        current_step = SimulationStep(self.step)
-        total_before = self._total_money()
-
-        match current_step:
+        match SimulationStep(self.step):
             case SimulationStep.START_OF_DAY:
-                new_step = self.finish_current_step_start_of_day()
+                return self.finish_current_step_start_of_day()
             case SimulationStep.PRODUCTION:
-                new_step = self.finish_current_step_production()
+                return self.finish_current_step_production()
             case SimulationStep.SELLING:
-                new_step = self.finish_current_step_selling()
+                return self.finish_current_step_selling()
             case SimulationStep.PRICE_STATS:
-                new_step = self.finish_current_step_price_stats()
+                return self.finish_current_step_price_stats()
             case SimulationStep.BUYING:
-                new_step = self.finish_current_step_buying()
+                return self.finish_current_step_buying()
             case SimulationStep.CONSUMPTION:
-                new_step = self.finish_current_step_consumption()
+                return self.finish_current_step_consumption()
             case SimulationStep.DEATH:
-                new_step = self.finish_current_step_death()
+                return self.finish_current_step_death()
             case SimulationStep.ANALYTICS:
-                new_step = self.finish_current_step_analytics()
+                return self.finish_current_step_analytics()
             case SimulationStep.END_OF_DAY:
-                new_step = self.finish_current_step_end_of_day()
-            case _:
-                new_step = self.step
-
-        total_after = self._total_money()
-        logger.info(
-            "Step summary: simulation_id=%s day=%s step=%s total_before=%.2f total_after=%.2f",
-            self.id,
-            self.day_number,
-            current_step.value,
-            total_before,
-            total_after,
-        )
-        return new_step
+                return self.finish_current_step_end_of_day()
+        return self.step
 
     # Helpers -------------------------------------------------
     def _validate_human_steps(self):
-        from capitalism.models import Human
-
         current_step = SimulationStep(self.step)
         next_step = self._next_step_value()
         allowed_values = {current_step.value, next_step.value}
@@ -284,10 +264,6 @@ class Simulation(models.Model):
 
         return SimulationStep(self.step)
 
-    @staticmethod
-    def _total_money() -> float:
-        total = Human.objects.aggregate(total=models.Sum("money"))["total"]
-        return float(total or 0.0)
 
 
 @admin.register(Simulation)

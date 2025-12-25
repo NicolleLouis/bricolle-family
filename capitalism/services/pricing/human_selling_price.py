@@ -15,6 +15,7 @@ from capitalism.services.jobs import (
 from capitalism.services.jobs.base import Job
 
 from .global_price_reference import GlobalPriceReferenceService
+from capitalism.constants.object_type import ObjectType
 from .production_time_cost import time_cost_per_unit
 
 
@@ -34,6 +35,19 @@ class HumanSellingPriceValuationService:
 
     def __init__(self):
         self.price_reference = GlobalPriceReferenceService()
+        self._reference_prices = self._load_reference_prices()
+
+    def _load_reference_prices(self) -> dict[str, float]:
+        return {
+            object_type: self.price_reference.get_reference_price(object_type)
+            for object_type, _label in ObjectType.choices
+        }
+
+    def _reference_price(self, object_type: str) -> float:
+        return self._reference_prices.get(
+            object_type,
+            self.price_reference.get_reference_price(object_type),
+        )
 
     def estimate_price(self, human, object_type: str) -> Optional[float]:
         job_cls = self._human_job_class(human)
@@ -67,7 +81,7 @@ class HumanSellingPriceValuationService:
         for resource_type, quantity in job_cls.get_input():
             if quantity <= 0:
                 continue
-            unit_price = self.price_reference.get_reference_price(resource_type)
+            unit_price = self._reference_price(resource_type)
             total_cost += unit_price * quantity
         return total_cost
 

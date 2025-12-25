@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from decimal import Decimal, ROUND_HALF_UP
-import logging
 from typing import TYPE_CHECKING
 
 from django.apps import apps
-from django.db import models, transaction
+from django.db import transaction
 
 from capitalism.constants.object_type import ObjectType
 from capitalism.constants.simulation_step import SimulationStep
@@ -13,8 +12,6 @@ from capitalism.services.pricing import HumanBuyingPriceValuationService
 
 if TYPE_CHECKING:
     from capitalism.models import Human, Object
-
-logger = logging.getLogger(__name__)
 
 
 class HumanBuyingService:
@@ -78,34 +75,14 @@ class HumanBuyingService:
             buyer = human_model.objects.select_for_update().get(id=self.human.id)
             seller = human_model.objects.select_for_update().get(id=seller.id)
 
-            total_before = self._total_money()
             self._debit_buyer(buyer, price)
             self._credit_seller(seller, price)
             self._transfer_object(locked_object, buyer)
             self._record_transaction(locked_object.type, price)
-            total_after = self._total_money()
-            logger.info(
-                "Transaction: object=%s price=%.2f buyer_id=%s buyer_job=%s seller_id=%s seller_job=%s total_before=%.2f total_after=%.2f",
-                locked_object.type,
-                price,
-                buyer.id,
-                buyer.job,
-                seller.id,
-                seller.job,
-                total_before,
-                total_after,
-            )
 
     def _debit_buyer(self, buyer: "Human", amount: float) -> None:
         raw_value = buyer.money - amount
         rounded_value = self._round_money(raw_value)
-        if rounded_value != raw_value:
-            logger.info(
-                "Money rounding (buyer): human_id=%s rounded=%s amount=%s",
-                buyer.id,
-                rounded_value,
-                amount,
-            )
         buyer.money = rounded_value
         buyer.save(update_fields=["money"])
 
@@ -113,13 +90,6 @@ class HumanBuyingService:
     def _credit_seller(seller: "Human", amount: float) -> None:
         raw_value = seller.money + amount
         rounded_value = HumanBuyingService._round_money(raw_value)
-        if rounded_value != raw_value:
-            logger.info(
-                "Money rounding (seller): human_id=%s rounded=%s amount=%s",
-                seller.id,
-                rounded_value,
-                amount,
-            )
         seller.money = rounded_value
         seller.save(update_fields=["money"])
 
@@ -135,9 +105,3 @@ class HumanBuyingService:
     @staticmethod
     def _round_money(value: float) -> float:
         return float(Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
-
-    @staticmethod
-    def _total_money() -> float:
-        human_model = apps.get_model("capitalism", "Human")
-        total = human_model.objects.aggregate(total=models.Sum("money"))["total"]
-        return float(total or 0.0)
