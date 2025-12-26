@@ -8,7 +8,8 @@ migrations:
 	poetry run python manage.py makemigrations
 
 test:
-	poetry run pytest
+	rm -f test_db.sqlite3
+	poetry run pytest --create-db
 
 console:
 	poetry run python manage.py shell

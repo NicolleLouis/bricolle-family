@@ -241,12 +241,12 @@ class Simulation(models.Model):
         return self.next_step()
 
     def finish_current_step_end_of_day(self):
-        from capitalism.models import Human, Object
+        from capitalism.models import Human, ObjectStack
         from capitalism.services.pricing import MarketPerceivedPriceUpdateService
 
         Human.objects.filter(dead=True).delete()
 
-        Object.objects.update(price=None, in_sale=False)
+        ObjectStack.objects.update(price=None, in_sale=False)
 
         survivors = Human.objects.filter(dead=False, step=SimulationStep.END_OF_DAY)
         for human in survivors:

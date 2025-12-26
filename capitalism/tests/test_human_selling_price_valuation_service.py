@@ -51,6 +51,7 @@ def test_stock_adjustment_decreases_price_when_surplus(service):
     assert price < expected_unit_cost * (1 + service.MARKUP_BASE)
 
 
+@pytest.mark.django_db
 def test_unknown_object_type_returns_none(service):
     price = service.estimate_price(None, "unknown")
 

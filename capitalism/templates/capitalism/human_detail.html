@@ -148,6 +148,7 @@
                                 <thead>
                                     <tr>
                                         <th scope="col">Type</th>
+                                        <th scope="col" class="text-end">Quantity</th>
                                         <th scope="col">In sale</th>
                                         <th scope="col">Price</th>
                                         <th scope="col" class="text-end">Actions</th>
@@ -157,6 +158,7 @@
                                     {% for obj in objects %}
                                         <tr>
                                             <td>{{ obj.get_type_display }}</td>
+                                            <td class="text-end">{{ obj.quantity }}</td>
                                             <td>
                                                 {% if obj.in_sale %}
                                                     <span class="badge bg-success">Yes</span>

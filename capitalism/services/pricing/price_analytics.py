@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from typing import Dict
 
 from django.apps import apps
-from django.db.models import Avg, Count, Max, Min, QuerySet
+from django.db import models
+from django.db.models import Avg, Count, Max, Min, QuerySet, Sum
 
 from capitalism.constants.object_type import ObjectType
 
@@ -29,7 +30,7 @@ class PriceAnalyticsRecorderService:
 
     def __init__(self, *, day_number: int):
         self.day_number = day_number
-        self.object_model = apps.get_model("capitalism", "Object")
+        self.object_model = apps.get_model("capitalism", "ObjectStack")
         self.price_analytics_model = apps.get_model("capitalism", "PriceAnalytics")
 
     def run(self) -> None:
@@ -39,22 +40,30 @@ class PriceAnalyticsRecorderService:
             self._upsert_price_analytics(object_type=object_type, snapshot=snapshot)
 
     def _collect_price_aggregates(self) -> Dict[str, _PriceSnapshot]:
+        price_expression = models.ExpressionWrapper(
+            models.F("price") * models.F("quantity"),
+            output_field=models.FloatField(),
+        )
         queryset: QuerySet = (
             self.object_model.objects.filter(in_sale=True, price__isnull=False)
             .values("type")
             .annotate(
                 min_price=Min("price"),
                 max_price=Max("price"),
-                avg_price=Avg("price"),
+                total_quantity=Sum("quantity"),
+                total_value=Sum(price_expression),
             )
         )
 
         aggregates: Dict[str, _PriceSnapshot] = {}
         for row in queryset:
+            total_quantity = float(row["total_quantity"] or 0.0)
+            total_value = float(row["total_value"] or 0.0)
+            avg_price = total_value / total_quantity if total_quantity else 0.0
             aggregates[row["type"]] = _PriceSnapshot(
                 min_price=float(row["min_price"] or 0.0),
                 max_price=float(row["max_price"] or 0.0),
-                avg_price=float(row["avg_price"] or 0.0),
+                avg_price=avg_price,
             )
         return aggregates
 

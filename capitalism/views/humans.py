@@ -1,10 +1,10 @@
 from django.contrib import messages
-from django.db.models import Count
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 
 from capitalism.constants.jobs import Job
 from capitalism.constants.object_type import ObjectType
-from capitalism.models import Human, Simulation, Object
+from capitalism.models import Human, Simulation
 from capitalism.services import (
     HumanBuyingPriceValuationService,
     HumanSellingPriceValuationService,
@@ -60,14 +60,14 @@ class HumansView:
                 labels = dict(ObjectType.choices)
                 summary = (
                     selected_human.owned_objects.values("type")
-                    .annotate(quantity=Count("id"))
+                    .annotate(quantity=Sum("quantity"))
                     .order_by("type")
                 )
                 object_summary = [
                     {
                         "type": row["type"],
                         "label": labels.get(row["type"], row["type"]),
-                        "quantity": row["quantity"],
+                        "quantity": int(row["quantity"] or 0),
                     }
                     for row in summary
                 ]
@@ -157,15 +157,24 @@ class HumansView:
             return
 
         objects_qs = human.owned_objects.filter(type=object_type).order_by("id")
-        to_delete = list(objects_qs[:quantity])
-        if not to_delete:
+        if not objects_qs.exists():
             messages.warning(request, "Aucun objet à supprimer pour ce type.")
             return
 
-        Object.objects.filter(id__in=[obj.id for obj in to_delete]).delete()
+        remaining = quantity
+        for stack in objects_qs:
+            if remaining <= 0:
+                break
+            take = min(stack.quantity, remaining)
+            stack.quantity -= take
+            remaining -= take
+            if stack.quantity <= 0:
+                stack.delete()
+            else:
+                stack.save(update_fields=["quantity"])
         messages.success(
             request,
-            f"{len(to_delete)} objet(s) '{label}' supprimé(s) de "
+            f"{quantity - remaining} objet(s) '{label}' supprimé(s) de "
             f"{human.name or f'Human #{human.id}'}.",
         )
 
@@ -182,11 +191,7 @@ class HumansView:
         if quantity is None:
             return False
 
-        objects_model = human.owned_objects.model
-        objects_to_create = [
-            objects_model(owner=human, type=object_type) for _ in range(quantity)
-        ]
-        human.owned_objects.bulk_create(objects_to_create)
+        human.add_objects(object_type, quantity)
 
         display_name = human.name or f"Human #{human.id}"
         messages.success(
@@ -224,15 +229,15 @@ class HumansView:
             messages.error(request, "Objet invalide.")
             return
 
-        obj = human.owned_objects.filter(id=int(object_id)).first()
-        if obj is None:
+        object_stack = human.owned_objects.filter(id=int(object_id)).first()
+        if object_stack is None:
             messages.error(request, "Objet introuvable pour ce human.")
             return
 
         if price_raw in (None, "", "null"):
-            obj.price = None
-            obj.in_sale = False
-            obj.save(update_fields=["price", "in_sale"])
+            object_stack.price = None
+            object_stack.in_sale = False
+            object_stack.save(update_fields=["price", "in_sale"])
             messages.success(request, "Le prix de l'objet a été supprimé.")
             return
 
@@ -247,9 +252,10 @@ class HumansView:
             return
 
         formatted_price = round(price + 1e-12, 2)
-        obj.price = formatted_price
-        obj.in_sale = True
-        obj.save(update_fields=["price", "in_sale"])
+        object_stack.price = formatted_price
+        object_stack.in_sale = True
+        object_stack.save(update_fields=["price", "in_sale"])
+        HumansView._merge_duplicate_stack(object_stack)
         messages.success(request, "Le prix de l'objet a été mis à jour.")
 
     @staticmethod
@@ -269,6 +275,20 @@ class HumansView:
                 )
 
         return desired_prices
+
+    @staticmethod
+    def _merge_duplicate_stack(stack):
+        duplicates = stack.owner.owned_objects.filter(
+            type=stack.type,
+            in_sale=stack.in_sale,
+            price=stack.price,
+        ).exclude(id=stack.id)
+        if not duplicates.exists():
+            return
+        total_quantity = stack.quantity + duplicates.aggregate(total=Sum("quantity"))["total"]
+        stack.quantity = int(total_quantity or stack.quantity)
+        stack.save(update_fields=["quantity"])
+        duplicates.delete()
 
     @staticmethod
     def _desired_selling_prices(human):

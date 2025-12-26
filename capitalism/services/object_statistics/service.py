@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import Dict, List
 
-from django.db.models import Count
+from django.db.models import Sum
 
 from capitalism.constants.object_type import ObjectType
 from capitalism.models import MarketPerceivedPrice
-from capitalism.models.object import Object
+from capitalism.models.object_stack import ObjectStack
 
 
 class ObjectInventoryStatisticsService:
@@ -17,7 +17,7 @@ class ObjectInventoryStatisticsService:
         return self._build_results(aggregates)
 
     def _collect_aggregates(self) -> Dict[str, Dict[str, object]]:
-        queryset = Object.objects.values("type").annotate(quantity=Count("id"))
+        queryset = ObjectStack.objects.values("type").annotate(quantity=Sum("quantity"))
         return {row["type"]: row for row in queryset}
 
     def _build_results(self, aggregates: Dict[str, Dict[str, object]]) -> List[Dict[str, object]]:
@@ -31,7 +31,7 @@ class ObjectInventoryStatisticsService:
                 {
                     "type": object_type,
                     "label": label,
-                    "quantity": row["quantity"] if row else 0,
+                    "quantity": int(row["quantity"] or 0) if row else 0,
                     "perceived_price": perceived_map.get(object_type),
                 }
             )

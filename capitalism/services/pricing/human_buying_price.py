@@ -58,14 +58,19 @@ class HumanBuyingPriceValuationService:
             self.price_reference.get_reference_price(object_type),
         )
 
-    def estimate_price(self, human, object_type: str) -> float:
+    def estimate_price(
+        self,
+        human,
+        object_type: str,
+        owned_quantity_override: dict[str, int] | None = None,
+    ) -> float:
         job_cls = self._job_class(human)
         if job_cls is None:
             return 0.0
 
         prices = [
-            self._input_purchase_price(human, job_cls, object_type),
-            self._consumption_purchase_price(human, object_type),
+            self._input_purchase_price(human, job_cls, object_type, owned_quantity_override),
+            self._consumption_purchase_price(human, object_type, owned_quantity_override),
         ]
         return max(prices)
 
@@ -78,11 +83,22 @@ class HumanBuyingPriceValuationService:
     def _is_input_for_job(job_cls: Type[Job], object_type: str) -> bool:
         return any(resource_type == object_type for resource_type, _ in job_cls.get_input())
 
-    def _input_purchase_price(self, human, job_cls: Type[Job], object_type: str) -> float:
+    def _input_purchase_price(
+        self,
+        human,
+        job_cls: Type[Job],
+        object_type: str,
+        owned_quantity_override: dict[str, int] | None,
+    ) -> float:
         if not self._is_input_for_job(job_cls, object_type):
             return 0.0
 
-        if self._has_more_than_two_days_stock(human, job_cls, object_type):
+        if self._has_more_than_two_days_stock(
+            human,
+            job_cls,
+            object_type,
+            owned_quantity_override,
+        ):
             return 0.0
 
         snapshot = self._build_input_snapshot(human, job_cls, object_type)
@@ -96,7 +112,12 @@ class HumanBuyingPriceValuationService:
         )
         return actionable_budget / snapshot.required_quantity
 
-    def _consumption_purchase_price(self, human, object_type: str) -> float:
+    def _consumption_purchase_price(
+        self,
+        human,
+        object_type: str,
+        owned_quantity_override: dict[str, int] | None,
+    ) -> float:
         if not self._is_consumption_need(object_type):
             return 0.0
 
@@ -107,7 +128,7 @@ class HumanBuyingPriceValuationService:
         if need_per_day <= 0:
             return 0.0
 
-        owned_quantity = human.owned_objects.filter(type=object_type).count()
+        owned_quantity = self._owned_quantity(human, object_type, owned_quantity_override)
         return base_value * (1.0 / (1.0 + owned_quantity / need_per_day))
 
     def _build_input_snapshot(
@@ -153,9 +174,28 @@ class HumanBuyingPriceValuationService:
         return object_type in self.CONSUMPTION_NEED_MAP
 
     @staticmethod
-    def _has_more_than_two_days_stock(human, job_cls: Type[Job], object_type: str) -> bool:
+    def _has_more_than_two_days_stock(
+        human,
+        job_cls: Type[Job],
+        object_type: str,
+        owned_quantity_override: dict[str, int] | None,
+    ) -> bool:
         target_quantity = JobTargetService.compute_target_quantity(job_cls, object_type)
         if target_quantity <= 0:
             return False
-        owned_quantity = human.owned_objects.filter(type=object_type).count()
+        owned_quantity = HumanBuyingPriceValuationService._owned_quantity(
+            human,
+            object_type,
+            owned_quantity_override,
+        )
         return owned_quantity > target_quantity
+
+    @staticmethod
+    def _owned_quantity(
+        human,
+        object_type: str,
+        owned_quantity_override: dict[str, int] | None,
+    ) -> int:
+        if owned_quantity_override is not None and object_type in owned_quantity_override:
+            return owned_quantity_override[object_type]
+        return human.get_object_quantity(object_type)

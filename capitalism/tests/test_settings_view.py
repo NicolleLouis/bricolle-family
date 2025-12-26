@@ -7,7 +7,7 @@ from capitalism.models import (
     Human,
     HumanAnalytics,
     MarketPerceivedPrice,
-    Object,
+    ObjectStack,
     Simulation,
     Transaction,
 )
@@ -42,7 +42,7 @@ def test_start_simulation_creates_if_missing(logged_client):
 def test_reset_simulation_clears_data(logged_client):
     simulation = Simulation.objects.create()
     human = Human.objects.create(step=simulation.step)
-    Object.objects.create(owner=human)
+    ObjectStack.objects.create(owner=human)
     HumanAnalytics.objects.create()
     Transaction.objects.create(object_type=ObjectType.ORE, price=10)
     MarketPerceivedPrice.objects.create(updated_at=99, object=ObjectType.ORE, perceived_price=42.0)
@@ -56,7 +56,7 @@ def test_reset_simulation_clears_data(logged_client):
     assert response.status_code == 200
     assert Simulation.objects.count() == 1
     assert Human.objects.count() == 0
-    assert Object.objects.count() == 0
+    assert ObjectStack.objects.count() == 0
     assert HumanAnalytics.objects.count() == 0
     assert Transaction.objects.count() == 0
     assert MarketPerceivedPrice.objects.count() == len(ObjectType.choices)

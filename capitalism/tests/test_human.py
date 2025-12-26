@@ -3,7 +3,7 @@ import pytest
 from capitalism.constants.jobs import Job
 from capitalism.constants.object_type import ObjectType
 from capitalism.constants.simulation_step import SimulationStep
-from capitalism.models import Human, Object
+from capitalism.models import Human, ObjectStack
 from capitalism.services.production.service import ProductionService
 from capitalism.services.pricing import HumanSellingPriceValuationService
 
@@ -54,7 +54,7 @@ def test_production_without_tool_uses_base_capacity():
     human.perform_current_step()
     human.refresh_from_db()
 
-    assert human.owned_objects.filter(type=ObjectType.ORE).count() == 1
+    assert human.get_object_quantity(ObjectType.ORE) == 1
     assert human.step == SimulationStep.SELLING
 
 
@@ -62,13 +62,13 @@ def test_production_without_tool_uses_base_capacity():
 def test_production_with_tool_creates_outputs(monkeypatch):
     monkeypatch.setattr(ProductionService, "random_generator", _FixedRandom(0.9))
     human = Human.objects.create(step=SimulationStep.PRODUCTION, job=Job.MINER)
-    human.owned_objects.create(type=ObjectType.PICKAXE)
+    human.add_objects(ObjectType.PICKAXE, 1)
 
     human.perform_current_step()
     human.refresh_from_db()
 
-    assert human.owned_objects.filter(type=ObjectType.ORE).count() == 10
-    assert human.owned_objects.filter(type=ObjectType.PICKAXE).count() == 1
+    assert human.get_object_quantity(ObjectType.ORE) == 10
+    assert human.get_object_quantity(ObjectType.PICKAXE) == 1
     assert human.step == SimulationStep.SELLING
 
 
@@ -80,20 +80,20 @@ def test_farmer_production_generates_wood_and_advances_step():
     human.refresh_from_db()
 
     assert human.step == SimulationStep.SELLING
-    assert human.owned_objects.filter(type=ObjectType.WHEAT).count() == 10
+    assert human.get_object_quantity(ObjectType.WHEAT) == 10
 
 
 @pytest.mark.django_db
 def test_production_tool_breaks_when_probability_hits(monkeypatch):
     monkeypatch.setattr(ProductionService, "random_generator", _FixedRandom(0.001))
     human = Human.objects.create(step=SimulationStep.PRODUCTION, job=Job.MINER)
-    human.owned_objects.create(type=ObjectType.PICKAXE)
+    human.add_objects(ObjectType.PICKAXE, 1)
 
     human.perform_current_step()
     human.refresh_from_db()
 
-    assert human.owned_objects.filter(type=ObjectType.ORE).count() == 10
-    assert human.owned_objects.filter(type=ObjectType.PICKAXE).count() == 0
+    assert human.get_object_quantity(ObjectType.ORE) == 10
+    assert human.get_object_quantity(ObjectType.PICKAXE) == 0
     assert human.step == SimulationStep.SELLING
 
 
@@ -101,13 +101,13 @@ def test_production_tool_breaks_when_probability_hits(monkeypatch):
 def test_production_tool_survives_when_probability_misses(monkeypatch):
     monkeypatch.setattr(ProductionService, "random_generator", _FixedRandom(0.5))
     human = Human.objects.create(step=SimulationStep.PRODUCTION, job=Job.MINER)
-    human.owned_objects.create(type=ObjectType.PICKAXE)
+    human.add_objects(ObjectType.PICKAXE, 1)
 
     human.perform_current_step()
     human.refresh_from_db()
 
-    assert human.owned_objects.filter(type=ObjectType.PICKAXE).count() == 1
-    assert human.owned_objects.filter(type=ObjectType.ORE).count() == 10
+    assert human.get_object_quantity(ObjectType.PICKAXE) == 1
+    assert human.get_object_quantity(ObjectType.ORE) == 10
     assert human.step == SimulationStep.SELLING
 
 
@@ -115,18 +115,18 @@ def test_production_tool_survives_when_probability_misses(monkeypatch):
 def test_production_limited_by_inputs(monkeypatch):
     monkeypatch.setattr(ProductionService, "random_generator", _FixedRandom(0.9))
     human = Human.objects.create(step=SimulationStep.PRODUCTION, job=Job.BAKER)
-    human.owned_objects.create(type=ObjectType.SPATULA)
+    human.add_objects(ObjectType.SPATULA, 1)
 
     for _ in range(3):
-        human.owned_objects.create(type=ObjectType.FLOUR)
-        human.owned_objects.create(type=ObjectType.WOOD)
+        human.add_objects(ObjectType.FLOUR, 1)
+        human.add_objects(ObjectType.WOOD, 1)
 
     human.perform_current_step()
     human.refresh_from_db()
 
-    assert human.owned_objects.filter(type=ObjectType.FLOUR).count() == 0
-    assert human.owned_objects.filter(type=ObjectType.WOOD).count() == 0
-    assert human.owned_objects.filter(type=ObjectType.BREAD).count() == 3
+    assert human.get_object_quantity(ObjectType.FLOUR) == 0
+    assert human.get_object_quantity(ObjectType.WOOD) == 0
+    assert human.get_object_quantity(ObjectType.BREAD) == 3
     assert human.step == SimulationStep.SELLING
 
 
@@ -149,7 +149,7 @@ def test_perform_selling_resets_inventory_and_lists_sellable_objects():
     assert ore.in_sale is True
     assert ore.price == pytest.approx(expected_price, rel=1e-6)
     assert bread.in_sale is False
-    assert bread.price == 0
+    assert bread.price is None
 
 
 @pytest.mark.django_db
@@ -177,13 +177,13 @@ def test_perform_selling_rounds_price_to_two_decimals(monkeypatch):
 @pytest.mark.django_db
 def test_use_basic_need_consumes_items_and_resets_counter():
     human = Human.objects.create(time_since_need_fulfilled=3, time_without_full_needs=5)
-    Object.objects.create(owner=human, type=ObjectType.WOOD)
-    Object.objects.create(owner=human, type=ObjectType.BREAD)
+    ObjectStack.objects.create(owner=human, type=ObjectType.WOOD)
+    ObjectStack.objects.create(owner=human, type=ObjectType.BREAD)
 
     human.use_basic_need()
     human.refresh_from_db()
 
-    assert human.owned_objects.count() == 0
+    assert human.owned_objects.total_quantity() == 0
     assert human.time_since_need_fulfilled == 0
     assert human.time_without_full_needs == 5
     assert human.step == SimulationStep.START_OF_DAY
@@ -192,7 +192,7 @@ def test_use_basic_need_consumes_items_and_resets_counter():
 @pytest.mark.django_db
 def test_use_basic_need_missing_item_increments_counters():
     human = Human.objects.create(time_since_need_fulfilled=0, time_without_full_needs=2)
-    Object.objects.create(owner=human, type=ObjectType.WOOD)
+    ObjectStack.objects.create(owner=human, type=ObjectType.WOOD)
 
     human.use_basic_need()
     human.refresh_from_db()
@@ -205,8 +205,8 @@ def test_use_basic_need_missing_item_increments_counters():
 @pytest.mark.django_db
 def test_perform_consumption_advances_step():
     human = Human.objects.create(step=SimulationStep.CONSUMPTION, time_since_need_fulfilled=2)
-    Object.objects.create(owner=human, type=ObjectType.WOOD)
-    Object.objects.create(owner=human, type=ObjectType.BREAD)
+    ObjectStack.objects.create(owner=human, type=ObjectType.WOOD)
+    ObjectStack.objects.create(owner=human, type=ObjectType.BREAD)
 
     human.perform_current_step()
     human.refresh_from_db()
@@ -227,14 +227,12 @@ def test_perform_buying_advances_step_and_transfers_objects():
 
     buyer.refresh_from_db()
     seller.refresh_from_db()
-    offer.refresh_from_db()
-
     assert buyer.step == SimulationStep.CONSUMPTION
     assert buyer.money == initial_money - bread_price
     assert seller.money == bread_price
-    assert offer.owner == buyer
-    assert offer.in_sale is False
-    assert offer.price is None
+    assert buyer.get_object_quantity(ObjectType.BREAD) == 1
+    assert seller.get_object_quantity(ObjectType.BREAD) == 0
+    assert buyer.owned_objects.filter(id=offer.id).exists() is False
 
 
 @pytest.mark.django_db

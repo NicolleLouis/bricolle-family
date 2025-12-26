@@ -21,7 +21,7 @@ class JobInventoryService:
                 capacities.append(float("inf"))
                 continue
 
-            available = human.owned_objects.filter(type=object_type).count()
+            available = human.owned_objects.filter(type=object_type).total_quantity()
             capacities.append(available // quantity)
 
         if not capacities:

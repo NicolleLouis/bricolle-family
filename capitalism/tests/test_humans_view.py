@@ -139,7 +139,7 @@ def test_humans_view_adds_object_via_post(logged_client):
     )
 
     assert response.status_code == 200
-    assert human.owned_objects.filter(type=ObjectType.WOOD).count() == 3
+    assert human.get_object_quantity(ObjectType.WOOD) == 3
     messages = list(response.context.get("messages", []))
     assert any("ajout" in message.message.lower() for message in messages)
 
@@ -165,7 +165,7 @@ def test_human_detail_view_delete_object(logged_client):
     )
 
     assert response.status_code == 200
-    assert human.owned_objects.filter(id=obj.id).exists() is False
+    assert human.get_object_quantity(ObjectType.BREAD) == 0
     messages = list(response.context.get("messages", []))
     assert any("supprimé" in message.message.lower() for message in messages)
 
@@ -190,7 +190,7 @@ def test_human_detail_view_add_object(logged_client):
     )
 
     assert response.status_code == 200
-    assert human.owned_objects.filter(type=ObjectType.ORE).count() == 2
+    assert human.get_object_quantity(ObjectType.ORE) == 2
     messages = list(response.context.get("messages", []))
     assert any("ajout" in message.message.lower() for message in messages)
 

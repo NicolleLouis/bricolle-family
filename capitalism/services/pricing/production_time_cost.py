@@ -15,7 +15,7 @@ def time_cost_per_unit(
 
     if job_cls.requires_tool():
         tool_type = getattr(job_cls, "TOOL", None)
-        if tool_type and human.owned_objects.filter(type=tool_type).exists():
+        if tool_type and human.has_object(tool_type):
             efficiency = getattr(job_cls, "TOOL_EFFICIENCY", 1) or 1
             if efficiency > 0:
                 duration_minutes = duration_minutes / efficiency

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from decimal import Decimal, ROUND_HALF_UP
-from typing import TYPE_CHECKING, Iterable, List
+from typing import TYPE_CHECKING
 
 from capitalism.constants.simulation_step import SimulationStep
 from capitalism.services.pricing import HumanSellingPriceValuationService
 
 if TYPE_CHECKING:
-    from capitalism.models import Human, Object
+    from capitalism.models import Human
 
 
 class HumanSellingService:
@@ -18,28 +18,24 @@ class HumanSellingService:
         self.valuation_service = valuation_service or HumanSellingPriceValuationService()
 
     def run(self) -> SimulationStep:
-        objects = list(self._owned_objects())
-        self._reset_listings(objects)
-        self._refresh_prices(objects)
+        self._reset_listings()
+        self._refresh_prices()
         return self._advance_step()
 
-    def _owned_objects(self) -> Iterable["Object"]:
-        return self.human.owned_objects.all()
+    def _reset_listings(self) -> None:
+        self.human.owned_objects.update(price=None, in_sale=False)
 
-    def _reset_listings(self, objects: List["Object"]) -> None:
-        for obj in objects:
-            obj.price = 0
-            obj.in_sale = False
-            obj.save(update_fields=["price", "in_sale"])
-
-    def _refresh_prices(self, objects: List["Object"]) -> None:
-        for obj in objects:
-            price = self.valuation_service.estimate_price(self.human, obj.type)
+    def _refresh_prices(self) -> None:
+        owned_types = self.human.owned_objects.values_list("type", flat=True).distinct()
+        for object_type in owned_types:
+            price = self.valuation_service.estimate_price(self.human, object_type)
             if price is None:
                 continue
-            obj.price = self._format_price(price)
-            obj.in_sale = True
-            obj.save(update_fields=["price", "in_sale"])
+            formatted_price = self._format_price(price)
+            self.human.owned_objects.filter(type=object_type).update(
+                price=formatted_price,
+                in_sale=True,
+            )
 
     def _advance_step(self) -> SimulationStep:
         return self.human.next_step()

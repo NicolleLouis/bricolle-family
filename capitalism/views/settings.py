@@ -6,7 +6,7 @@ from capitalism.services.human_factory import HumanFactory
 
 from capitalism.constants.jobs import Job
 from capitalism.constants.simulation_step import SimulationStep
-from capitalism.models import Human, HumanAnalytics, Object, PriceAnalytics, Simulation, Transaction
+from capitalism.models import Human, HumanAnalytics, ObjectStack, PriceAnalytics, Simulation, Transaction
 from capitalism.services.pricing import MarketPerceivedPriceResetService
 
 
@@ -54,7 +54,7 @@ class SettingView:
     def _reset_simulation(request):
         with transaction.atomic():
             Human.objects.all().delete()
-            Object.objects.all().delete()
+            ObjectStack.objects.all().delete()
             HumanAnalytics.objects.all().delete()
             PriceAnalytics.objects.all().delete()
             Transaction.objects.all().delete()

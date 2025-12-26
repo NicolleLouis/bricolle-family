@@ -78,35 +78,28 @@ class ProductionService:
         without_tool, with_tool = JobCapacityService.compute_daily_capacity(job_cls)
         if not job_cls.requires_tool():
             return without_tool
-        elif self.human.owned_objects.filter(type=job_cls.TOOL).exists():
+        elif self.human.has_object(job_cls.TOOL):
             return with_tool
         return without_tool
 
     def _has_tool(self, tool_type) -> bool:
         if tool_type is None:
             return True
-        return self.human.owned_objects.filter(type=tool_type).exists()
+        return self.human.has_object(tool_type)
 
     def _consume_inputs(self, job_cls, max_actions: int):
         for object_type, quantity in job_cls.get_input():
             total_needed = quantity * max_actions
-            for _ in range(total_needed):
-                obj = (
-                    self.human.owned_objects.filter(type=object_type)
-                    .order_by("id")
-                    .first()
+            removed = self.human.remove_objects(object_type, total_needed)
+            if removed < total_needed:
+                raise MissingObjectInput(
+                    f"Insufficient inventory for {object_type} while processing production."
                 )
-                if not obj:
-                    raise MissingObjectInput(
-                        f"Insufficient inventory for {object_type} while processing production."
-                    )
-                obj.delete()
 
     def _produce_outputs(self, job_cls, max_actions: int):
         for object_type, quantity in job_cls.get_output():
             total_to_create = quantity * max_actions
-            for _ in range(total_to_create):
-                self.human.owned_objects.create(type=object_type)
+            self.human.add_objects(object_type, total_to_create)
 
     def _handle_tool_wear(self, job_cls):
         if not job_cls.requires_tool():
@@ -117,12 +110,11 @@ class ProductionService:
             return
 
         tool_type = job_cls.TOOL
-        tool_qs = self.human.owned_objects.filter(type=tool_type).order_by("id")
-        if not tool_qs.exists():
+        if not self.human.has_object(tool_type):
             return
 
         if self._should_break_tool(probability):
-            tool_qs.first().delete()
+            self.human.remove_objects(tool_type, 1)
 
     def _should_break_tool(self, probability: float) -> bool:
         return self.random_generator.random() < probability

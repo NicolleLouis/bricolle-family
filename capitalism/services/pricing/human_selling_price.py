@@ -93,7 +93,7 @@ class HumanSellingPriceValuationService:
         daily_output = self._daily_output_capacity(human, job_cls, object_type)
         if daily_output <= 0:
             return 0.0
-        owned_quantity = human.owned_objects.filter(type=object_type).count()
+        owned_quantity = human.get_object_quantity(object_type)
         return owned_quantity / daily_output
 
     def _daily_output_capacity(self, human, job_cls: Type[Job], object_type: str) -> float:
@@ -107,7 +107,7 @@ class HumanSellingPriceValuationService:
 
         without_tool, with_tool = JobCapacityService.compute_daily_capacity(job_cls)
         if job_cls.requires_tool() and job_cls.TOOL is not None:
-            has_tool = human.owned_objects.filter(type=job_cls.TOOL).exists()
+            has_tool = human.has_object(job_cls.TOOL)
             actions_per_day = with_tool if has_tool else without_tool
         else:
             actions_per_day = without_tool
