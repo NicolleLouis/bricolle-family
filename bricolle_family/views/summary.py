@@ -19,6 +19,7 @@ class SummaryView:
             {"name": "Games Collection", "url": "/games_collection/", "color": "#8e44ad"},
             {"name": "The Bazaar", "url": "/the_bazaar/", "color": "#5DADE2"},
             {"name": "Civilization 7", "url": "/civilization7/", "color": "#d35400"},
+            {"name": "Seven and Half", "url": "/seven_and_half/", "color": "#1f6f8b"},
         ]
         return render(request, "bricolle_family/summary.html", {"modules": modules})
 

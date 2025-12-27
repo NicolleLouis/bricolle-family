@@ -1,0 +1,37 @@
+{% extends "seven_and_half/base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6">
+        <h1 class="mb-3">Proba de reussir une pioche</h1>
+        <p class="text-muted">
+            Choisissez une carte initiale pour estimer la probabilite qu'une seule pioche garde la main valide.
+        </p>
+        <form method="post" class="card card-body shadow-sm">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ form.initial_card_value.label_tag }}
+                {{ form.initial_card_value }}
+            </div>
+            <button class="btn btn-primary" type="submit">Calculer</button>
+        </form>
+    </div>
+    <div class="col-lg-6">
+        {% if result %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5">Resultat</h2>
+                    <p class="mb-2">Cartes restantes: {{ result.total_cards }}</p>
+                    <p class="mb-2">Cartes qui font depasser 7.5: {{ result.bust_cards }}</p>
+                    <p class="mb-2">Probabilite de depasser 7.5: {{ bust_percentage }}%</p>
+                    <p class="mb-0">Probabilite de reussir la pioche: {{ success_percentage }}%</p>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-secondary" role="alert">
+                Aucun calcul pour le moment. Choisissez une carte et validez.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

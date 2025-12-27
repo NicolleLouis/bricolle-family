@@ -9,6 +9,7 @@ from flash_cards.views.api import (
 from flash_cards.views.hall_of_fame import hall_of_fame
 from flash_cards.views.home import home
 from flash_cards.views.settings import (
+    category_delete,
     categories,
     question_delete,
     question_form,
@@ -26,6 +27,7 @@ urlpatterns = [
     path("hall-of-fame/", hall_of_fame, name="hall_of_fame"),
     path("settings/", settings, name="settings"),
     path("categories/", categories, name="categories"),
+    path("categories/<int:category_id>/delete/", category_delete, name="category_delete"),
     path("theme-presets/", theme_presets, name="theme_presets"),
     path("theme-presets/<int:preset_id>/", theme_presets, name="theme_preset_edit"),
     path("questions/add/", question_form, name="question_create"),

@@ -1,0 +1,15 @@
+{% extends "seven_and_half/base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <h1 class="mb-3">7 et demi</h1>
+        <a class="btn btn-primary" href="{% url 'seven_and_half:draw_probability' %}">
+            Draw probability
+        </a>
+        <a class="btn btn-outline-primary ms-2" href="{% url 'seven_and_half:game_simulation' %}">
+            Game simulator
+        </a>
+    </div>
+</div>
+{% endblock %}

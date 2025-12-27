@@ -94,6 +94,21 @@ def categories(request):
     )
 
 
+def category_delete(request, category_id):
+    category = get_object_or_404(Category, pk=category_id)
+    if request.method == "POST":
+        category_has_questions = category.questions.exists()
+        if category_has_questions:
+            messages.error(
+                request,
+                "Impossible de supprimer une catégorie qui contient des questions.",
+            )
+        else:
+            category.delete()
+            messages.success(request, "Catégorie supprimée.")
+    return redirect(reverse("flash_cards:categories"))
+
+
 def question_form(request, question_id=None):
     if question_id:
         question_instance = get_object_or_404(Question, pk=question_id)

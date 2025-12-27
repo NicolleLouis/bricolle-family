@@ -1,0 +1,19 @@
+{% load static %}
+{% load bootstrap5 %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seven and Half</title>
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+</head>
+<body>
+{% include "seven_and_half/header.html" %}
+<div class="container py-4">
+    {% block content %}
+    {% endblock %}
+</div>
+</body>
+</html>

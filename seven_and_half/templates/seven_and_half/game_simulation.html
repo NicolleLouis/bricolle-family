@@ -1,0 +1,42 @@
+{% extends "seven_and_half/base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6">
+        <h1 class="mb-3">Simulation de partie</h1>
+        <p class="text-muted">
+            Choisissez les cartes initiales du joueur et de la banque pour simuler 1000 parties.
+        </p>
+        <form method="post" class="card card-body shadow-sm">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div class="mb-3">
+                {{ form.player_card_value.label_tag }}
+                {{ form.player_card_value }}
+            </div>
+            <div class="mb-3">
+                {{ form.bank_card_value.label_tag }}
+                {{ form.bank_card_value }}
+            </div>
+            <button class="btn btn-primary" type="submit">Simuler</button>
+        </form>
+    </div>
+    <div class="col-lg-6">
+        {% if result %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5">Resultat</h2>
+                    <p class="mb-2">Nombre de parties: {{ result.simulations }}</p>
+                    <p class="mb-2">Victoires joueur: {{ result.player_wins }}</p>
+                    <p class="mb-2">Victoires banque: {{ result.bank_wins }}</p>
+                    <p class="mb-0">Taux de victoire joueur: {{ player_win_percentage }}%</p>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-secondary" role="alert">
+                Aucun calcul pour le moment. Choisissez les cartes et lancez la simulation.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

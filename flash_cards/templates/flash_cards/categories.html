@@ -19,6 +19,7 @@
                     <tr>
                         <th scope="col">Nom</th>
                         <th scope="col" class="text-center">Questions</th>
+                        <th scope="col" class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -26,10 +27,20 @@
                     <tr>
                         <td class="align-middle">{{ category.name }}</td>
                         <td class="align-middle text-center">{{ category.question_count }}</td>
+                        <td class="align-middle text-center">
+                            {% if category.question_count == 0 %}
+                                <form method="post" action="{% url 'flash_cards:category_delete' category.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </td>
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="2" class="text-center py-4 text-muted">
+                        <td colspan="3" class="text-center py-4 text-muted">
                             Aucune catégorie pour le moment.
                         </td>
                     </tr>
