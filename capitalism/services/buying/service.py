@@ -11,7 +11,7 @@ from capitalism.constants.simulation_step import SimulationStep
 from capitalism.services.pricing import HumanBuyingPriceValuationService
 
 if TYPE_CHECKING:
-    from capitalism.models import Human
+    from capitalism.models import Human, Transaction
 
 
 class HumanBuyingService:
@@ -29,11 +29,26 @@ class HumanBuyingService:
         self.transaction_model = apps.get_model("capitalism", "Transaction")
 
     def run(self) -> SimulationStep:
-        self._owned_quantities = self._build_owned_quantities()
-        for object_type, _label in ObjectType.choices:
-            if self.human.money <= 0:
-                break
-            self._buy_affordable_objects(object_type)
+        self._pending_transactions: list["Transaction"] = []
+        with transaction.atomic():
+            human_model = apps.get_model("capitalism", "Human")
+            buyer = human_model.objects.select_for_update().get(id=self.human.id)
+            self._owned_quantities = self._build_owned_quantities()
+            self._buyer_money = buyer.money
+            self._buyer_initial_money = buyer.money
+            for object_type, _label in ObjectType.choices:
+                if self._buyer_money <= 0:
+                    break
+                self._buy_affordable_objects(buyer, object_type)
+            if self._pending_transactions:
+                self.transaction_model.objects.bulk_create(
+                    self._pending_transactions,
+                    batch_size=200,
+                )
+            if self._buyer_money != self._buyer_initial_money:
+                human_model.objects.filter(id=buyer.id).update(money=self._buyer_money)
+                buyer.money = self._buyer_money
+                self.human.money = self._buyer_money
         return self.human.next_step()
 
     def _build_owned_quantities(self) -> dict[str, int]:
@@ -44,7 +59,7 @@ class HumanBuyingService:
         )
         return {row["type"]: int(row["total"] or 0) for row in rows}
 
-    def _buy_affordable_objects(self, object_type: str) -> None:
+    def _buy_affordable_objects(self, buyer: "Human", object_type: str) -> None:
         queryset = (
             self.object_model.objects.select_related("owner")
             .filter(
@@ -59,58 +74,60 @@ class HumanBuyingService:
         )
 
         for object_stack in queryset:
-            if self.human.money <= 0:
+            if self._buyer_money <= 0:
                 break
             price = float(object_stack.price or 0)
             if price <= 0:
                 continue
-            self._process_purchase(object_stack.id, object_type, price)
+            self._process_purchase(buyer, object_stack.id, object_type, price)
 
-    def _process_purchase(self, object_id: int, object_type: str, price: float) -> None:
-        with transaction.atomic():
-            locked_object = (
-                self.object_model.objects.select_for_update()
-                .select_related("owner")
-                .get(id=object_id)
-            )
-            seller = locked_object.owner
-            if seller is None:
-                return
-            if locked_object.quantity <= 0 or not locked_object.in_sale:
-                return
-            if locked_object.price is None or float(locked_object.price) != price:
-                return
+    def _process_purchase(
+        self,
+        buyer: "Human",
+        object_id: int,
+        object_type: str,
+        price: float,
+    ) -> None:
+        locked_object = (
+            self.object_model.objects.select_for_update()
+            .select_related("owner")
+            .get(id=object_id)
+        )
+        seller = locked_object.owner
+        if seller is None:
+            return
+        if locked_object.quantity <= 0 or not locked_object.in_sale:
+            return
+        if locked_object.price is None or float(locked_object.price) != price:
+            return
 
-            human_model = apps.get_model("capitalism", "Human")
-            buyer = human_model.objects.select_for_update().get(id=self.human.id)
-            seller = human_model.objects.select_for_update().get(id=seller.id)
+        human_model = apps.get_model("capitalism", "Human")
+        seller = human_model.objects.select_for_update().get(id=seller.id)
+        buyer.money = self._buyer_money
 
-            units_to_buy, buyer_money, seller_money, updated_quantities = self._compute_purchase_units(
-                buyer,
-                seller,
-                object_type,
-                price,
-                locked_object.quantity,
-            )
-            if units_to_buy <= 0:
-                return
+        units_to_buy, buyer_money, seller_money, updated_quantities = self._compute_purchase_units(
+            buyer,
+            seller,
+            object_type,
+            price,
+            locked_object.quantity,
+        )
+        if units_to_buy <= 0:
+            return
 
-            buyer.money = buyer_money
-            buyer.save(update_fields=["money"])
-            seller.money = seller_money
-            seller.save(update_fields=["money"])
+        human_model.objects.filter(id=seller.id).update(money=seller_money)
 
-            locked_object.quantity -= units_to_buy
-            if locked_object.quantity <= 0:
-                locked_object.delete()
-            else:
-                locked_object.save(update_fields=["quantity"])
+        locked_object.quantity -= units_to_buy
+        if locked_object.quantity <= 0:
+            locked_object.delete()
+        else:
+            locked_object.save(update_fields=["quantity"])
 
-            self._add_buyer_stack(buyer, object_type, units_to_buy)
-            self._record_transactions(object_type, price, units_to_buy)
+        self._add_buyer_stack(buyer, object_type, units_to_buy)
+        self._record_transactions(object_type, price, units_to_buy)
 
-            self.human.money = buyer_money
-            self._owned_quantities = updated_quantities
+        self._buyer_money = buyer_money
+        self._owned_quantities = updated_quantities
 
     def _compute_purchase_units(
         self,
@@ -163,11 +180,10 @@ class HumanBuyingService:
     def _record_transactions(self, object_type: str, price: float, quantity: int) -> None:
         if quantity <= 0:
             return
-        transactions = [
+        self._pending_transactions.extend(
             self.transaction_model(object_type=object_type, price=price)
             for _ in range(quantity)
-        ]
-        self.transaction_model.objects.bulk_create(transactions, batch_size=200)
+        )
 
     @staticmethod
     def _round_money(value: float) -> float:
