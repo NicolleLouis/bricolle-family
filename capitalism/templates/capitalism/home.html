@@ -42,6 +42,11 @@
                 </form>
                 <form method="post" action="">
                     {% csrf_token %}
+                    <input type="hidden" name="action" value="next_ten_days">
+                    <button type="submit" class="btn btn-outline-primary w-100">Next 10 Days</button>
+                </form>
+                <form method="post" action="">
+                    {% csrf_token %}
                     <input type="hidden" name="action" value="next_step">
                     <button type="submit" class="btn btn-outline-secondary w-100">Next Step</button>
                 </form>

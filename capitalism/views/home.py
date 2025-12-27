@@ -14,6 +14,8 @@ class HomeView:
                 return HomeView._next_day(request)
             if action == "next_step":
                 return HomeView._next_step(request)
+            if action == "next_ten_days":
+                return HomeView._next_ten_days(request)
 
         macro_info = DashboardService().macro_overview()
         return render(request, "capitalism/home.html", {"macro_info": macro_info})
@@ -57,5 +59,30 @@ class HomeView:
             messages.success(
                 request,
                 "Journée complète exécutée avec succès.",
+            )
+        return redirect("capitalism:home")
+
+    @staticmethod
+    def _next_ten_days(request):
+        simulation = Simulation.objects.order_by("id").first()
+        if simulation is None:
+            messages.error(request, "Aucune simulation disponible.")
+            return redirect("capitalism:home")
+
+        executed_days = 0
+        try:
+            for _ in range(10):
+                simulation.next_day()
+                executed_days += 1
+        except Exception as exc:  # pylint: disable=broad-except
+            messages.error(
+                request,
+                "Erreur lors de l'exécution des 10 jours "
+                f"(après {executed_days} jour(s)) : {exc}",
+            )
+        else:
+            messages.success(
+                request,
+                "10 journées exécutées avec succès.",
             )
         return redirect("capitalism:home")
