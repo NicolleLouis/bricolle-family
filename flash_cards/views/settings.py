@@ -104,6 +104,8 @@ def question_form(request, question_id=None):
         form = QuestionForm(request.POST, instance=question_instance)
         formset = AnswerFormSet(request.POST, instance=question_instance)
         if form.is_valid() and formset.is_valid():
+            if question_instance.pk:
+                form.instance.needs_rework = False
             question = form.save()
             formset.instance = question
             formset.save()

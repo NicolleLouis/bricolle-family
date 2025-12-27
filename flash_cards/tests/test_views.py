@@ -64,6 +64,41 @@ def test_question_creation_flow(client, user):
 
 
 @pytest.mark.django_db
+def test_question_edit_resets_needs_rework(client, user):
+    category = Category.objects.create(name="Culture")
+    question = Question.objects.create(
+        category=category,
+        text="Capital of Italy ?",
+        needs_rework=True,
+    )
+    answer = Answer.objects.create(question=question, text="Rome", is_correct=True)
+    client.force_login(user)
+
+    url = reverse("flash_cards:question_edit", args=[question.id])
+    data = {
+        "category": category.id,
+        "text": "Capitale de l'Italie ?",
+        "needs_rework": "on",
+        "answers-TOTAL_FORMS": "2",
+        "answers-INITIAL_FORMS": "1",
+        "answers-MIN_NUM_FORMS": "0",
+        "answers-MAX_NUM_FORMS": "1000",
+        "answers-0-id": str(answer.id),
+        "answers-0-text": "Rome",
+        "answers-0-is_correct": "on",
+        "answers-1-text": "Milan",
+        "answers-1-is_correct": "",
+    }
+
+    response = client.post(url, data)
+
+    assert response.status_code == 302
+    question.refresh_from_db()
+    assert question.needs_rework is False
+    assert question.text == "Capitale de l'Italie ?"
+
+
+@pytest.mark.django_db
 def test_question_creation_from_json(client, user):
     category = Category.objects.create(name="Culture")
     client.force_login(user)
