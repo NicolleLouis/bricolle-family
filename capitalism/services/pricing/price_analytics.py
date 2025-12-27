@@ -35,9 +35,42 @@ class PriceAnalyticsRecorderService:
 
     def run(self) -> None:
         aggregates = self._collect_price_aggregates()
+        existing = {
+            analytics.object_type: analytics
+            for analytics in self.price_analytics_model.objects.filter(day_number=self.day_number)
+        }
+        to_create = []
+        to_update = []
         for object_type, _label in ObjectType.choices:
             snapshot = aggregates.get(object_type, _PriceSnapshot(0.0, 0.0, 0.0))
-            self._upsert_price_analytics(object_type=object_type, snapshot=snapshot)
+            analytics = existing.get(object_type)
+            if analytics is None:
+                to_create.append(
+                    self.price_analytics_model(
+                        day_number=self.day_number,
+                        object_type=object_type,
+                        lowest_price_displayed=snapshot.min_price,
+                        max_price_displayed=snapshot.max_price,
+                        average_price_displayed=snapshot.avg_price,
+                        lowest_price=0.0,
+                        max_price=0.0,
+                        average_price=0.0,
+                        transaction_number=0,
+                    )
+                )
+                continue
+            analytics.lowest_price_displayed = snapshot.min_price
+            analytics.max_price_displayed = snapshot.max_price
+            analytics.average_price_displayed = snapshot.avg_price
+            to_update.append(analytics)
+        if to_create:
+            self.price_analytics_model.objects.bulk_create(to_create, batch_size=200)
+        if to_update:
+            self.price_analytics_model.objects.bulk_update(
+                to_update,
+                ["lowest_price_displayed", "max_price_displayed", "average_price_displayed"],
+                batch_size=200,
+            )
 
     def _collect_price_aggregates(self) -> Dict[str, _PriceSnapshot]:
         price_expression = models.ExpressionWrapper(
@@ -67,33 +100,6 @@ class PriceAnalyticsRecorderService:
             )
         return aggregates
 
-    def _upsert_price_analytics(self, *, object_type: str, snapshot: _PriceSnapshot) -> None:
-        analytics, created = self.price_analytics_model.objects.get_or_create(
-            day_number=self.day_number,
-            object_type=object_type,
-            defaults={
-                "lowest_price_displayed": snapshot.min_price,
-                "max_price_displayed": snapshot.max_price,
-                "average_price_displayed": snapshot.avg_price,
-                "lowest_price": 0.0,
-                "max_price": 0.0,
-                "average_price": 0.0,
-                "transaction_number": 0,
-            },
-        )
-
-        if not created:
-            analytics.lowest_price_displayed = snapshot.min_price
-            analytics.max_price_displayed = snapshot.max_price
-            analytics.average_price_displayed = snapshot.avg_price
-            analytics.save(
-                update_fields=[
-                    "lowest_price_displayed",
-                    "max_price_displayed",
-                    "average_price_displayed",
-                ]
-            )
-
 
 class TransactionPriceAnalyticsService:
     """Update price analytics with accepted transaction data and clear processed transactions."""
@@ -105,13 +111,67 @@ class TransactionPriceAnalyticsService:
 
     def run(self) -> None:
         aggregates = self._collect_transaction_aggregates()
+        existing = {
+            analytics.object_type: analytics
+            for analytics in self.price_analytics_model.objects.filter(day_number=self.day_number)
+        }
+        to_create = []
+        to_update = []
         for object_type, _label in ObjectType.choices:
             snapshot = aggregates.get(object_type)
             if snapshot:
-                self._apply_snapshot(object_type=object_type, snapshot=snapshot)
-                self.transaction_model.objects.filter(object_type=object_type).delete()
+                analytics = existing.get(object_type)
+                if analytics is None:
+                    to_create.append(
+                        self.price_analytics_model(
+                            day_number=self.day_number,
+                            object_type=object_type,
+                            lowest_price_displayed=snapshot.min_price,
+                            max_price_displayed=snapshot.max_price,
+                            average_price_displayed=snapshot.avg_price,
+                            lowest_price=snapshot.min_price,
+                            max_price=snapshot.max_price,
+                            average_price=snapshot.avg_price,
+                            transaction_number=snapshot.count,
+                        )
+                    )
+                    continue
+                analytics.lowest_price = snapshot.min_price
+                analytics.max_price = snapshot.max_price
+                analytics.average_price = snapshot.avg_price
+                analytics.transaction_number = snapshot.count
+                to_update.append(analytics)
             else:
-                self._reset_snapshot(object_type=object_type)
+                analytics = existing.get(object_type)
+                if analytics is None:
+                    to_create.append(
+                        self.price_analytics_model(
+                            day_number=self.day_number,
+                            object_type=object_type,
+                            lowest_price_displayed=0.0,
+                            max_price_displayed=0.0,
+                            average_price_displayed=0.0,
+                            lowest_price=0.0,
+                            max_price=0.0,
+                            average_price=0.0,
+                            transaction_number=0,
+                        )
+                    )
+                    continue
+                analytics.lowest_price = 0.0
+                analytics.max_price = 0.0
+                analytics.average_price = 0.0
+                analytics.transaction_number = 0
+                to_update.append(analytics)
+        if to_create:
+            self.price_analytics_model.objects.bulk_create(to_create, batch_size=200)
+        if to_update:
+            self.price_analytics_model.objects.bulk_update(
+                to_update,
+                ["lowest_price", "max_price", "average_price", "transaction_number"],
+                batch_size=200,
+            )
+        self.transaction_model.objects.all().delete()
 
     def _collect_transaction_aggregates(self) -> Dict[str, _TransactionSnapshot]:
         queryset: QuerySet = (
@@ -133,56 +193,3 @@ class TransactionPriceAnalyticsService:
                 count=int(row["count"] or 0),
             )
         return aggregates
-
-    def _apply_snapshot(self, *, object_type: str, snapshot: _TransactionSnapshot) -> None:
-        analytics, created = self.price_analytics_model.objects.get_or_create(
-            day_number=self.day_number,
-            object_type=object_type,
-            defaults={
-                "lowest_price_displayed": snapshot.min_price,
-                "max_price_displayed": snapshot.max_price,
-                "average_price_displayed": snapshot.avg_price,
-                "lowest_price": snapshot.min_price,
-                "max_price": snapshot.max_price,
-                "average_price": snapshot.avg_price,
-                "transaction_number": snapshot.count,
-            },
-        )
-
-        if not created:
-            analytics.lowest_price = snapshot.min_price
-            analytics.max_price = snapshot.max_price
-            analytics.average_price = snapshot.avg_price
-            analytics.transaction_number = snapshot.count
-            analytics.save(
-                update_fields=[
-                    "lowest_price",
-                    "max_price",
-                    "average_price",
-                    "transaction_number",
-                ]
-            )
-
-    def _reset_snapshot(self, *, object_type: str) -> None:
-        updated = self.price_analytics_model.objects.filter(
-            day_number=self.day_number,
-            object_type=object_type,
-        ).update(
-            lowest_price=0.0,
-            max_price=0.0,
-            average_price=0.0,
-            transaction_number=0,
-        )
-
-        if not updated:
-            self.price_analytics_model.objects.create(
-                day_number=self.day_number,
-                object_type=object_type,
-                lowest_price_displayed=0.0,
-                max_price_displayed=0.0,
-                average_price_displayed=0.0,
-                lowest_price=0.0,
-                max_price=0.0,
-                average_price=0.0,
-                transaction_number=0,
-            )

@@ -30,6 +30,12 @@ class HumanAnalyticsRecorderService:
     def run(self) -> None:
         alive_aggregates = self._collect_alive_aggregates()
         dead_counts = self._collect_dead_counts()
+        existing = {
+            analytics.job: analytics
+            for analytics in self.analytics_model.objects.filter(day_number=self.day_number)
+        }
+        to_create = []
+        to_update = []
 
         for job_value, _label in Job.choices:
             snapshot = self._build_snapshot(
@@ -37,7 +43,46 @@ class HumanAnalyticsRecorderService:
                 alive_aggregates=alive_aggregates,
                 dead_counts=dead_counts,
             )
-            self._store_snapshot(job=job_value, snapshot=snapshot)
+            analytics = existing.get(job_value)
+            if analytics is None:
+                to_create.append(
+                    self.analytics_model(
+                        day_number=self.day_number,
+                        job=job_value,
+                        number_alive=snapshot.alive_count,
+                        dead_number=snapshot.dead_count,
+                        average_money=snapshot.avg_money,
+                        lowest_money=int(snapshot.min_money),
+                        max_money=int(snapshot.max_money),
+                        average_age=snapshot.avg_age,
+                        new_joiner=0,
+                    )
+                )
+                continue
+            analytics.number_alive = snapshot.alive_count
+            analytics.dead_number = snapshot.dead_count
+            analytics.average_money = snapshot.avg_money
+            analytics.lowest_money = int(snapshot.min_money)
+            analytics.max_money = int(snapshot.max_money)
+            analytics.average_age = snapshot.avg_age
+            analytics.new_joiner = 0
+            to_update.append(analytics)
+        if to_create:
+            self.analytics_model.objects.bulk_create(to_create, batch_size=200)
+        if to_update:
+            self.analytics_model.objects.bulk_update(
+                to_update,
+                [
+                    "number_alive",
+                    "dead_number",
+                    "average_money",
+                    "lowest_money",
+                    "max_money",
+                    "average_age",
+                    "new_joiner",
+                ],
+                batch_size=200,
+            )
 
     def _collect_alive_aggregates(self) -> Dict[str, Dict[str, float]]:
         queryset: QuerySet = (
@@ -90,19 +135,4 @@ class HumanAnalyticsRecorderService:
             min_money=alive_row["min_money"],
             max_money=alive_row["max_money"],
             avg_age=alive_row["avg_age"],
-        )
-
-    def _store_snapshot(self, *, job: str, snapshot: _JobSnapshot) -> None:
-        self.analytics_model.objects.update_or_create(
-            day_number=self.day_number,
-            job=job,
-            defaults={
-                "number_alive": snapshot.alive_count,
-                "dead_number": snapshot.dead_count,
-                "average_money": snapshot.avg_money,
-                "lowest_money": int(snapshot.min_money),
-                "max_money": int(snapshot.max_money),
-                "average_age": snapshot.avg_age,
-                "new_joiner": 0,
-            },
         )
