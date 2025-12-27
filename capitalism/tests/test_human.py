@@ -6,6 +6,7 @@ from capitalism.constants.simulation_step import SimulationStep
 from capitalism.models import Human, ObjectStack
 from capitalism.services.production.service import ProductionService
 from capitalism.services.pricing import HumanSellingPriceValuationService
+from capitalism.services.selling import HumanSellingService
 
 
 class _FixedRandom:
@@ -133,29 +134,35 @@ def test_production_limited_by_inputs(monkeypatch):
 @pytest.mark.django_db
 def test_perform_selling_resets_inventory_and_lists_sellable_objects():
     human = Human.objects.create(step=SimulationStep.SELLING, job=Job.MINER)
-    ore = human.owned_objects.create(type=ObjectType.ORE, price=5, in_sale=True)
-    bread = human.owned_objects.create(type=ObjectType.BREAD, price=12, in_sale=True)
+    human.owned_objects.create(type=ObjectType.ORE, price=5, in_sale=True, quantity=2)
+    human.owned_objects.create(type=ObjectType.BREAD, price=12, in_sale=True, quantity=2)
 
     expected_price = HumanSellingPriceValuationService().estimate_price(human, ObjectType.ORE)
     assert expected_price is not None
+    expected_price = HumanSellingService._format_price(expected_price)
 
     next_step = human.perform_selling()
     human.refresh_from_db()
-    ore.refresh_from_db()
-    bread.refresh_from_db()
 
     assert next_step == SimulationStep.PRICE_STATS
     assert human.step == SimulationStep.PRICE_STATS
-    assert ore.in_sale is True
-    assert ore.price == pytest.approx(expected_price, rel=1e-6)
-    assert bread.in_sale is False
-    assert bread.price is None
+    assert human.owned_objects.filter(type=ObjectType.ORE, in_sale=True).total_quantity() == 1
+    assert human.owned_objects.filter(type=ObjectType.ORE, in_sale=False).total_quantity() == 1
+    assert (
+        human.owned_objects.filter(type=ObjectType.ORE, in_sale=True)
+        .values_list("price", flat=True)
+        .distinct()
+        .get()
+        == pytest.approx(expected_price, rel=1e-6)
+    )
+    assert human.owned_objects.filter(type=ObjectType.BREAD, in_sale=True).exists() is False
+    assert human.owned_objects.filter(type=ObjectType.BREAD, price__isnull=False).exists() is False
 
 
 @pytest.mark.django_db
 def test_perform_selling_rounds_price_to_two_decimals(monkeypatch):
     human = Human.objects.create(step=SimulationStep.SELLING, job=Job.MINER)
-    ore = human.owned_objects.create(type=ObjectType.ORE, price=0, in_sale=False)
+    human.owned_objects.create(type=ObjectType.ORE, price=0, in_sale=False, quantity=2)
 
     def fake_estimate_price(self, _human, _type):
         return 5.6789
@@ -168,10 +175,23 @@ def test_perform_selling_rounds_price_to_two_decimals(monkeypatch):
 
     human.perform_current_step()
     human.refresh_from_db()
-    ore.refresh_from_db()
 
-    assert ore.in_sale is True
-    assert ore.price == pytest.approx(5.68)
+    sale_stack = human.owned_objects.filter(type=ObjectType.ORE, in_sale=True).first()
+    assert sale_stack is not None
+    assert sale_stack.price == pytest.approx(5.68)
+
+
+@pytest.mark.django_db
+def test_perform_selling_keeps_basic_needs_out_of_sale():
+    human = Human.objects.create(step=SimulationStep.SELLING, job=Job.BAKER)
+    human.owned_objects.create(type=ObjectType.BREAD, price=3.0, in_sale=True, quantity=3)
+
+    human.perform_selling()
+    human.refresh_from_db()
+
+    assert human.owned_objects.filter(type=ObjectType.BREAD, in_sale=True).total_quantity() == 1
+    assert human.owned_objects.filter(type=ObjectType.BREAD, in_sale=False).total_quantity() == 2
+    assert human.owned_objects.filter(type=ObjectType.BREAD, in_sale=False, price__isnull=False).exists() is False
 
 
 @pytest.mark.django_db
