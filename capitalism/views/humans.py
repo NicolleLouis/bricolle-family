@@ -111,6 +111,9 @@ class HumansView:
             if action == "update_price":
                 HumansView._handle_object_price_update(request, human)
                 return redirect("capitalism:human_detail", human_id=human.id)
+            if action == "kill":
+                HumansView._handle_human_death(request, human)
+                return redirect("capitalism:human_detail", human_id=human.id)
 
         objects = human.owned_objects.order_by("type", "id")
         desired_prices = HumansView._desired_purchase_prices(human)
@@ -127,6 +130,16 @@ class HumansView:
         }
 
         return render(request, HumansView.detail_template_name, context)
+
+    @staticmethod
+    def _handle_human_death(request, human):
+        if human.dead:
+            messages.info(request, "Cet humain est déjà mort.")
+            return
+
+        human.die()
+        display_name = human.name or f"Human #{human.id}"
+        messages.warning(request, f"{display_name} a été tué manuellement.")
 
     @staticmethod
     def _handle_object_creation(request):

@@ -79,6 +79,8 @@ class Simulation(models.Model):
                 return self.can_change_step_death()
             case SimulationStep.ANALYTICS:
                 return self.can_change_step_analytics()
+            case SimulationStep.GOVERNMENT_ACTIONS:
+                return self.can_change_step_government_actions()
             case SimulationStep.END_OF_DAY:
                 return self.can_change_step_end_of_day()
         return False
@@ -103,6 +105,8 @@ class Simulation(models.Model):
                 return self.finish_current_step_death()
             case SimulationStep.ANALYTICS:
                 return self.finish_current_step_analytics()
+            case SimulationStep.GOVERNMENT_ACTIONS:
+                return self.finish_current_step_government_actions()
             case SimulationStep.END_OF_DAY:
                 return self.finish_current_step_end_of_day()
         return self.step
@@ -174,6 +178,9 @@ class Simulation(models.Model):
     def can_change_step_end_of_day(self):
         return True
 
+    def can_change_step_government_actions(self):
+        return True
+
     def finish_current_step_start_of_day(self):
         starters = Human.objects.filter(dead=False, step=SimulationStep.START_OF_DAY)
         for human in starters:
@@ -235,6 +242,19 @@ class Simulation(models.Model):
         TransactionPriceAnalyticsService(day_number=self.day_number).run()
 
         humans = Human.objects.filter(dead=False, step=SimulationStep.ANALYTICS)
+        for human in humans:
+            human.perform_current_step()
+
+        return self.next_step()
+
+    def finish_current_step_government_actions(self):
+        from capitalism.services.central_government_actions import (
+            CentralGovernmentActionsService,
+        )
+
+        CentralGovernmentActionsService(self).run()
+
+        humans = Human.objects.filter(dead=False, step=SimulationStep.GOVERNMENT_ACTIONS)
         for human in humans:
             human.perform_current_step()
 

@@ -46,7 +46,7 @@ def test_simulation_next_step_cycles_through_sequence():
     assert simulation.step == SimulationStep.BUYING
 
     # advance until wrap-around
-    for _ in range(5):
+    for _ in range(6):
         next_step = simulation._next_step_value()
         Human.objects.update(step=next_step.value if hasattr(next_step, "value") else next_step)
         if simulation.step == SimulationStep.ANALYTICS:

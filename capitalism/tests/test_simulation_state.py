@@ -158,9 +158,9 @@ def test_finish_analytics_records_human_stats_and_advances_humans(monkeypatch):
     human.refresh_from_db()
 
     assert recorder_calls == [8, "run"]
-    assert result == SimulationStep.END_OF_DAY
-    assert simulation.step == SimulationStep.END_OF_DAY
-    assert human.step == SimulationStep.END_OF_DAY
+    assert result == SimulationStep.GOVERNMENT_ACTIONS
+    assert simulation.step == SimulationStep.GOVERNMENT_ACTIONS
+    assert human.step == SimulationStep.GOVERNMENT_ACTIONS
 
 
 @pytest.mark.django_db
@@ -201,6 +201,21 @@ def test_finish_analytics_updates_price_analytics_with_transactions():
     assert wood_stats.average_price == pytest.approx(25.0)
     assert wood_stats.transaction_number == 3
     assert not Transaction.objects.filter(object_type=ObjectType.WOOD).exists()
+    assert result == SimulationStep.GOVERNMENT_ACTIONS
+    assert simulation.step == SimulationStep.GOVERNMENT_ACTIONS
+    assert human.step == SimulationStep.GOVERNMENT_ACTIONS
+
+
+@pytest.mark.django_db
+def test_finish_government_actions_advances_humans():
+    simulation = Simulation.objects.create(step=SimulationStep.GOVERNMENT_ACTIONS)
+    human = Human.objects.create(step=SimulationStep.GOVERNMENT_ACTIONS)
+
+    result = simulation.finish_current_step_government_actions()
+
+    simulation.refresh_from_db()
+    human.refresh_from_db()
+
     assert result == SimulationStep.END_OF_DAY
     assert simulation.step == SimulationStep.END_OF_DAY
     assert human.step == SimulationStep.END_OF_DAY

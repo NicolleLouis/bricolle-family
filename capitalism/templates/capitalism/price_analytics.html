@@ -32,41 +32,67 @@
             <span>Historique des prix - {{ object_label }}</span>
             <span class="badge bg-info text-dark">{{ analytics|length }} jours</span>
         </div>
-        <div class="card-body p-0">
-            {% if analytics %}
-                <div class="table-responsive">
-                    <table class="table table-striped mb-0 align-middle">
-                        <thead>
-                            <tr>
-                                <th scope="col">Jour</th>
-                                <th scope="col" class="text-end">Prix proposé min</th>
-                                <th scope="col" class="text-end">Prix proposé moyen</th>
-                                <th scope="col" class="text-end">Prix proposé max</th>
-                                <th scope="col" class="text-end">Prix accepté min</th>
-                                <th scope="col" class="text-end">Prix accepté moyen</th>
-                                <th scope="col" class="text-end">Prix accepté max</th>
-                                <th scope="col" class="text-end">Transactions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for entry in analytics %}
-                                <tr>
-                                    <td>{{ entry.day_number }}</td>
-                                    <td class="text-end">{{ entry.lowest_price_displayed|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.average_price_displayed|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.max_price_displayed|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.lowest_price|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.average_price|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.max_price|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.transaction_number }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+        <div class="card-body">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="price-analytics-table-tab" data-bs-toggle="tab" data-bs-target="#price-analytics-table" type="button" role="tab" aria-controls="price-analytics-table" aria-selected="true">Table</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="price-analytics-graph-tab" data-bs-toggle="tab" data-bs-target="#price-analytics-graph" type="button" role="tab" aria-controls="price-analytics-graph" aria-selected="false">Graph</button>
+                </li>
+            </ul>
+            <div class="tab-content pt-3">
+                <div class="tab-pane fade show active" id="price-analytics-table" role="tabpanel" aria-labelledby="price-analytics-table-tab">
+                    {% if analytics %}
+                        <div class="table-responsive">
+                            <table class="table table-striped mb-0 align-middle">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Jour</th>
+                                        <th scope="col" class="text-end">Prix proposé min</th>
+                                        <th scope="col" class="text-end">Prix proposé moyen</th>
+                                        <th scope="col" class="text-end">Prix proposé max</th>
+                                        <th scope="col" class="text-end">Prix accepté min</th>
+                                        <th scope="col" class="text-end">Prix accepté moyen</th>
+                                        <th scope="col" class="text-end">Prix accepté max</th>
+                                        <th scope="col" class="text-end">Transactions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for entry in analytics %}
+                                        <tr>
+                                            <td>{{ entry.day_number }}</td>
+                                            <td class="text-end">{{ entry.lowest_price_displayed|floatformat:2 }}</td>
+                                            <td class="text-end">{{ entry.average_price_displayed|floatformat:2 }}</td>
+                                            <td class="text-end">{{ entry.max_price_displayed|floatformat:2 }}</td>
+                                            <td class="text-end">{{ entry.lowest_price|floatformat:2 }}</td>
+                                            <td class="text-end">{{ entry.average_price|floatformat:2 }}</td>
+                                            <td class="text-end">{{ entry.max_price|floatformat:2 }}</td>
+                                            <td class="text-end">{{ entry.transaction_number }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">Aucune donnée disponible pour cet objet.</p>
+                    {% endif %}
                 </div>
-            {% else %}
-                <p class="text-muted p-3 mb-0">Aucune donnée disponible pour cet objet.</p>
-            {% endif %}
+                <div class="tab-pane fade" id="price-analytics-graph" role="tabpanel" aria-labelledby="price-analytics-graph-tab">
+                    {% if average_price_chart %}
+                        <div class="mb-4">
+                            <div class="overflow-auto">
+                                {{ average_price_chart|safe }}
+                            </div>
+                        </div>
+                        <div class="overflow-auto">
+                            {{ transaction_chart|safe }}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">Aucune donnée disponible pour cet objet.</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

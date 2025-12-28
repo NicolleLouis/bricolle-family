@@ -3,7 +3,7 @@ import pytest
 from capitalism.constants.jobs import Job
 from capitalism.constants.object_type import ObjectType
 from capitalism.constants.simulation_step import SimulationStep
-from capitalism.models import Human, ObjectStack
+from capitalism.models import CentralGovernment, Human, ObjectStack, Simulation
 from capitalism.services.production.service import ProductionService
 from capitalism.services.pricing import HumanSellingPriceValuationService
 from capitalism.services.selling import HumanSellingService
@@ -267,6 +267,22 @@ def test_perform_death_moves_to_analytics_when_threshold_exceeded():
 
     assert human.step == SimulationStep.ANALYTICS
     assert human.dead is True
+
+
+@pytest.mark.django_db
+def test_die_transfers_money_to_central_government():
+    simulation = Simulation.objects.create()
+    central_government, _ = CentralGovernment.objects.get_or_create(simulation=simulation)
+    human = Human.objects.create(money=200)
+
+    human.die()
+
+    human.refresh_from_db()
+    central_government.refresh_from_db()
+    assert human.dead is True
+    assert human.money == 0
+    assert central_government.money == pytest.approx(200)
+    assert central_government.lifetime_collected_money == pytest.approx(200)
 
 
 @pytest.mark.django_db

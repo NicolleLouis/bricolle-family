@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 from capitalism.constants.object_type import ObjectType
 from capitalism.models import PriceAnalytics
+from capitalism.services.pricing import PriceAnalyticsChartsService
 
 
 class PriceAnalyticsView:
@@ -20,11 +21,17 @@ class PriceAnalyticsView:
             .order_by("day_number")
         )
 
+        average_price_chart, transaction_chart = PriceAnalyticsChartsService().render(
+            object_type=object_type
+        )
+
         context = {
             "object_choices": ObjectType.choices,
             "selected_object": object_type,
             "analytics": analytics,
             "object_label": choices.get(object_type, object_type),
+            "average_price_chart": average_price_chart,
+            "transaction_chart": transaction_chart,
         }
 
         return render(request, PriceAnalyticsView.template_name, context)

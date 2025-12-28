@@ -10,6 +10,7 @@ class SimulationStep(models.TextChoices):
     CONSUMPTION = "consumption", "Consumption"
     DEATH = "death", "Death"
     ANALYTICS = "analytics", "Analytics"
+    GOVERNMENT_ACTIONS = "government_actions", "Government Actions"
     END_OF_DAY = "end_of_day", "End of Day"
 
 
@@ -22,5 +23,6 @@ DEFAULT_STEP_SEQUENCE = (
     SimulationStep.CONSUMPTION,
     SimulationStep.DEATH,
     SimulationStep.ANALYTICS,
+    SimulationStep.GOVERNMENT_ACTIONS,
     SimulationStep.END_OF_DAY,
 )

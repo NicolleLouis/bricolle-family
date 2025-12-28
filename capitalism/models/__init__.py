@@ -1,6 +1,7 @@
 from .human import Human
 from .object_stack import ObjectStack
 from .simulation import Simulation
+from .central_government import CentralGovernment
 from .transaction import Transaction
 from .human_analytics import HumanAnalytics
 from .price_analytics import PriceAnalytics
@@ -10,6 +11,7 @@ __all__ = [
     "Human",
     "ObjectStack",
     "Simulation",
+    "CentralGovernment",
     "Transaction",
     "HumanAnalytics",
     "PriceAnalytics",

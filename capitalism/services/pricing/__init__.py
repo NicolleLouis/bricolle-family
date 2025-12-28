@@ -6,6 +6,7 @@ from .price_analytics import (
     PriceAnalyticsRecorderService,
     TransactionPriceAnalyticsService,
 )
+from .price_analytics_charts import PriceAnalyticsChartsService
 
 __all__ = [
     "GlobalPriceReferenceService",
@@ -15,4 +16,5 @@ __all__ = [
     "HumanSellingPriceValuationService",
     "PriceAnalyticsRecorderService",
     "TransactionPriceAnalyticsService",
+    "PriceAnalyticsChartsService",
 ]

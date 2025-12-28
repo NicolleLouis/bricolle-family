@@ -3,6 +3,7 @@ from django.shortcuts import render
 from capitalism.constants.jobs import Job
 from capitalism.models import HumanAnalytics
 from capitalism.services.human_analytics import (
+    AverageMoneyChartService,
     HumanJobAnalyticsService,
     HumanNeedsSatisfactionChartService,
 )
@@ -35,10 +36,13 @@ class HumanAnalyticsView:
             .order_by("day_number")
         )
 
+        average_money_chart = AverageMoneyChartService().render(job=job)
+
         context = {
             "job_choices": Job.choices,
             "selected_job": job,
             "job_label": job_labels.get(job, job),
             "analytics": analytics,
+            "average_money_chart": average_money_chart,
         }
         return render(request, HumanAnalyticsView.template_name, context)

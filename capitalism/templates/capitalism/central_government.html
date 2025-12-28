@@ -1,0 +1,33 @@
+{% extends 'capitalism/base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Central Government</h1>
+            <p class="text-muted mb-0">Trésorerie principale de la simulation en cours.</p>
+        </div>
+    </div>
+
+    {% if central_government %}
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-uppercase text-muted small">Simulation</div>
+                        <div>Jour {{ simulation.day_number }} - {{ simulation.get_step_display }}</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-uppercase text-muted small">Money</div>
+                        <div class="fs-4">{{ central_government.money|floatformat:2 }}</div>
+                    </div>
+                </div>
+                <div class="border-top mt-3 pt-3">
+                    <div class="text-uppercase text-muted small">Total récupéré</div>
+                    <div class="fs-5">{{ central_government.lifetime_collected_money|floatformat:2 }}</div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <p class="text-muted">Aucune simulation active.</p>
+    {% endif %}
+{% endblock %}

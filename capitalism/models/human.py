@@ -48,6 +48,8 @@ class Human(models.Model):
                 return self.perform_death()
             case SimulationStep.ANALYTICS:
                 return self.perform_analytics()
+            case SimulationStep.GOVERNMENT_ACTIONS:
+                return self.perform_government_actions()
             case SimulationStep.END_OF_DAY:
                 return self.perform_end_of_day()
         return self.step
@@ -80,8 +82,25 @@ class Human(models.Model):
             self.die()
 
     def die(self):
+        self._transfer_money_to_central_government()
         self.dead = True
-        self.save(update_fields=["dead"])
+        self.money = 0.0
+        self.save(update_fields=["dead", "money"])
+
+    def _transfer_money_to_central_government(self):
+        if self.money <= 0:
+            return
+
+        simulation_model = apps.get_model("capitalism", "Simulation")
+        simulation = simulation_model.objects.order_by("id").first()
+        if simulation is None:
+            return
+
+        central_government_model = apps.get_model("capitalism", "CentralGovernment")
+        central_government, _ = central_government_model.objects.get_or_create(
+            simulation=simulation
+        )
+        central_government.receive_money(self.money)
 
     def use_basic_need(self):
         needs_met = True
@@ -178,6 +197,9 @@ class Human(models.Model):
         return self.next_step()
 
     def perform_analytics(self):
+        return self.next_step()
+
+    def perform_government_actions(self):
         return self.next_step()
 
     def perform_end_of_day(self):

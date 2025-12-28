@@ -8,6 +8,7 @@ from capitalism.views.human_analytics import HumanAnalyticsView, HumanRepartitio
 from capitalism.views.price_analytics import PriceAnalyticsView
 from capitalism.views.transactions import TransactionsView
 from capitalism.views.documents import CapitalismDocumentView
+from capitalism.views.central_government import CentralGovernmentView
 
 app_name = "capitalism"
 
@@ -21,5 +22,6 @@ urlpatterns = [
     path("human-analytics/", HumanAnalyticsView.home, name="human_analytics"),
     path("price-analytics/", PriceAnalyticsView.home, name="price_analytics"),
     path("transactions/", TransactionsView.home, name="transactions"),
+    path("central-government/", CentralGovernmentView.home, name="central_government"),
     path("idea/", CapitalismDocumentView.idea, name="idea"),
 ]
