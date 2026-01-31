@@ -8,7 +8,12 @@ from the_bazaar.constants.result import Result
 
 class Object(models.Model):
     name = models.CharField(max_length=32)
-    character = models.CharField(max_length=9, choices=Character.choices)
+    character = models.CharField(
+        max_length=9,
+        choices=Character.choices,
+        null=True,
+        blank=True,
+    )
     size = models.CharField(
         max_length=6,
         choices=ItemSize.choices,
