@@ -24,8 +24,8 @@
                 {{ filter.form.result|add_class:"form-select form-select-sm" }}
             </div>
             <div class="col-auto">
-                <label for="id_greenheart_dungeon" class="form-label">Greenheart Dungeon</label>
-                {{ filter.form.greenheart_dungeon|add_class:"form-select form-select-sm" }}
+                <label for="id_dungeons" class="form-label">Dungeons</label>
+                {{ filter.form.dungeons|add_class:"form-select form-select-sm" }}
             </div>
             <div class="col-auto">
                 <button class="btn btn-sm btn-primary" type="submit">Filtrer</button>
@@ -40,6 +40,7 @@
                 <th>Character</th>
                 <th>Archetype</th>
                 <th>Result</th>
+                <th>Dungeons</th>
                 <th>Day</th>
             </tr>
             </thead>
@@ -49,6 +50,13 @@
                     <td>{{ run.get_character_display }}</td>
                     <td>{{ run.archetype.name }}</td>
                     <td>{{ run.get_result_display }}</td>
+                    <td>
+                        {% if run.dungeons.exists %}
+                            {{ run.dungeons.all|join:", " }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
                     <td>{{ run.created_at|date:"d M Y" }}</td>
                     <td>
                         <a href="{% url 'the_bazaar:run_update' run.id %}"

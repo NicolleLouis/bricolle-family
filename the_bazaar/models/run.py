@@ -26,7 +26,10 @@ class Run(models.Model):
         null=True,
         blank=True,
     )
-    greenheart_dungeon = models.BooleanField(default=False)
+    dungeons = models.ManyToManyField(
+        'the_bazaar.Dungeon',
+        blank=True,
+    )
     win_number = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(10)])
     notes = models.TextField(null=True, blank=True)
     result = models.CharField(
@@ -86,8 +89,8 @@ class Run(models.Model):
 
 @admin.register(Run)
 class RunAdmin(admin.ModelAdmin):
-    list_display = ('character', 'archetype', 'result', 'greenheart_dungeon', 'formatted_created_at')
-    list_filter = ('character', 'archetype', 'result', 'greenheart_dungeon')
+    list_display = ('character', 'archetype', 'result', 'formatted_created_at')
+    list_filter = ('character', 'archetype', 'result', 'dungeons')
     search_fields = ["character", "archetype__name"]
     readonly_fields = ('result',)
     ordering = ('-created_at',)

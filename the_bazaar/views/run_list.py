@@ -10,14 +10,20 @@ from django_filters.views import FilterView
 from the_bazaar.constants.character import Character
 from the_bazaar.forms.run import RunForm
 from the_bazaar.forms.fight import FightForm
-from the_bazaar.models import Run, Archetype, Fight
+from the_bazaar.models import Run, Archetype, Fight, Dungeon
 from django.db import models
 
 
 class RunFilter(django_filters.FilterSet):
+    dungeons = django_filters.ModelChoiceFilter(
+        field_name="dungeons",
+        queryset=Dungeon.objects.all(),
+        label="Dungeons",
+    )
+
     class Meta:
         model = Run
-        fields = ['character', 'archetype', 'result', 'greenheart_dungeon']
+        fields = ['character', 'archetype', 'result', 'dungeons']
 
 
 class RunListView(FilterView):

@@ -1,0 +1,72 @@
+{% extends 'the_bazaar/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Dungeons Impact</h2>
+    {% for entry in dungeon_stats %}
+        <div class="mt-4">
+            <h4>{{ entry.dungeon.name }}</h4>
+            <p class="text-muted mb-2">Season apparition: {{ entry.dungeon.season_apparition }}</p>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card text-center shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Dungeon Ratio</h5>
+                            <p class="display-6">{{ entry.ratio|floatformat:2 }}%</p>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ entry.ratio }}%" aria-valuenow="{{ entry.ratio }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card text-center shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Avg wins with dungeon</h5>
+                            <p class="display-6 text-success">{{ entry.avg_with|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card text-center shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Avg wins without dungeon</h5>
+                            <p class="display-6 text-danger">{{ entry.avg_without|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p>No dungeons found.</p>
+    {% endfor %}
+
+    <div class="mt-5">
+        <h3>Multi-Dungeon Runs</h3>
+        <div class="table-responsive mt-3">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Combination</th>
+                    <th>Runs</th>
+                    <th>Avg Win Number</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for entry in multi_dungeon_stats %}
+                    <tr>
+                        <td>{{ entry.combination }}</td>
+                        <td>{{ entry.run_count }}</td>
+                        <td>{{ entry.avg_win_number|floatformat:2 }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3">No multi-dungeon runs found.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
