@@ -1,0 +1,50 @@
+{% extends 'baby_name/base.html' %}
+
+{% block content %}
+    <div class="container py-5">
+        <h1 class="mb-4">Script Mass Yes</h1>
+
+        <p class="text-muted">
+            Le script applique un vote "Oui" en masse pour tous les membres de la famille choisie.
+        </p>
+
+        <form method="post" class="card p-4 shadow-sm">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ form.names.label_tag }}
+                {{ form.names }}
+            </div>
+            <div class="mb-3">
+                {{ form.family.label_tag }}
+                {{ form.family }}
+            </div>
+            <button type="submit" class="btn btn-primary">Préparer</button>
+        </form>
+
+        {% if is_submitted %}
+            <div class="card mt-4 p-4 shadow-sm">
+                {% if form.errors %}
+                    <h5 class="mb-3">Erreurs du formulaire</h5>
+                    <div class="alert alert-danger mb-0">
+                        {{ form.errors }}
+                    </div>
+                {% else %}
+                    <h5 class="mb-3">Résultat</h5>
+                    <p><strong>Nombre de prénoms détectés:</strong> {{ mass_yes_result.parsed_names|length }}</p>
+                    <p><strong>Noms créés:</strong> {{ mass_yes_result.created_name_count }}</p>
+                    <p><strong>Évaluations créées (Oui):</strong> {{ mass_yes_result.created_evaluation_count }}</p>
+                    <p><strong>Évaluations mises à jour (Non → Oui):</strong> {{ mass_yes_result.updated_evaluation_count }}</p>
+                    <p><strong>Évaluations déjà positives inchangées:</strong> {{ mass_yes_result.unchanged_positive_count }}</p>
+                    <hr>
+                    <ul class="mb-0">
+                        {% for name in mass_yes_result.parsed_names %}
+                            <li>{{ name }}</li>
+                        {% empty %}
+                            <li>Aucun prénom exploitable détecté.</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

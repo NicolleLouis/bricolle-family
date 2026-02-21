@@ -9,6 +9,7 @@ from .views.home import home
 from .views.user_leaderboard import user_leaderboard
 from .views.ranking import Ranking
 from .views.results import results
+from .views.scripts import ScriptController
 from .views.vote import Vote
 
 app_name = "baby_name"
@@ -23,6 +24,8 @@ urlpatterns = [
     path("ranking/", Ranking.form, name="ranking"),
     path("ranking_vote/", Ranking.post, name="ranking_vote"),
     path("results/", results, name="results"),
+    path("scripts/", ScriptController.glossary, name="scripts_home"),
+    path("scripts/mass-yes/", ScriptController.mass_yes, name="scripts_mass_yes"),
     path("user_leaderboard/", user_leaderboard, name="user_leaderboard"),
     path("vote/", Vote.post, name="vote"),
     path("vote_form/", Vote.form, name="vote_form"),
