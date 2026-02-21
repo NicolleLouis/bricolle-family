@@ -20,7 +20,7 @@ class MassYesResult:
 
 
 class MassYesService:
-    def execute(self, raw_names: str, family: Family, source_name: str) -> MassYesResult:
+    def execute(self, raw_names: str, family: Family, source_name: str, sex: bool) -> MassYesResult:
         parsed_names = MassYesNameParser().parse_names(raw_names)
         if not parsed_names:
             return MassYesResult(
@@ -33,7 +33,7 @@ class MassYesService:
 
         with transaction.atomic():
             family_users = list(self._get_family_users(family))
-            names, created_name_count = self._get_or_create_names(parsed_names, source_name)
+            names, created_name_count = self._get_or_create_names(parsed_names, source_name, sex)
             evaluation_by_key = self._get_existing_evaluations(family_users, names)
 
             created_evaluation_count = 0
@@ -70,11 +70,11 @@ class MassYesService:
     def _get_family_users(self, family: Family):
         return User.objects.filter(userprofile__family=family)
 
-    def _get_or_create_names(self, parsed_names: list[str], source_name: str) -> tuple[list[Name], int]:
+    def _get_or_create_names(self, parsed_names: list[str], source_name: str, sex: bool) -> tuple[list[Name], int]:
         lowercase_names = [name.lower() for name in parsed_names]
         existing_names = (
             Name.objects.annotate(lower_name=Lower("name"))
-            .filter(lower_name__in=lowercase_names)
+            .filter(lower_name__in=lowercase_names, sex=sex)
             .order_by("id")
         )
         existing_by_lower_name: dict[str, Name] = {}
@@ -93,7 +93,7 @@ class MassYesService:
 
             created_name = Name.objects.create(
                 name=parsed_name,
-                sex=False,
+                sex=sex,
                 source=source_name,
                 tag="mass_yes",
             )

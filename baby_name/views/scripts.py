@@ -23,6 +23,7 @@ class ScriptController:
                     raw_names=form.cleaned_data["names"],
                     family=form.cleaned_data["family"],
                     source_name=request.user.username,
+                    sex=form.cleaned_data["sex"],
                 )
 
         context = {
