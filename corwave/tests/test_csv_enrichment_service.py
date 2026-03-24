@@ -101,8 +101,25 @@ class TestCorwaveCsvEnrichmentService:
                 csv_file_content=csv_content,
             )
 
-    def test_enrich_csv_raises_error_when_abstract_is_missing(self):
+    def test_enrich_csv_uses_title_when_abstract_is_missing(self):
         csv_content = "Title,Abstract\nA,\n".encode("utf-8")
+        fake_service = FakeOpenAIExtractionService(
+            responses=[{"article_type": "Review", "subject": "Clinical", "category": "LVAD"}]
+        )
+        service = CorwaveCsvEnrichmentService()
+        service._openai_extraction_service = fake_service
+
+        result = service.enrich_csv(
+            csv_file_name="input.csv",
+            csv_file_content=csv_content,
+        )
+        output_rows = list(csv.DictReader(io.StringIO(result.content)))
+        assert output_rows[0]["article_type"] == "Review"
+        assert fake_service.calls[0]["title"] == "A"
+        assert fake_service.calls[0]["abstract"] == ""
+
+    def test_enrich_csv_raises_error_when_title_and_abstract_are_missing(self):
+        csv_content = "Title,Abstract\n,\n".encode("utf-8")
         fake_service = FakeOpenAIExtractionService(responses=[])
         service = CorwaveCsvEnrichmentService()
         service._openai_extraction_service = fake_service

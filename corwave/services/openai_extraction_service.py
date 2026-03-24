@@ -97,10 +97,8 @@ class OpenAIExtractionService:
 
     @staticmethod
     def _validate_inputs(*, title: str, abstract: str) -> None:
-        if not title.strip():
-            raise ValueError("title cannot be empty.")
-        if not abstract.strip():
-            raise ValueError("abstract cannot be empty.")
+        if not title.strip() and not abstract.strip():
+            raise ValueError("title and abstract cannot both be empty.")
 
     def _validate_configuration(self) -> None:
         if not self._api_key:
@@ -133,6 +131,7 @@ class OpenAIExtractionService:
 
     @staticmethod
     def _build_classification_messages(*, title: str, abstract: str) -> list[dict[str, str]]:
+        abstract_for_prompt = abstract if abstract else "Not available."
         return [
             {
                 "role": "system",
@@ -181,7 +180,7 @@ class OpenAIExtractionService:
                     "- TET\n"
                     "- Other\n\n"
                     f"Title:\n{title}\n\n"
-                    f"Abstract:\n{abstract}"
+                    f"Abstract:\n{abstract_for_prompt}"
                 ),
             },
         ]

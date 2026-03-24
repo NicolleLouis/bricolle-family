@@ -91,11 +91,11 @@ class TestOpenAIExtractionService:
                     abstract="Abstract",
                 )
 
-    def test_classify_publication_raises_error_when_title_is_empty(self) -> None:
+    def test_classify_publication_raises_error_when_title_and_abstract_are_empty(self) -> None:
         service = OpenAIExtractionService(api_key="test-api-key", model="test-model")
 
-        with pytest.raises(ValueError, match="title cannot be empty"):
+        with pytest.raises(ValueError, match="both be empty"):
             service.classify_publication(
                 title="   ",
-                abstract="some abstract",
+                abstract="   ",
             )

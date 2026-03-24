@@ -99,10 +99,10 @@ class CorwaveCsvEnrichmentService:
     def _read_publication_fields(self, *, current_row: dict[str, str]) -> tuple[str, str]:
         title = self._get_field_value(current_row=current_row, target_field_name="Title")
         abstract = self._get_field_value(current_row=current_row, target_field_name="Abstract")
-        if not title.strip():
-            raise CorwaveCsvEnrichmentServiceError("CSV row has an empty Title value.")
-        if not abstract.strip():
-            raise CorwaveCsvEnrichmentServiceError("CSV row has an empty Abstract value.")
+        if not title.strip() and not abstract.strip():
+            raise CorwaveCsvEnrichmentServiceError(
+                "CSV row has empty Title and Abstract values."
+            )
         return title, abstract
 
     @staticmethod
@@ -110,7 +110,7 @@ class CorwaveCsvEnrichmentService:
         for field_name, field_value in current_row.items():
             if (field_name or "").strip().lower() == target_field_name.lower():
                 return field_value or ""
-        raise CorwaveCsvEnrichmentServiceError(f"CSV must contain a '{target_field_name}' column.")
+        return ""
 
     def _build_output_csv(
         self,
