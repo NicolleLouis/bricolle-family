@@ -2,7 +2,7 @@ services:
   web:
     build: .
     container_name: bricolle_web
-    command: gunicorn bricolle_family.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn bricolle_family.wsgi:application --bind 0.0.0.0:8000 --timeout 300
     volumes:
       - .:/app
       - ./static:/app/static

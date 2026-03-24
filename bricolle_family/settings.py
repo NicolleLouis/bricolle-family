@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "documents",
     "chess",
     "seven_and_half",
+    "corwave",
     "capitalism.apps.CapitalismConfig",
     "django.contrib.admin",
     "django.contrib.auth",

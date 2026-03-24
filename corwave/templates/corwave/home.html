@@ -1,0 +1,24 @@
+{% extends "corwave/base.html" %}
+
+{% block title %}Corwave - CSV Enrichment{% endblock %}
+
+{% block content %}
+  <h1>Corwave CSV Enrichment</h1>
+  <p>Upload un CSV PubMed, puis télécharge le CSV enrichi avec article_type, subject et category.</p>
+
+  {% if error_message %}
+    <div style="color: #b00020; margin-bottom: 1rem;">
+      {{ error_message }}
+    </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div style="margin-bottom: 1rem;">
+      <label for="csv_file">Fichier CSV</label><br />
+      <input id="csv_file" type="file" name="csv_file" accept=".csv,text/csv" required />
+    </div>
+
+    <button type="submit">Lancer l'enrichissement</button>
+  </form>
+{% endblock %}

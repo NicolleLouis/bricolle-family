@@ -6,6 +6,7 @@ class SummaryView:
         modules = [
             {"name": "Agathe", "url": "/agathe/", "color": "#e09cff"},
             {"name": "Flash Cards", "url": "/flash_cards/", "color": "#16a085"},
+            {"name": "Corwave", "url": "/corwave/", "color": "#0f766e"},
             {"name": "Games", "url": "/games", "color": "#ffbe5c"},
             {"name": "More...", "url": "/more", "color": "#3498db"},
         ]
