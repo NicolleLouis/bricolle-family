@@ -23,7 +23,7 @@ class CsvEnrichmentResult:
 class CorwaveCsvEnrichmentService:
     """Enrich each CSV row with structured data extracted by OpenAI."""
 
-    _OUTPUT_COLUMNS = ["article_type", "subject", "category", "summary"]
+    _OUTPUT_COLUMNS = ["article_type", "subject", "category", "summary", "relevance_score"]
 
     def __init__(self) -> None:
         self._openai_extraction_service = OpenAIExtractionService()
@@ -71,8 +71,8 @@ class CorwaveCsvEnrichmentService:
         self,
         *,
         original_rows: list[dict[str, str]],
-    ) -> list[dict[str, str]]:
-        extracted_rows: list[dict[str, str]] = []
+    ) -> list[dict[str, str | int]]:
+        extracted_rows: list[dict[str, str | int]] = []
         for row_index, current_row in enumerate(original_rows):
             source_line_number = row_index + 2
             try:
@@ -121,7 +121,7 @@ class CorwaveCsvEnrichmentService:
         *,
         original_column_names: list[str],
         original_rows: list[dict[str, str]],
-        extracted_rows: list[dict[str, str]],
+        extracted_rows: list[dict[str, str | int]],
     ) -> str:
         additional_columns, extraction_column_map = self._build_output_columns(existing_columns=original_column_names)
         output_columns = original_column_names + additional_columns

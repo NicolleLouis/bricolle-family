@@ -22,6 +22,7 @@ class TestOpenAIExtractionService:
                                 "article_type": "Review",
                                 "subject": "Clinical",
                                 "category": "LVAD",
+                                "relevance_score": 3,
                             }
                         )
                     }
@@ -41,6 +42,7 @@ class TestOpenAIExtractionService:
             "article_type": "Review",
             "subject": "Clinical",
             "category": "LVAD",
+            "relevance_score": 3,
         }
 
     def test_classify_publication_uses_expected_json_schema_without_summary(self) -> None:
@@ -55,6 +57,7 @@ class TestOpenAIExtractionService:
                                 "article_type": "Clinical trial",
                                 "subject": "Clinical",
                                 "category": "LVAD",
+                                "relevance_score": 3,
                             }
                         )
                     }
@@ -76,6 +79,7 @@ class TestOpenAIExtractionService:
             "article_type",
             "subject",
             "category",
+            "relevance_score",
         ]
 
     def test_classify_publication_uses_expected_json_schema_with_summary(self) -> None:
@@ -91,6 +95,7 @@ class TestOpenAIExtractionService:
                                 "subject": "Clinical",
                                 "category": "LVAD",
                                 "summary": "Assesses outcomes of LVAD-supported patients.",
+                                "relevance_score": 3,
                             }
                         )
                     }
@@ -111,6 +116,7 @@ class TestOpenAIExtractionService:
             "article_type",
             "subject",
             "category",
+            "relevance_score",
             "summary",
         ]
         assert extracted_data["summary"] == "Assesses outcomes of LVAD-supported patients."

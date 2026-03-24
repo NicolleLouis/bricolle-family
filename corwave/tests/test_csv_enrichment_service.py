@@ -34,8 +34,20 @@ class TestCorwaveCsvEnrichmentService:
         csv_content = "Title,Abstract,PMID\nTitle A,Abstract A,1\nTitle B,Abstract B,2\n".encode("utf-8")
         fake_service = FakeOpenAIExtractionService(
             responses=[
-                {"article_type": "Review", "subject": "Clinical", "category": "LVAD", "summary": "Goal A"},
-                {"article_type": "Clinical trial", "subject": "Epidemiology", "category": "HTx", "summary": "Goal B"},
+                {
+                    "article_type": "Review",
+                    "subject": "Clinical",
+                    "category": "LVAD",
+                    "summary": "Goal A",
+                    "relevance_score": 3,
+                },
+                {
+                    "article_type": "Clinical trial",
+                    "subject": "Epidemiology",
+                    "category": "HTx",
+                    "summary": "Goal B",
+                    "relevance_score": 2,
+                },
             ]
         )
         service = CorwaveCsvEnrichmentService()
@@ -54,10 +66,12 @@ class TestCorwaveCsvEnrichmentService:
         assert output_rows[0]["subject"] == "Clinical"
         assert output_rows[0]["category"] == "LVAD"
         assert output_rows[0]["summary"] == "Goal A"
+        assert output_rows[0]["relevance_score"] == "3"
         assert output_rows[1]["article_type"] == "Clinical trial"
         assert output_rows[1]["subject"] == "Epidemiology"
         assert output_rows[1]["category"] == "HTx"
         assert output_rows[1]["summary"] == "Goal B"
+        assert output_rows[1]["relevance_score"] == "2"
 
         assert fake_service.calls[0]["title"] == "Title A"
         assert fake_service.calls[0]["abstract"] == "Abstract A"
@@ -66,7 +80,15 @@ class TestCorwaveCsvEnrichmentService:
     def test_enrich_csv_raises_error_when_output_column_already_exists(self):
         csv_content = "Title,Abstract,article_type\nA,B,existing\n".encode("utf-8")
         fake_service = FakeOpenAIExtractionService(
-            responses=[{"article_type": "Review", "subject": "Clinical", "category": "LVAD", "summary": "Goal"}]
+            responses=[
+                {
+                    "article_type": "Review",
+                    "subject": "Clinical",
+                    "category": "LVAD",
+                    "summary": "Goal",
+                    "relevance_score": 3,
+                }
+            ]
         )
         service = CorwaveCsvEnrichmentService()
         service._openai_extraction_service = fake_service
@@ -92,7 +114,13 @@ class TestCorwaveCsvEnrichmentService:
         csv_content = "Title,Abstract\nA,a\nB,b\n".encode("utf-8")
         fake_service = FakeOpenAIExtractionService(
             responses=[
-                {"article_type": "Review", "subject": "Clinical", "category": "LVAD", "summary": "Goal"},
+                {
+                    "article_type": "Review",
+                    "subject": "Clinical",
+                    "category": "LVAD",
+                    "summary": "Goal",
+                    "relevance_score": 3,
+                },
                 OpenAIExtractionServiceError("network down"),
             ]
         )
@@ -108,7 +136,14 @@ class TestCorwaveCsvEnrichmentService:
     def test_enrich_csv_uses_title_when_abstract_is_missing(self):
         csv_content = "Title,Abstract\nA,\n".encode("utf-8")
         fake_service = FakeOpenAIExtractionService(
-            responses=[{"article_type": "Review", "subject": "Clinical", "category": "LVAD"}]
+            responses=[
+                {
+                    "article_type": "Review",
+                    "subject": "Clinical",
+                    "category": "LVAD",
+                    "relevance_score": 3,
+                }
+            ]
         )
         service = CorwaveCsvEnrichmentService()
         service._openai_extraction_service = fake_service
@@ -120,6 +155,7 @@ class TestCorwaveCsvEnrichmentService:
         output_rows = list(csv.DictReader(io.StringIO(result.content)))
         assert output_rows[0]["article_type"] == "Review"
         assert output_rows[0]["summary"] == ""
+        assert output_rows[0]["relevance_score"] == "3"
         assert fake_service.calls[0]["title"] == "A"
         assert fake_service.calls[0]["abstract"] == ""
         assert fake_service.calls[0]["include_summary"] is False

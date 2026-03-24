@@ -61,8 +61,12 @@ class OpenAIExtractionService:
                     "Other",
                 ],
             },
+            "relevance_score": {
+                "type": "integer",
+                "enum": [0, 1, 2, 3],
+            },
         },
-        "required": ["article_type", "subject", "category"],
+        "required": ["article_type", "subject", "category", "relevance_score"],
         "additionalProperties": False,
     }
     _CLASSIFICATION_WITH_SUMMARY_SCHEMA = {
@@ -71,7 +75,7 @@ class OpenAIExtractionService:
             **_CLASSIFICATION_SCHEMA["properties"],
             "summary": {"type": "string"},
         },
-        "required": ["article_type", "subject", "category", "summary"],
+        "required": ["article_type", "subject", "category", "relevance_score", "summary"],
         "additionalProperties": False,
     }
 
@@ -92,7 +96,7 @@ class OpenAIExtractionService:
         title: str,
         abstract: str,
         include_summary: bool = False,
-    ) -> dict[str, str]:
+    ) -> dict[str, str | int]:
         self._validate_inputs(title=title, abstract=abstract)
         self._validate_configuration()
 
@@ -210,6 +214,11 @@ class OpenAIExtractionService:
                     "- Pediatric\n"
                     "- TET\n"
                     "- Other\n\n"
+                    "Relevance score options:\n"
+                    "- 3 = LVAD (Left Ventricular Assist Device)\n"
+                    "- 2 = Temporary MCS / Heart Failure (ECMO, Impella, IABP, HF epidemiology)\n"
+                    "- 1 = Other cardiac pathologies/surgeries\n"
+                    "- 0 = Not relevant to mechanical circulatory support\n\n"
                     f"{summary_instruction}\n\n"
                     f"Title:\n{title}\n\n"
                     f"Abstract:\n{abstract_for_prompt}"
@@ -280,8 +289,8 @@ class OpenAIExtractionService:
         *,
         parsed_content: dict,
         include_summary: bool,
-    ) -> dict[str, str]:
-        expected_keys = {"article_type", "subject", "category"}
+    ) -> dict[str, str | int]:
+        expected_keys = {"article_type", "subject", "category", "relevance_score"}
         if include_summary:
             expected_keys.add("summary")
         parsed_keys = set(parsed_content.keys())
@@ -290,16 +299,21 @@ class OpenAIExtractionService:
                 "OpenAI response contains unexpected classification fields."
             )
 
-        for key in expected_keys:
+        for key in expected_keys - {"relevance_score"}:
             if not isinstance(parsed_content[key], str) or not parsed_content[key].strip():
                 raise OpenAIExtractionServiceError(
                     f"OpenAI response field '{key}' must be a non-empty string."
                 )
+        if not isinstance(parsed_content["relevance_score"], int):
+            raise OpenAIExtractionServiceError(
+                "OpenAI response field 'relevance_score' must be an integer."
+            )
 
-        validated_content = {
+        validated_content: dict[str, str | int] = {
             "article_type": parsed_content["article_type"].strip(),
             "subject": parsed_content["subject"].strip(),
             "category": parsed_content["category"].strip(),
+            "relevance_score": parsed_content["relevance_score"],
         }
         if include_summary:
             validated_content["summary"] = parsed_content["summary"].strip()
