@@ -23,7 +23,7 @@ class CsvEnrichmentResult:
 class CorwaveCsvEnrichmentService:
     """Enrich each CSV row with structured data extracted by OpenAI."""
 
-    _OUTPUT_COLUMNS = ["article_type", "subject", "category"]
+    _OUTPUT_COLUMNS = ["article_type", "subject", "category", "summary"]
 
     def __init__(self) -> None:
         self._openai_extraction_service = OpenAIExtractionService()
@@ -83,10 +83,14 @@ class CorwaveCsvEnrichmentService:
                 ) from row_error
 
             try:
+                include_summary = bool(abstract.strip())
                 extracted_row = self._openai_extraction_service.classify_publication(
                     title=title,
                     abstract=abstract,
+                    include_summary=include_summary,
                 )
+                if not include_summary:
+                    extracted_row["summary"] = ""
             except OpenAIExtractionServiceError as extraction_error:
                 raise CorwaveCsvEnrichmentServiceError(
                     f"OpenAI extraction failed at CSV line {source_line_number}: {extraction_error}"

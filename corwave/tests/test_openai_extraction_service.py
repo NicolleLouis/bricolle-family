@@ -43,7 +43,7 @@ class TestOpenAIExtractionService:
             "category": "LVAD",
         }
 
-    def test_classify_publication_uses_expected_json_schema(self) -> None:
+    def test_classify_publication_uses_expected_json_schema_without_summary(self) -> None:
         mocked_response = Mock()
         mocked_response.raise_for_status.return_value = None
         mocked_response.json.return_value = {
@@ -77,6 +77,43 @@ class TestOpenAIExtractionService:
             "subject",
             "category",
         ]
+
+    def test_classify_publication_uses_expected_json_schema_with_summary(self) -> None:
+        mocked_response = Mock()
+        mocked_response.raise_for_status.return_value = None
+        mocked_response.json.return_value = {
+            "choices": [
+                {
+                    "message": {
+                        "content": json.dumps(
+                            {
+                                "article_type": "Clinical trial",
+                                "subject": "Clinical",
+                                "category": "LVAD",
+                                "summary": "Assesses outcomes of LVAD-supported patients.",
+                            }
+                        )
+                    }
+                }
+            ]
+        }
+        service = OpenAIExtractionService(api_key="test-api-key", model="test-model")
+
+        with patch("corwave.services.openai_extraction_service.requests.post", return_value=mocked_response) as mocked_post:
+            extracted_data = service.classify_publication(
+                title="Title",
+                abstract="Abstract",
+                include_summary=True,
+            )
+
+        request_payload = mocked_post.call_args.kwargs["json"]
+        assert request_payload["response_format"]["json_schema"]["schema"]["required"] == [
+            "article_type",
+            "subject",
+            "category",
+            "summary",
+        ]
+        assert extracted_data["summary"] == "Assesses outcomes of LVAD-supported patients."
 
     def test_classify_publication_raises_error_when_openai_returns_invalid_json_content(self) -> None:
         mocked_response = Mock()

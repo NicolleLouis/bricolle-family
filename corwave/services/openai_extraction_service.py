@@ -65,6 +65,15 @@ class OpenAIExtractionService:
         "required": ["article_type", "subject", "category"],
         "additionalProperties": False,
     }
+    _CLASSIFICATION_WITH_SUMMARY_SCHEMA = {
+        "type": "object",
+        "properties": {
+            **_CLASSIFICATION_SCHEMA["properties"],
+            "summary": {"type": "string"},
+        },
+        "required": ["article_type", "subject", "category", "summary"],
+        "additionalProperties": False,
+    }
 
     def __init__(
         self,
@@ -82,6 +91,7 @@ class OpenAIExtractionService:
         *,
         title: str,
         abstract: str,
+        include_summary: bool = False,
     ) -> dict[str, str]:
         self._validate_inputs(title=title, abstract=abstract)
         self._validate_configuration()
@@ -89,11 +99,15 @@ class OpenAIExtractionService:
         request_payload = self._build_classification_payload(
             title=title.strip(),
             abstract=abstract.strip(),
+            include_summary=include_summary,
         )
         response_payload = self._perform_request(request_payload=request_payload)
         message_content = self._extract_message_content(response_payload=response_payload)
         parsed_content = self._parse_json(message_content=message_content)
-        return self._validate_classification_output(parsed_content=parsed_content)
+        return self._validate_classification_output(
+            parsed_content=parsed_content,
+            include_summary=include_summary,
+        )
 
     @staticmethod
     def _validate_inputs(*, title: str, abstract: str) -> None:
@@ -111,12 +125,14 @@ class OpenAIExtractionService:
         *,
         title: str,
         abstract: str,
+        include_summary: bool,
     ) -> dict:
         return {
             "model": self._model,
             "messages": self._build_classification_messages(
                 title=title,
                 abstract=abstract,
+                include_summary=include_summary,
             ),
             "temperature": 0,
             "response_format": {
@@ -124,14 +140,29 @@ class OpenAIExtractionService:
                 "json_schema": {
                     "name": "publication_classification",
                     "strict": True,
-                    "schema": self._CLASSIFICATION_SCHEMA,
+                    "schema": (
+                        self._CLASSIFICATION_WITH_SUMMARY_SCHEMA
+                        if include_summary
+                        else self._CLASSIFICATION_SCHEMA
+                    ),
                 },
             },
         }
 
     @staticmethod
-    def _build_classification_messages(*, title: str, abstract: str) -> list[dict[str, str]]:
+    def _build_classification_messages(
+        *,
+        title: str,
+        abstract: str,
+        include_summary: bool,
+    ) -> list[dict[str, str]]:
         abstract_for_prompt = abstract if abstract else "Not available."
+        summary_instruction = (
+            "Also return a summary of maximum 20 words explaining the article goal. "
+            "If relevant, mention pulsatility or recovery in LVAD patients."
+            if include_summary
+            else "Do not return a summary field."
+        )
         return [
             {
                 "role": "system",
@@ -139,7 +170,7 @@ class OpenAIExtractionService:
                     "Role: retrieve relevant information and help sort scientific publications in a systematic way. "
                     "Context: we work at Corwave, a company developing a novel LVAD. "
                     "Use only the title and abstract provided. "
-                    "Return only valid JSON with keys article_type, subject, category. "
+                    "Return only valid JSON with the expected keys. "
                     "Avoid any invention, remain factual."
                 ),
             },
@@ -179,6 +210,7 @@ class OpenAIExtractionService:
                     "- Pediatric\n"
                     "- TET\n"
                     "- Other\n\n"
+                    f"{summary_instruction}\n\n"
                     f"Title:\n{title}\n\n"
                     f"Abstract:\n{abstract_for_prompt}"
                 ),
@@ -244,12 +276,18 @@ class OpenAIExtractionService:
         return parsed_content
 
     @staticmethod
-    def _validate_classification_output(*, parsed_content: dict) -> dict[str, str]:
+    def _validate_classification_output(
+        *,
+        parsed_content: dict,
+        include_summary: bool,
+    ) -> dict[str, str]:
         expected_keys = {"article_type", "subject", "category"}
+        if include_summary:
+            expected_keys.add("summary")
         parsed_keys = set(parsed_content.keys())
         if parsed_keys != expected_keys:
             raise OpenAIExtractionServiceError(
-                "OpenAI response must contain exactly article_type, subject, category."
+                "OpenAI response contains unexpected classification fields."
             )
 
         for key in expected_keys:
@@ -258,8 +296,11 @@ class OpenAIExtractionService:
                     f"OpenAI response field '{key}' must be a non-empty string."
                 )
 
-        return {
+        validated_content = {
             "article_type": parsed_content["article_type"].strip(),
             "subject": parsed_content["subject"].strip(),
             "category": parsed_content["category"].strip(),
         }
+        if include_summary:
+            validated_content["summary"] = parsed_content["summary"].strip()
+        return validated_content
