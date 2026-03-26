@@ -83,6 +83,7 @@ class TestOpenAIExtractionService:
             "subject",
             "category",
             "relevance_score",
+            "tag",
         ]
 
     def test_classify_publication_uses_expected_json_schema_with_summary(self) -> None:
@@ -122,6 +123,7 @@ class TestOpenAIExtractionService:
             "category",
             "relevance_score",
             "summary",
+            "tag",
         ]
         assert extracted_data["summary"] == "Assesses outcomes of LVAD-supported patients."
         assert extracted_data["tag"] == "NuPulse"

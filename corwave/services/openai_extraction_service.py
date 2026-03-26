@@ -4,6 +4,7 @@ import json
 from typing import Any
 
 import requests
+from requests import HTTPError
 from decouple import config
 
 
@@ -67,7 +68,7 @@ class OpenAIExtractionService:
             },
             "tag": {"type": "string"},
         },
-        "required": ["article_type", "subject", "category", "relevance_score"],
+        "required": ["article_type", "subject", "category", "relevance_score", "tag"],
         "additionalProperties": False,
     }
     _CLASSIFICATION_WITH_SUMMARY_SCHEMA = {
@@ -76,7 +77,7 @@ class OpenAIExtractionService:
             **_CLASSIFICATION_SCHEMA["properties"],
             "summary": {"type": "string"},
         },
-        "required": ["article_type", "subject", "category", "relevance_score", "summary"],
+        "required": ["article_type", "subject", "category", "relevance_score", "summary", "tag"],
         "additionalProperties": False,
     }
 
@@ -270,6 +271,17 @@ class OpenAIExtractionService:
             )
             response.raise_for_status()
             return response.json()
+        except HTTPError as request_error:
+            response_text = ""
+            if request_error.response is not None:
+                response_text = request_error.response.text.strip()
+            if response_text:
+                raise OpenAIExtractionServiceError(
+                    f"OpenAI request failed: {request_error} | response: {response_text}"
+                ) from request_error
+            raise OpenAIExtractionServiceError(
+                f"OpenAI request failed: {request_error}"
+            ) from request_error
         except requests.RequestException as request_error:
             raise OpenAIExtractionServiceError(
                 f"OpenAI request failed: {request_error}"
@@ -324,13 +336,11 @@ class OpenAIExtractionService:
         parsed_content: dict,
         include_summary: bool,
     ) -> dict[str, str | int]:
-        expected_keys = {"article_type", "subject", "category", "relevance_score"}
+        expected_keys = {"article_type", "subject", "category", "relevance_score", "tag"}
         if include_summary:
             expected_keys.add("summary")
         parsed_keys = set(parsed_content.keys())
-        allowed_keys = set(expected_keys)
-        allowed_keys.add("tag")
-        if not expected_keys.issubset(parsed_keys) or not parsed_keys.issubset(allowed_keys):
+        if parsed_keys != expected_keys:
             raise OpenAIExtractionServiceError(
                 "OpenAI response contains unexpected classification fields."
             )
@@ -340,7 +350,7 @@ class OpenAIExtractionService:
                 raise OpenAIExtractionServiceError(
                     f"OpenAI response field '{key}' must be a non-empty string."
                 )
-        if "tag" in parsed_content and not isinstance(parsed_content["tag"], str):
+        if not isinstance(parsed_content["tag"], str):
             raise OpenAIExtractionServiceError(
                 "OpenAI response field 'tag' must be a string."
             )
@@ -354,7 +364,7 @@ class OpenAIExtractionService:
             "subject": parsed_content["subject"].strip(),
             "category": parsed_content["category"].strip(),
             "relevance_score": parsed_content["relevance_score"],
-            "tag": (parsed_content.get("tag") or "").strip(),
+            "tag": parsed_content["tag"].strip(),
         }
         if include_summary:
             validated_content["summary"] = parsed_content["summary"].strip()
