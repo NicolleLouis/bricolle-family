@@ -23,7 +23,7 @@ class CsvEnrichmentResult:
 class CorwaveCsvEnrichmentService:
     """Enrich each CSV row with structured data extracted by OpenAI."""
 
-    _OUTPUT_COLUMNS = ["article_type", "subject", "category", "summary", "relevance_score"]
+    _OUTPUT_COLUMNS = ["article_type", "subject", "category", "summary", "relevance_score", "tag"]
 
     def __init__(self) -> None:
         self._openai_extraction_service = OpenAIExtractionService()

@@ -40,6 +40,7 @@ class TestCorwaveCsvEnrichmentService:
                     "category": "LVAD",
                     "summary": "Goal A",
                     "relevance_score": 3,
+                    "tag": "empagliflozin",
                 },
                 {
                     "article_type": "Clinical trial",
@@ -47,6 +48,7 @@ class TestCorwaveCsvEnrichmentService:
                     "category": "HTx",
                     "summary": "Goal B",
                     "relevance_score": 2,
+                    "tag": "NuPulse",
                 },
             ]
         )
@@ -67,11 +69,13 @@ class TestCorwaveCsvEnrichmentService:
         assert output_rows[0]["category"] == "LVAD"
         assert output_rows[0]["summary"] == "Goal A"
         assert output_rows[0]["relevance_score"] == "3"
+        assert output_rows[0]["tag"] == "empagliflozin"
         assert output_rows[1]["article_type"] == "Clinical trial"
         assert output_rows[1]["subject"] == "Epidemiology"
         assert output_rows[1]["category"] == "HTx"
         assert output_rows[1]["summary"] == "Goal B"
         assert output_rows[1]["relevance_score"] == "2"
+        assert output_rows[1]["tag"] == "NuPulse"
 
         assert fake_service.calls[0]["title"] == "Title A"
         assert fake_service.calls[0]["abstract"] == "Abstract A"
@@ -87,6 +91,7 @@ class TestCorwaveCsvEnrichmentService:
                     "category": "LVAD",
                     "summary": "Goal",
                     "relevance_score": 3,
+                    "tag": "",
                 }
             ]
         )
@@ -120,6 +125,7 @@ class TestCorwaveCsvEnrichmentService:
                     "category": "LVAD",
                     "summary": "Goal",
                     "relevance_score": 3,
+                    "tag": "",
                 },
                 OpenAIExtractionServiceError("network down"),
             ]
@@ -142,6 +148,7 @@ class TestCorwaveCsvEnrichmentService:
                     "subject": "Clinical",
                     "category": "LVAD",
                     "relevance_score": 3,
+                    "tag": "",
                 }
             ]
         )
@@ -156,6 +163,7 @@ class TestCorwaveCsvEnrichmentService:
         assert output_rows[0]["article_type"] == "Review"
         assert output_rows[0]["summary"] == ""
         assert output_rows[0]["relevance_score"] == "3"
+        assert output_rows[0]["tag"] == ""
         assert fake_service.calls[0]["title"] == "A"
         assert fake_service.calls[0]["abstract"] == ""
         assert fake_service.calls[0]["include_summary"] is False

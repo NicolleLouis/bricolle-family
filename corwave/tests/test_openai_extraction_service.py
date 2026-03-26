@@ -23,6 +23,7 @@ class TestOpenAIExtractionService:
                                 "subject": "Clinical",
                                 "category": "LVAD",
                                 "relevance_score": 3,
+                                "tag": "empagliflozin",
                             }
                         )
                     }
@@ -43,6 +44,7 @@ class TestOpenAIExtractionService:
             "subject": "Clinical",
             "category": "LVAD",
             "relevance_score": 3,
+            "tag": "empagliflozin",
         }
 
     def test_classify_publication_uses_expected_json_schema_without_summary(self) -> None:
@@ -58,6 +60,7 @@ class TestOpenAIExtractionService:
                                 "subject": "Clinical",
                                 "category": "LVAD",
                                 "relevance_score": 3,
+                                "tag": "",
                             }
                         )
                     }
@@ -96,6 +99,7 @@ class TestOpenAIExtractionService:
                                 "category": "LVAD",
                                 "summary": "Assesses outcomes of LVAD-supported patients.",
                                 "relevance_score": 3,
+                                "tag": "NuPulse",
                             }
                         )
                     }
@@ -120,6 +124,7 @@ class TestOpenAIExtractionService:
             "summary",
         ]
         assert extracted_data["summary"] == "Assesses outcomes of LVAD-supported patients."
+        assert extracted_data["tag"] == "NuPulse"
 
     def test_classify_publication_raises_error_when_openai_returns_invalid_json_content(self) -> None:
         mocked_response = Mock()

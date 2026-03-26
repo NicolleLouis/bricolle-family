@@ -63,8 +63,9 @@ class OpenAIExtractionService:
             },
             "relevance_score": {
                 "type": "integer",
-                "enum": [0, 1, 2, 3],
+                "enum": [0, 1, 2, 3, 4],
             },
+            "tag": {"type": "string"},
         },
         "required": ["article_type", "subject", "category", "relevance_score"],
         "additionalProperties": False,
@@ -162,7 +163,7 @@ class OpenAIExtractionService:
     ) -> list[dict[str, str]]:
         abstract_for_prompt = abstract if abstract else "Not available."
         summary_instruction = (
-            "Also return a summary of maximum 20 words explaining the article goal. "
+            "Also return a summary of maximum 15 words explaining the article goal. "
             "If relevant, mention pulsatility or recovery in LVAD patients."
             if include_summary
             else "Do not return a summary field."
@@ -215,10 +216,43 @@ class OpenAIExtractionService:
                     "- TET\n"
                     "- Other\n\n"
                     "Relevance score options:\n"
-                    "- 3 = LVAD (Left Ventricular Assist Device)\n"
-                    "- 2 = Temporary MCS / Heart Failure (ECMO, Impella, IABP, HF epidemiology)\n"
-                    "- 1 = Other cardiac pathologies/surgeries\n"
-                    "- 0 = Not relevant to mechanical circulatory support\n\n"
+                    "- 0: Irrelevant (Non-cardiac topics like pure physics or oncology. "
+                    "Exception with xenotransplantation: relevance can be 3 if the paper describes "
+                    "a new implantation of a xenotransplant in a patient, even if it is not a heart)\n"
+                    "- 1: Mildly interesting (General heart failure, standard drugs, epidemiology without "
+                    "device focus, atrial fibrillation)\n"
+                    "- 2: Interesting for HF field (Transplantation, HFpEF, general cardiac surgery, "
+                    "tMCS without mention about LVAD)\n"
+                    "- 3: Interesting for LVAD (Central topics on LVAD, clinical complications, "
+                    "patient management, small case reports)\n"
+                    "- 4: Very interesting for LVAD / MCS (Major innovations, INTERMACS reports, "
+                    "survival predictors and clinical outcomes under LVAD, flow estimation, LVAD competitors, "
+                    "myocardial recovery in LVAD patients)\n\n"
+                    "Special competitor rule:\n"
+                    "If a competitor device is the main topic of the paper, relevance score cannot be below 3.\n"
+                    "Relevant competitors/devices:\n"
+                    "- BrioVAD\n"
+                    "- CH-VAD\n"
+                    "- MiniVAD by CalonCardio\n"
+                    "- Corinnova (cardiac compression sleeve)\n"
+                    "- Corvion\n"
+                    "- Danial Medical\n"
+                    "- NuPulse\n"
+                    "- Evaheart\n"
+                    "- Fineheart\n"
+                    "- Mi-VAD\n"
+                    "- PulseCath\n"
+                    "- ModulHeart\n"
+                    "- Second Heart Assisst\n"
+                    "- CorHeart 6\n"
+                    "- Systol Dynamics\n"
+                    "- TorVAD\n"
+                    "- RealHeart\n"
+                    "- Adjucor\n\n"
+                    "Tag field:\n"
+                    "- Provide the name of the drug used if relevant (examples: Finerenone, empagliflozin).\n"
+                    "- Provide the device name if the main topic is a device.\n"
+                    "- If none applies, return an empty string.\n\n"
                     f"{summary_instruction}\n\n"
                     f"Title:\n{title}\n\n"
                     f"Abstract:\n{abstract_for_prompt}"
@@ -294,16 +328,22 @@ class OpenAIExtractionService:
         if include_summary:
             expected_keys.add("summary")
         parsed_keys = set(parsed_content.keys())
-        if parsed_keys != expected_keys:
+        allowed_keys = set(expected_keys)
+        allowed_keys.add("tag")
+        if not expected_keys.issubset(parsed_keys) or not parsed_keys.issubset(allowed_keys):
             raise OpenAIExtractionServiceError(
                 "OpenAI response contains unexpected classification fields."
             )
 
-        for key in expected_keys - {"relevance_score"}:
+        for key in expected_keys - {"relevance_score", "tag"}:
             if not isinstance(parsed_content[key], str) or not parsed_content[key].strip():
                 raise OpenAIExtractionServiceError(
                     f"OpenAI response field '{key}' must be a non-empty string."
                 )
+        if "tag" in parsed_content and not isinstance(parsed_content["tag"], str):
+            raise OpenAIExtractionServiceError(
+                "OpenAI response field 'tag' must be a string."
+            )
         if not isinstance(parsed_content["relevance_score"], int):
             raise OpenAIExtractionServiceError(
                 "OpenAI response field 'relevance_score' must be an integer."
@@ -314,6 +354,7 @@ class OpenAIExtractionService:
             "subject": parsed_content["subject"].strip(),
             "category": parsed_content["category"].strip(),
             "relevance_score": parsed_content["relevance_score"],
+            "tag": (parsed_content.get("tag") or "").strip(),
         }
         if include_summary:
             validated_content["summary"] = parsed_content["summary"].strip()
