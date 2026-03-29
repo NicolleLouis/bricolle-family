@@ -179,3 +179,37 @@ class TestCorwaveCsvEnrichmentService:
                 csv_file_name="input.csv",
                 csv_file_content=csv_content,
             )
+
+    def test_enrich_csv_calls_progress_callback_for_each_processed_row(self):
+        csv_content = "Title,Abstract\nA,a\nB,b\n".encode("utf-8")
+        fake_service = FakeOpenAIExtractionService(
+            responses=[
+                {
+                    "article_type": "Review",
+                    "subject": "Clinical",
+                    "category": "LVAD",
+                    "summary": "Goal A",
+                    "relevance_score": 3,
+                    "tag": "empagliflozin",
+                },
+                {
+                    "article_type": "Clinical trial",
+                    "subject": "Epidemiology",
+                    "category": "HTx",
+                    "summary": "Goal B",
+                    "relevance_score": 2,
+                    "tag": "NuPulse",
+                },
+            ]
+        )
+        progress_updates = []
+        service = CorwaveCsvEnrichmentService()
+        service._openai_extraction_service = fake_service
+
+        service.enrich_csv(
+            csv_file_name="input.csv",
+            csv_file_content=csv_content,
+            progress_callback=lambda processed, total: progress_updates.append((processed, total)),
+        )
+
+        assert progress_updates == [(1, 2), (2, 2)]

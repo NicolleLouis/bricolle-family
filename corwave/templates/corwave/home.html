@@ -4,7 +4,7 @@
 
 {% block content %}
   <h1>Corwave CSV Enrichment</h1>
-  <p>Upload un CSV PubMed, puis télécharge le CSV enrichi avec article_type, subject et category.</p>
+  <p>Upload un CSV PubMed, puis récupère le CSV enrichi quand le traitement asynchrone est terminé.</p>
 
   {% if error_message %}
     <div style="color: #b00020; margin-bottom: 1rem;">
@@ -21,4 +21,43 @@
 
     <button type="submit">Lancer l'enrichissement</button>
   </form>
+
+  {% if job_id %}
+    <hr style="margin: 1.5rem 0;" />
+    <section>
+      <p><strong>Job #{{ job_id }}</strong></p>
+      <p id="job-status-message">{{ eta_message }}</p>
+      <p id="job-download-link" style="display: none;"></p>
+    </section>
+
+    <script>
+      (function () {
+        const statusUrl = "{{ status_url }}";
+        const statusMessageElement = document.getElementById("job-status-message");
+        const downloadLinkElement = document.getElementById("job-download-link");
+
+        function updateStatus() {
+          fetch(statusUrl)
+            .then((response) => response.json())
+            .then((payload) => {
+              statusMessageElement.textContent = payload.message;
+
+              if (payload.download_url) {
+                downloadLinkElement.style.display = "block";
+                downloadLinkElement.innerHTML = `<a href="${payload.download_url}">Télécharger le CSV enrichi</a>`;
+              }
+
+              if (payload.status !== "done" && payload.status !== "failed") {
+                window.setTimeout(updateStatus, 3000);
+              }
+            })
+            .catch(() => {
+              statusMessageElement.textContent = "Impossible de récupérer le statut du job.";
+            });
+        }
+
+        window.setTimeout(updateStatus, 3000);
+      })();
+    </script>
+  {% endif %}
 {% endblock %}

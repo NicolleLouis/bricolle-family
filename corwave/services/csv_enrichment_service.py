@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import io
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from corwave.services.openai_extraction_service import (
@@ -33,9 +34,13 @@ class CorwaveCsvEnrichmentService:
         *,
         csv_file_name: str,
         csv_file_content: bytes,
+        progress_callback: Callable[[int, int], None] | None = None,
     ) -> CsvEnrichmentResult:
         original_column_names, original_rows = self._parse_csv(csv_file_content=csv_file_content)
-        extracted_rows = self._extract_rows(original_rows=original_rows)
+        extracted_rows = self._extract_rows(
+            original_rows=original_rows,
+            progress_callback=progress_callback,
+        )
         output_content = self._build_output_csv(
             original_column_names=original_column_names,
             original_rows=original_rows,
@@ -71,8 +76,10 @@ class CorwaveCsvEnrichmentService:
         self,
         *,
         original_rows: list[dict[str, str]],
+        progress_callback: Callable[[int, int], None] | None = None,
     ) -> list[dict[str, str | int]]:
         extracted_rows: list[dict[str, str | int]] = []
+        total_rows = len(original_rows)
         for row_index, current_row in enumerate(original_rows):
             source_line_number = row_index + 2
             try:
@@ -97,6 +104,8 @@ class CorwaveCsvEnrichmentService:
                 ) from extraction_error
 
             extracted_rows.append(extracted_row)
+            if progress_callback is not None:
+                progress_callback(row_index + 1, total_rows)
 
         return extracted_rows
 
