@@ -3,7 +3,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from slay_the_spire2.models import Character, Encounter, Relic, RunFile, RunSummary
+from slay_the_spire2.models import Card, Character, Encounter, Relic, RunFile, RunSummary, RunSummaryCard
 
 
 @pytest.mark.django_db
@@ -12,7 +12,7 @@ class TestRunFileModel:
         run_file = RunFile.objects.create(
             file=SimpleUploadedFile(
                 "1711111111.run",
-                b'{"win": true, "was_abandoned": false, "start_time": 1772916631, "ascension": 3, "killed_by_encounter": "NONE.NONE", "killed_by_event": "NONE.NONE", "players": [{"character": "CHARACTER.IRONCLAD", "relics": [{"id": "RELIC.SPARKLING_ROUGE"}]}]}',
+                b'{"win": true, "was_abandoned": false, "start_time": 1772916631, "ascension": 3, "killed_by_encounter": "NONE.NONE", "killed_by_event": "NONE.NONE", "players": [{"character": "CHARACTER.IRONCLAD", "relics": [{"id": "RELIC.SPARKLING_ROUGE"}], "deck": [{"id": "CARD.BODYGUARD"}, {"id": "CARD.BODYGUARD"}, {"id": "CARD.STRIKE_NECROBINDER"}, {"id": "CARD.DEFEND_NECROBINDER"}]}]}',
                 content_type="application/json",
             )
         )
@@ -25,7 +25,18 @@ class TestRunFileModel:
             "ascension": 3,
             "killed_by_encounter": "NONE.NONE",
             "killed_by_event": "NONE.NONE",
-            "players": [{"character": "CHARACTER.IRONCLAD", "relics": [{"id": "RELIC.SPARKLING_ROUGE"}]}],
+            "players": [
+                {
+                    "character": "CHARACTER.IRONCLAD",
+                    "relics": [{"id": "RELIC.SPARKLING_ROUGE"}],
+                    "deck": [
+                        {"id": "CARD.BODYGUARD"},
+                        {"id": "CARD.BODYGUARD"},
+                        {"id": "CARD.STRIKE_NECROBINDER"},
+                        {"id": "CARD.DEFEND_NECROBINDER"},
+                    ],
+                }
+            ],
         }
         assert run_file.summary.win is True
         assert run_file.summary.abandonned is False
@@ -35,8 +46,15 @@ class TestRunFileModel:
         assert run_file.summary.killed_by is None
         assert run_file.summary.relics.count() == 1
         assert run_file.summary.relics.first().name == "SPARKLING ROUGE"
+        assert run_file.summary.cards.count() == 3
+        assert RunSummaryCard.objects.get(run_summary=run_file.summary, card__name="Bodyguard").quantity == 2
+        assert RunSummaryCard.objects.get(run_summary=run_file.summary, card__name="Strike").quantity == 1
+        assert RunSummaryCard.objects.get(run_summary=run_file.summary, card__name="Defend").quantity == 1
         assert Character.objects.filter(name="IRONCLAD").count() == 1
         assert Relic.objects.filter(name="SPARKLING ROUGE").count() == 1
+        assert Card.objects.filter(name="Bodyguard").count() == 1
+        assert Card.objects.filter(name="Strike").count() == 1
+        assert Card.objects.filter(name="Defend").count() == 1
 
     def test_save_raises_validation_error_when_file_is_not_valid_json(self):
         run_file = RunFile(
@@ -99,6 +117,21 @@ class TestRunFileModel:
         )
 
         with pytest.raises(ValidationError, match="multiplayer non geree"):
+            run_file.save()
+
+        assert RunFile.objects.count() == 0
+        assert RunSummary.objects.count() == 0
+
+    def test_save_raises_validation_error_when_deck_id_is_invalid(self):
+        run_file = RunFile(
+            file=SimpleUploadedFile(
+                "invalid-deck.run",
+                b'{"win": true, "was_abandoned": false, "start_time": 1772916680, "ascension": 0, "killed_by_encounter": "NONE.NONE", "killed_by_event": "NONE.NONE", "players": [{"character": "CHARACTER.IRONCLAD", "deck": [{"id": "BODYGUARD"}]}]}',
+                content_type="application/json",
+            )
+        )
+
+        with pytest.raises(ValidationError, match="CARD.\\{name\\}"):
             run_file.save()
 
         assert RunFile.objects.count() == 0

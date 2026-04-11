@@ -32,6 +32,12 @@ class RunSummary(models.Model):
         blank=True,
         related_name="run_summaries",
     )
+    cards = models.ManyToManyField(
+        "slay_the_spire2.Card",
+        through="slay_the_spire2.RunSummaryCard",
+        blank=True,
+        related_name="run_summaries",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -1,7 +1,11 @@
+from collections import Counter
+
+from slay_the_spire2.models.card import Card
 from slay_the_spire2.models.character import Character
 from slay_the_spire2.models.encounter import Encounter
 from slay_the_spire2.models.relic import Relic
 from slay_the_spire2.models.run_summary import RunSummary
+from slay_the_spire2.models.run_summary_card import RunSummaryCard
 
 
 class RunSummaryBuilderService:
@@ -19,6 +23,7 @@ class RunSummaryBuilderService:
         }
         summary, _ = RunSummary.objects.update_or_create(run_file=run_file, defaults=defaults)
         summary.relics.set(self._extract_relics(payload))
+        self._replace_deck_entries(summary, payload)
         return summary
 
     def _read_boolean(self, payload: dict, key: str) -> bool:
@@ -156,6 +161,61 @@ class RunSummaryBuilderService:
         if not raw_relic_id.startswith(prefix) or len(raw_relic_id) <= len(prefix):
             raise ValueError("Le champ 'players[0].relics[].id' doit avoir le format RELIC.{name}.")
         return raw_relic_id[len(prefix):].replace("_", " ")
+
+    def _replace_deck_entries(self, summary: RunSummary, payload: dict) -> None:
+        parsed_cards = self._extract_cards_with_quantities(payload)
+        summary.deck_entries.all().delete()
+        RunSummaryCard.objects.bulk_create(
+            [
+                RunSummaryCard(
+                    run_summary=summary,
+                    card=card,
+                    quantity=quantity,
+                )
+                for card, quantity in parsed_cards
+            ]
+        )
+
+    def _extract_cards_with_quantities(self, payload: dict) -> list[tuple[Card, int]]:
+        first_player = self._extract_first_player(payload, max_players=2)
+        if first_player is None:
+            return []
+
+        deck = first_player.get("deck", [])
+        if not isinstance(deck, list):
+            raise ValueError("Le champ 'players[0].deck' doit etre une liste.")
+
+        card_name_counter = Counter()
+        for card_data in deck:
+            if not isinstance(card_data, dict):
+                raise ValueError("Chaque carte de 'players[0].deck' doit etre un objet.")
+            raw_card_id = card_data.get("id")
+            if not isinstance(raw_card_id, str):
+                raise ValueError("Le champ 'players[0].deck[].id' doit etre une chaine de caracteres.")
+
+            card_name = self._parse_card_name(raw_card_id)
+            card_name_counter[card_name] += 1
+
+        parsed_cards = []
+        for card_name, quantity in card_name_counter.items():
+            card, _ = Card.objects.get_or_create(name=card_name)
+            parsed_cards.append((card, quantity))
+
+        return parsed_cards
+
+    def _parse_card_name(self, raw_card_id: str) -> str:
+        prefix = "CARD."
+        if not raw_card_id.startswith(prefix) or len(raw_card_id) <= len(prefix):
+            raise ValueError("Le champ 'players[0].deck[].id' doit avoir le format CARD.{name}.")
+
+        raw_card_name = raw_card_id[len(prefix):]
+        if raw_card_name.startswith("STRIKE_") or raw_card_name.startswith("STRIKE-"):
+            return "Strike"
+        if raw_card_name.startswith("DEFEND_") or raw_card_name.startswith("DEFEND-"):
+            return "Defend"
+
+        normalized_card_name = raw_card_name.replace("_", " ").replace("-", " ").strip()
+        return normalized_card_name.title()
 
     def _extract_first_player(self, payload: dict, max_players: int) -> dict | None:
         players = payload.get("players")
