@@ -1,0 +1,51 @@
+{% extends "slay_the_spire2/base.html" %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h1 class="h3 mb-3">Character</h1>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                <tr>
+                    <th>
+                        <a href="?sort=character_name&direction={% if sort_by == 'character_name' and direction == 'asc' %}desc{% else %}asc{% endif %}">
+                            Character{% if sort_by == 'character_name' %} {% if direction == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?sort=run_number&direction={% if sort_by == 'run_number' and direction == 'asc' %}desc{% else %}asc{% endif %}">
+                            Runs{% if sort_by == 'run_number' %} {% if direction == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?sort=win_number&direction={% if sort_by == 'win_number' and direction == 'asc' %}desc{% else %}asc{% endif %}">
+                            Wins{% if sort_by == 'win_number' %} {% if direction == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?sort=win_percentage&direction={% if sort_by == 'win_percentage' and direction == 'asc' %}desc{% else %}asc{% endif %}">
+                            Win %{% if sort_by == 'win_percentage' %} {% if direction == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                        </a>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for stat in character_stats %}
+                    <tr>
+                        <td>{{ stat.character_name }}</td>
+                        <td>{{ stat.run_number }}</td>
+                        <td>{{ stat.win_number }}</td>
+                        <td>{{ stat.win_percentage }}%</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-muted">Aucune run avec character pour le moment.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

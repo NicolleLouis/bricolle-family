@@ -11,3 +11,4 @@ class Directories(models.TextChoices):
     CAPITALISM = "capitalism", "Capitalism"
     RUNETERRA = "runeterra", "Runeterra"
     SPEEDRUN = "speedrun", "Speedrun"
+    STS = "sts", "Slay The Spire 2"

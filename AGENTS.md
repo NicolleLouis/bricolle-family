@@ -4,9 +4,8 @@
 
 This repository hosts a multi-app Django project. Core configuration and global templates live in `bricolle_family/`;
 shared helpers sit in `core/`. Feature apps (e.g., `baby_name`, `altered`) keep their own URLs, models, and templates,
-with tests under `<app>/tests/`. New apps must follow the house layout: sibling folders `templates/`, `models/`,
-`views/`, and `services/`. Static assets stay in `static/` (collected to `staticfiles/`), uploads in `media/`, and
-deployment helpers remain at the root.
+with tests under `<app>/tests/`. Static assets stay in `static/` (collected to `staticfiles/`), uploads in `media/`,
+and deployment helpers remain at the root.
 
 ## Build, Test, and Development Commands
 
@@ -31,16 +30,11 @@ syntax; name them
 after their route (`baby_name/index.html`) and use Bootstrap-friendly markup (`django-bootstrap-v5`).
 Avoid variable names that are contractions or abbreviations; prefer full, descriptive names.
 
-## Template & App Scaffolding
+## Skills
 
-Each app’s `templates/` directory must provide three base files:
+App scaffolding rules (new app structure, homepage button, and required templates `header/base/home`) are now centralized in:
 
-- `header.html`: renders navigation, with the app name on the left linking to the app home and an admin button on the
-  right targeting `/admin/{app_name}`.
-- `base.html`: shared layout for every page in the app.
-- `home.html`: landing page extending `base.html`.
-  Keep reusable fragments in `{% include %}` files to stay DRY and ensure navigation also exposes the global home when
-  relevant.
+- `skills/create-new-app/SKILL.md`
 
 ## Testing Guidelines
 

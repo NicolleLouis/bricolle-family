@@ -1,0 +1,33 @@
+{% extends "slay_the_spire2/base.html" %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h1 class="h3 mb-3">Death Type</h1>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                <tr>
+                    <th>Encounter</th>
+                    <th>Type</th>
+                    <th>Deaths</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for stat in death_type_stats %}
+                    <tr>
+                        <td>{{ stat.encounter_name }}</td>
+                        <td>{{ stat.encounter_type }}</td>
+                        <td>{{ stat.death_count }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-muted">Aucune mort enregistree pour le moment.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

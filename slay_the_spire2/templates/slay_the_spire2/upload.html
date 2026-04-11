@@ -1,0 +1,18 @@
+{% extends "slay_the_spire2/base.html" %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h1 class="h3 mb-3">Upload</h1>
+        <p class="mb-4">Importe un fichier de run (.run) ou une archive (.zip). Cela cree un RunFile et son RunSummary associe.</p>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="run_file" class="form-label">Fichier de run</label>
+                <input id="run_file" type="file" name="run_file" class="form-control" accept=".run,.zip,application/json,application/zip" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

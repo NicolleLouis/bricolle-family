@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "chess",
     "seven_and_half",
     "corwave",
+    "slay_the_spire2",
     "capitalism.apps.CapitalismConfig",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -202,6 +203,11 @@ if DEBUG:
                 "propagate": False,
             },
             "django.server": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": False,
+            },
+            "slay_the_spire2": {
                 "handlers": ["console"],
                 "level": "INFO",
                 "propagate": False,

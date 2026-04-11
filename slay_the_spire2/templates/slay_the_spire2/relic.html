@@ -1,0 +1,92 @@
+{% extends "slay_the_spire2/base.html" %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h1 class="h3 mb-3">Relic</h1>
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+                <a class="nav-link {% if current_tab == 'general' %}active{% endif %}"
+                   href="?tab=general&character={{ selected_character }}&sort={{ sort_by }}&direction={{ direction }}">
+                    General
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if current_tab == 'win_by_relic_number' %}active{% endif %}"
+                   href="?tab=win_by_relic_number&character={{ selected_character }}">
+                    Win By Relic Number
+                </a>
+            </li>
+        </ul>
+        <form method="get" class="row g-2 align-items-end mb-3">
+            <div class="col-12 col-md-4">
+                <label for="characterFilter" class="form-label">Character</label>
+                <select id="characterFilter" name="character" class="form-select">
+                    <option value="all" {% if selected_character == "all" %}selected{% endif %}>All</option>
+                    {% for character in character_choices %}
+                        <option value="{{ character.id }}" {% if selected_character == character.id|stringformat:"s" %}selected{% endif %}>
+                            {{ character.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <input type="hidden" name="tab" value="{{ current_tab }}">
+            <input type="hidden" name="sort" value="{{ sort_by }}">
+            <input type="hidden" name="direction" value="{{ direction }}">
+            <div class="col-12 col-md-auto">
+                <button type="submit" class="btn btn-outline-primary">Filter</button>
+            </div>
+        </form>
+        {% if current_tab == "general" %}
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                    <tr>
+                        <th>
+                            <a href="?tab={{ current_tab }}&character={{ selected_character }}&sort=relic_name&direction={% if sort_by == 'relic_name' and direction == 'asc' %}desc{% else %}asc{% endif %}">
+                                Relic{% if sort_by == 'relic_name' %} {% if direction == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="?tab={{ current_tab }}&character={{ selected_character }}&sort=run_number&direction={% if sort_by == 'run_number' and direction == 'asc' %}desc{% else %}asc{% endif %}">
+                                Runs{% if sort_by == 'run_number' %} {% if direction == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="?tab={{ current_tab }}&character={{ selected_character }}&sort=win_number&direction={% if sort_by == 'win_number' and direction == 'asc' %}desc{% else %}asc{% endif %}">
+                                Wins{% if sort_by == 'win_number' %} {% if direction == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="?tab={{ current_tab }}&character={{ selected_character }}&sort=win_percentage&direction={% if sort_by == 'win_percentage' and direction == 'asc' %}desc{% else %}asc{% endif %}">
+                                Win %{% if sort_by == 'win_percentage' %} {% if direction == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                            </a>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for stat in relic_stats %}
+                        <tr>
+                            <td>{{ stat.relic_name }}</td>
+                            <td>{{ stat.run_number }}</td>
+                            <td>{{ stat.win_number }}</td>
+                            <td>{{ stat.win_percentage }}%</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-muted">Aucune run avec relic pour le moment.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            {% if win_by_relic_number_chart %}
+                {{ win_by_relic_number_chart|safe }}
+            {% else %}
+                <p class="text-muted mb-0">Pas assez de donnees pour afficher le chart.</p>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

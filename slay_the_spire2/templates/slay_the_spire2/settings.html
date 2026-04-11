@@ -1,0 +1,17 @@
+{% extends "slay_the_spire2/base.html" %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h1 class="h3 mb-3">Settings</h1>
+        <p class="mb-4">
+            Lance un reparse asynchrone de tous les fichiers run deja presents en base.
+            Utilise ce bouton apres chaque enrichissement du parser.
+        </p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-warning">Relancer le parse global</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

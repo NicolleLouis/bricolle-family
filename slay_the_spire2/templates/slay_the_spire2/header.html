@@ -1,0 +1,38 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light px-3">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'slay_the_spire2:home' %}">Slay The Spire 2</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#slayTheSpire2Navbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="slayTheSpire2Navbar">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'slay_the_spire2:character' %}">🦊 Character</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'slay_the_spire2:relic' %}">🐼 Relic</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'slay_the_spire2:death_type' %}">🦁 Death Type</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'slay_the_spire2:ideas' %}">🐙 Ideas</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'slay_the_spire2:upload' %}">🦉 Upload</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'slay_the_spire2:settings' %}">🐢 Settings</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home' %}">🦝 Accueil global</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/slay_the_spire2/">🐯 Admin</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
