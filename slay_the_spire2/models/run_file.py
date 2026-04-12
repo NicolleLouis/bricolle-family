@@ -30,6 +30,25 @@ class RunFile(models.Model):
                     RunSummaryBuilderService().upsert_from_run_file(self)
                 except ValueError as error:
                     raise ValidationError({"file": str(error)}) from error
+                self._validate_abandoned_run_quality()
+
+    def _validate_abandoned_run_quality(self) -> None:
+        if not hasattr(self, "summary"):
+            return
+        if not self.summary.abandonned:
+            return
+        if self.summary.encounters.count() >= 2:
+            return
+
+        self.file.delete(save=False)
+        raise ValidationError(
+            {
+                "file": (
+                    "Run ignoree: abandonnee avec moins de 2 encounters. "
+                    "Le fichier a ete supprime."
+                )
+            }
+        )
 
     def __str__(self):
         return self.original_file_name

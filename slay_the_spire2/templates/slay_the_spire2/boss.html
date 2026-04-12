@@ -1,0 +1,63 @@
+{% extends "slay_the_spire2/base.html" %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h1 class="h3 mb-3">Boss</h1>
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+                <a class="nav-link active" href="?character={{ selected_character }}&act={{ selected_act }}">
+                    Dangerousness
+                </a>
+            </li>
+        </ul>
+        <form method="get" class="row g-2 align-items-end mb-3">
+            <div class="col-12 col-md-4">
+                <label for="characterFilter" class="form-label">Character</label>
+                <select id="characterFilter" name="character" class="form-select">
+                    <option value="all" {% if selected_character == "all" %}selected{% endif %}>All</option>
+                    {% for character in character_choices %}
+                        <option value="{{ character.id }}" {% if selected_character == character.id|stringformat:"s" %}selected{% endif %}>
+                            {{ character.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-md-3">
+                <label for="actFilter" class="form-label">Act</label>
+                <select id="actFilter" name="act" class="form-select">
+                    <option value="all" {% if selected_act == "all" %}selected{% endif %}>All</option>
+                    <option value="0" {% if selected_act == "0" %}selected{% endif %}>Act 1</option>
+                    <option value="1" {% if selected_act == "1" %}selected{% endif %}>Act 2</option>
+                    <option value="2" {% if selected_act == "2" %}selected{% endif %}>Act 3</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-auto">
+                <button type="submit" class="btn btn-outline-primary">Filter</button>
+            </div>
+        </form>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                <tr>
+                    <th>Boss</th>
+                    <th>Average Damage Taken</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for stat in dangerousness_stats %}
+                    <tr>
+                        <td>{{ stat.encounter_name }}</td>
+                        <td>{{ stat.average_damage_taken }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-muted">Aucune rencontre boss pour le moment.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

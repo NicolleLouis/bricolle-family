@@ -45,7 +45,7 @@ class TestUploadView:
             data={
                 "run_file": SimpleUploadedFile(
                     "view-upload.run",
-                    b'{"win": false, "was_abandoned": true, "start_time": 1772916800, "ascension": 2, "killed_by_encounter": "NONE.NONE", "killed_by_event": "EVENT.ROOM_TEST"}',
+                    b'{"win": false, "was_abandoned": true, "start_time": 1772916800, "ascension": 2, "killed_by_encounter": "NONE.NONE", "killed_by_event": "EVENT.ROOM_TEST", "map_point_history": [["EVENT.A", "EVENT.B"]]}',
                     content_type="application/json",
                 )
             },
@@ -107,11 +107,29 @@ class TestUploadView:
         assert RunSummary.objects.count() == 1
         assert b"existe deja en base" in response.content
 
+    def test_upload_post_rejects_abandoned_run_with_less_than_two_encounters(self, authenticated_client):
+        response = authenticated_client.post(
+            reverse("slay_the_spire2:upload"),
+            data={
+                "run_file": SimpleUploadedFile(
+                    "abandoned-too-short.run",
+                    b'{"win": false, "was_abandoned": true, "start_time": 1772916901, "ascension": 0, "killed_by_encounter": "NONE.NONE", "killed_by_event": "NONE.NONE", "map_point_history": [["EVENT.ONLY_ONE"]]}',
+                    content_type="application/json",
+                )
+            },
+            follow=True,
+        )
+
+        assert response.status_code == 200
+        assert RunFile.objects.count() == 0
+        assert RunSummary.objects.count() == 0
+        assert b"abandonnee avec moins de 2 encounters" in response.content
+
     def test_upload_post_zip_imports_each_file(self, authenticated_client):
         zip_file = self._build_zip_upload_file(
             {
                 "first.run": b'{"win": true, "was_abandoned": false, "start_time": 1772917000, "ascension": 1, "killed_by_encounter": "NONE.NONE", "killed_by_event": "NONE.NONE"}',
-                "second.run": b'{"win": false, "was_abandoned": true, "start_time": 1772917001, "ascension": 2, "killed_by_encounter": "ENCOUNTER.KNIGHTS_ELITE", "killed_by_event": "NONE.NONE"}',
+                "second.run": b'{"win": false, "was_abandoned": true, "start_time": 1772917001, "ascension": 2, "killed_by_encounter": "ENCOUNTER.KNIGHTS_ELITE", "killed_by_event": "NONE.NONE", "map_point_history": [["EVENT.A", "EVENT.B"]]}',
             }
         )
 

@@ -1,11 +1,15 @@
 from collections import Counter
+import logging
 
 from slay_the_spire2.models.card import Card
 from slay_the_spire2.models.character import Character
 from slay_the_spire2.models.encounter import Encounter
 from slay_the_spire2.models.relic import Relic
+from slay_the_spire2.models.run_encounter import RunEncounter
 from slay_the_spire2.models.run_summary import RunSummary
 from slay_the_spire2.models.run_summary_card import RunSummaryCard
+
+logger = logging.getLogger(__name__)
 
 
 class RunSummaryBuilderService:
@@ -24,6 +28,7 @@ class RunSummaryBuilderService:
         summary, _ = RunSummary.objects.update_or_create(run_file=run_file, defaults=defaults)
         summary.relics.set(self._extract_relics(payload))
         self._replace_deck_entries(summary, payload)
+        self._replace_run_encounters(summary, payload)
         return summary
 
     def _read_boolean(self, payload: dict, key: str) -> bool:
@@ -232,3 +237,236 @@ class RunSummaryBuilderService:
         if not isinstance(first_player, dict):
             raise ValueError("Le premier element de 'players' doit etre un objet.")
         return first_player
+
+    def _replace_run_encounters(self, summary: RunSummary, payload: dict) -> None:
+        map_point_history = payload.get("map_point_history")
+        if map_point_history is None:
+            summary.encounters.all().delete()
+            return
+        if not isinstance(map_point_history, list):
+            raise ValueError("Le champ 'map_point_history' doit etre une liste.")
+
+        parsed_entries: list[RunEncounter] = []
+        for act_index, act_entries in enumerate(map_point_history):
+            if act_index > RunEncounter.Act.ACT_3:
+                raise ValueError("Le champ 'map_point_history' ne peut pas contenir plus de 3 acts.")
+            if not isinstance(act_entries, list):
+                raise ValueError("Chaque element de 'map_point_history' doit etre une liste.")
+
+            for floor_index, map_point in enumerate(act_entries):
+                try:
+                    encounter, damage_taken = self._parse_map_point_history_item(map_point)
+                except Exception:
+                    logger.exception(
+                        "Erreur de parsing map_point_history (act=%s, floor=%s, map_point=%s)",
+                        act_index,
+                        floor_index,
+                        map_point,
+                    )
+                    raise
+                parsed_entries.append(
+                    RunEncounter(
+                        run_summary=summary,
+                        encounter=encounter,
+                        act=act_index,
+                        floor=floor_index,
+                        damage_taken=damage_taken,
+                    )
+                )
+
+        summary.encounters.all().delete()
+        RunEncounter.objects.bulk_create(parsed_entries)
+
+    def _parse_map_point_history_item(self, map_point) -> tuple[Encounter, int]:
+        if isinstance(map_point, str):
+            return self._parse_string_map_point_history_item(map_point)
+        if isinstance(map_point, dict):
+            return self._parse_object_map_point_history_item(map_point)
+        raise ValueError("Chaque item de 'map_point_history' doit etre une chaine ou un objet.")
+
+    def _parse_string_map_point_history_item(self, map_point: str) -> tuple[Encounter, int]:
+        if not map_point:
+            raise ValueError("Les items de 'map_point_history' ne peuvent pas etre vides.")
+
+        encounter, _ = Encounter.objects.get_or_create(
+            type=Encounter.Type.ROOM,
+            name=map_point,
+        )
+        return encounter, 0
+
+    def _parse_object_map_point_history_item(self, map_point: dict) -> tuple[Encounter, int]:
+        map_point_type = map_point.get("map_point_type")
+        if not isinstance(map_point_type, str):
+            raise ValueError("Le champ 'map_point_type' de map_point_history doit etre une chaine de caracteres.")
+        first_room = self._extract_single_room(map_point)
+        room_type = first_room.get("room_type")
+        if room_type == "shop":
+            encounter_type, encounter_name = self._extract_shop_encounter_from_rooms(map_point)
+        elif room_type == "monster":
+            encounter_type, encounter_name = self._extract_monster_encounter_from_rooms(map_point)
+        elif room_type == "treasure":
+            encounter_type, encounter_name = self._extract_treasure_encounter_from_rooms(map_point)
+        elif map_point_type == Encounter.Type.ANCIENT:
+            encounter_type = Encounter.Type.ANCIENT
+            encounter_name = self._extract_ancient_encounter_name_from_rooms(map_point)
+        elif map_point_type == Encounter.Type.REST_SITE:
+            encounter_type, encounter_name = self._extract_rest_site_encounter_from_rooms(map_point)
+        elif map_point_type == Encounter.Type.ELITE:
+            encounter_type, encounter_name = self._extract_elite_encounter_from_rooms(map_point)
+        elif map_point_type == Encounter.Type.BOSS:
+            encounter_type, encounter_name = self._extract_boss_encounter_from_rooms(map_point)
+        else:
+            encounter_type, encounter_name = self._extract_room_encounter_from_event_room(map_point, map_point_type)
+
+        damage_taken = self._extract_damage_taken_from_player_stats(map_point)
+        encounter, _ = Encounter.objects.get_or_create(
+            type=encounter_type,
+            name=encounter_name,
+        )
+        return encounter, damage_taken
+
+    def _extract_ancient_encounter_name_from_rooms(self, map_point: dict) -> str:
+        first_room = self._extract_single_room(map_point)
+        model_id = first_room.get("model_id")
+        if not isinstance(model_id, str):
+            raise ValueError("Le champ 'rooms[0].model_id' doit etre une chaine de caracteres.")
+        prefix = "EVENT."
+        if not model_id.startswith(prefix) or len(model_id) <= len(prefix):
+            raise ValueError("Le champ 'rooms[0].model_id' doit avoir le format EVENT.{name}.")
+
+        return self._normalize_encounter_name(model_id[len(prefix):])
+
+    def _extract_monster_encounter_from_rooms(self, map_point: dict) -> tuple[str, str]:
+        first_room = self._extract_single_room(map_point)
+        room_type = first_room.get("room_type")
+        if room_type != "monster":
+            raise ValueError("Le champ 'rooms[0].room_type' doit valoir 'monster' pour map_point_type='monster'.")
+
+        model_id = first_room.get("model_id")
+        if not isinstance(model_id, str):
+            raise ValueError("Le champ 'rooms[0].model_id' doit etre une chaine de caracteres.")
+        prefix = "ENCOUNTER."
+        if not model_id.startswith(prefix) or len(model_id) <= len(prefix):
+            raise ValueError("Le champ 'rooms[0].model_id' doit avoir le format ENCOUNTER.{name}.")
+
+        raw_name = model_id[len(prefix):]
+        for suffix in ("_NORMAL", "_WEAK"):
+            if raw_name.endswith(suffix):
+                raw_name = raw_name[: -len(suffix)]
+                break
+        if not raw_name:
+            raise ValueError("Le nom de l'encounter monster est vide.")
+
+        return Encounter.Type.MONSTER, self._normalize_encounter_name(raw_name)
+
+    def _extract_shop_encounter_from_rooms(self, map_point: dict) -> tuple[str, str]:
+        first_room = self._extract_single_room(map_point)
+        room_type = first_room.get("room_type")
+        if room_type != "shop":
+            raise ValueError("Le champ 'rooms[0].room_type' doit valoir 'shop' pour map_point_type='shop'.")
+        return Encounter.Type.SHOP, "Shop"
+
+    def _extract_treasure_encounter_from_rooms(self, map_point: dict) -> tuple[str, str]:
+        first_room = self._extract_single_room(map_point)
+        room_type = first_room.get("room_type")
+        if room_type != "treasure":
+            raise ValueError("Le champ 'rooms[0].room_type' doit valoir 'treasure' pour map_point_type='treasure'.")
+        return Encounter.Type.TREASURE, "Treasure"
+
+    def _extract_rest_site_encounter_from_rooms(self, map_point: dict) -> tuple[str, str]:
+        first_room = self._extract_single_room(map_point)
+        room_type = first_room.get("room_type")
+        if room_type != "rest_site":
+            raise ValueError("Le champ 'rooms[0].room_type' doit valoir 'rest_site' pour map_point_type='rest_site'.")
+        return Encounter.Type.REST_SITE, "Rest Site"
+
+    def _extract_room_encounter_from_event_room(self, map_point: dict, map_point_type: str) -> tuple[str, str]:
+        first_room = self._extract_single_room(map_point)
+        room_type = first_room.get("room_type")
+        if room_type != "event":
+            raise ValueError(f"Le map_point_type '{map_point_type}' n'est pas gere pour le moment.")
+
+        model_id = first_room.get("model_id")
+        if not isinstance(model_id, str):
+            raise ValueError("Le champ 'rooms[0].model_id' doit etre une chaine de caracteres.")
+        prefix = "EVENT."
+        if not model_id.startswith(prefix) or len(model_id) <= len(prefix):
+            raise ValueError("Le champ 'rooms[0].model_id' doit avoir le format EVENT.{name}.")
+
+        return Encounter.Type.ROOM, self._normalize_encounter_name(model_id[len(prefix):])
+
+    def _extract_elite_encounter_from_rooms(self, map_point: dict) -> tuple[str, str]:
+        first_room = self._extract_single_room(map_point)
+        room_type = first_room.get("room_type")
+        if room_type != "elite":
+            raise ValueError("Le champ 'rooms[0].room_type' doit valoir 'elite' pour map_point_type='elite'.")
+
+        model_id = first_room.get("model_id")
+        if not isinstance(model_id, str):
+            raise ValueError("Le champ 'rooms[0].model_id' doit etre une chaine de caracteres.")
+        prefix = "ENCOUNTER."
+        if not model_id.startswith(prefix) or len(model_id) <= len(prefix):
+            raise ValueError("Le champ 'rooms[0].model_id' doit avoir le format ENCOUNTER.{name}.")
+
+        raw_name = model_id[len(prefix):]
+        suffix = "_ELITE"
+        if raw_name.endswith(suffix):
+            raw_name = raw_name[: -len(suffix)]
+        if not raw_name:
+            raise ValueError("Le nom de l'encounter elite est vide.")
+
+        return Encounter.Type.ELITE, self._normalize_encounter_name(raw_name)
+
+    def _extract_boss_encounter_from_rooms(self, map_point: dict) -> tuple[str, str]:
+        first_room = self._extract_single_room(map_point)
+        room_type = first_room.get("room_type")
+        if room_type != "boss":
+            raise ValueError("Le champ 'rooms[0].room_type' doit valoir 'boss' pour map_point_type='boss'.")
+
+        model_id = first_room.get("model_id")
+        if not isinstance(model_id, str):
+            raise ValueError("Le champ 'rooms[0].model_id' doit etre une chaine de caracteres.")
+        prefix = "ENCOUNTER."
+        if not model_id.startswith(prefix) or len(model_id) <= len(prefix):
+            raise ValueError("Le champ 'rooms[0].model_id' doit avoir le format ENCOUNTER.{name}.")
+
+        raw_name = model_id[len(prefix):]
+        suffix = "_BOSS"
+        if raw_name.endswith(suffix):
+            raw_name = raw_name[: -len(suffix)]
+        if not raw_name:
+            raise ValueError("Le nom de l'encounter boss est vide.")
+
+        return Encounter.Type.BOSS, self._normalize_encounter_name(raw_name)
+
+    def _extract_single_room(self, map_point: dict) -> dict:
+        rooms = map_point.get("rooms")
+        if not isinstance(rooms, list):
+            raise ValueError("Le champ 'rooms' de map_point_history doit etre une liste.")
+        if len(rooms) == 0:
+            raise ValueError("Le champ 'rooms' de map_point_history doit contenir un element.")
+        if len(rooms) > 1:
+            raise ValueError("Le champ 'rooms' de map_point_history ne peut pas contenir plus d'un element.")
+
+        first_room = rooms[0]
+        if not isinstance(first_room, dict):
+            raise ValueError("Le premier element de 'rooms' doit etre un objet.")
+        return first_room
+
+    def _extract_damage_taken_from_player_stats(self, map_point: dict) -> int:
+        player_stats = map_point.get("player_stats")
+        if not isinstance(player_stats, list):
+            raise ValueError("Le champ 'player_stats' de map_point_history doit etre une liste.")
+        if len(player_stats) == 0:
+            raise ValueError("Le champ 'player_stats' de map_point_history doit contenir un element.")
+        if len(player_stats) > 1:
+            raise ValueError("Le champ 'player_stats' de map_point_history ne peut pas contenir plus d'un element.")
+
+        first_player_stat = player_stats[0]
+        if not isinstance(first_player_stat, dict):
+            raise ValueError("Le premier element de 'player_stats' doit etre un objet.")
+
+        damage_taken = first_player_stat.get("damage_taken")
+        if not isinstance(damage_taken, int):
+            raise ValueError("Le champ 'player_stats[0].damage_taken' doit etre un entier.")
+        return damage_taken

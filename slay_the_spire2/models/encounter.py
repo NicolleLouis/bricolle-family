@@ -6,6 +6,7 @@ class Encounter(models.Model):
     class Type(models.TextChoices):
         ANCIENT = "ancient", "Ancient"
         MONSTER = "monster", "Monster"
+        SHOP = "shop", "Shop"
         ROOM = "room", "Room"
         ELITE = "elite", "Elite"
         BOSS = "boss", "Boss"

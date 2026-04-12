@@ -1,6 +1,10 @@
+import logging
+
 from django.contrib import admin
 from django.contrib import messages
 from django.db import models
+
+logger = logging.getLogger(__name__)
 
 
 class RunSummary(models.Model):
@@ -65,8 +69,16 @@ class RunSummaryAdmin(admin.ModelAdmin):
             try:
                 reparse_service.reparse_one(run_summary.run_file)
                 reparsed_count += 1
-            except ValueError:
+            except Exception:
                 error_count += 1
+                logger.exception(
+                    "Erreur pendant le re-parse d'une run",
+                    extra={
+                        "run_summary_id": run_summary.id,
+                        "run_file_id": run_summary.run_file_id,
+                        "run_file_name": run_summary.run_file.original_file_name,
+                    },
+                )
 
         if reparsed_count:
             self.message_user(
