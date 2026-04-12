@@ -12,6 +12,39 @@
             {% csrf_token %}
             <button type="submit" class="btn btn-warning">Relancer le parse global</button>
         </form>
+        <hr class="my-4">
+        <h2 class="h5 mb-3">Dernier run du job</h2>
+        {% if last_reparse_job %}
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Status</dt>
+                <dd class="col-sm-9">{{ last_reparse_job.get_status_display }}</dd>
+
+                <dt class="col-sm-3">Succes</dt>
+                <dd class="col-sm-9">{{ last_reparse_job.reparsed_count }}</dd>
+
+                <dt class="col-sm-3">Fails</dt>
+                <dd class="col-sm-9">{{ last_reparse_job.error_count }}</dd>
+
+                <dt class="col-sm-3">Lance le</dt>
+                <dd class="col-sm-9">{{ last_reparse_job.started_at }}</dd>
+
+                <dt class="col-sm-3">Termine le</dt>
+                <dd class="col-sm-9">
+                    {% if last_reparse_job.finished_at %}
+                        {{ last_reparse_job.finished_at }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </dd>
+
+                {% if last_reparse_job.error_message %}
+                    <dt class="col-sm-3">Erreur</dt>
+                    <dd class="col-sm-9 text-danger">{{ last_reparse_job.error_message }}</dd>
+                {% endif %}
+            </dl>
+        {% else %}
+            <p class="text-muted mb-0">Aucun run du job pour le moment.</p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
