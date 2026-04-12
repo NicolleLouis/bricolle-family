@@ -374,6 +374,52 @@ class TestRunFileModel:
         assert run_encounter.encounter.type == Encounter.Type.MONSTER
         assert run_encounter.encounter.name == "Shrinker Beetle"
 
+    def test_save_converts_unknown_map_point_with_event_and_monster_rooms_using_monster_room(self):
+        map_point_item = {
+            "map_point_type": "unknown",
+            "player_stats": [
+                {
+                    "damage_taken": 15,
+                }
+            ],
+            "rooms": [
+                {
+                    "model_id": "EVENT.THE_LANTERN_KEY",
+                    "room_type": "event",
+                    "turns_taken": 0,
+                },
+                {
+                    "model_id": "ENCOUNTER.MYSTERIOUS_KNIGHT_EVENT_ENCOUNTER",
+                    "monster_ids": ["MONSTER.MYSTERIOUS_KNIGHT"],
+                    "room_type": "monster",
+                    "turns_taken": 2,
+                },
+            ],
+        }
+        payload = {
+            "win": True,
+            "was_abandoned": False,
+            "start_time": 1772916696,
+            "ascension": 0,
+            "killed_by_encounter": "NONE.NONE",
+            "killed_by_event": "NONE.NONE",
+            "map_point_history": [[map_point_item]],
+        }
+        run_file = RunFile.objects.create(
+            file=SimpleUploadedFile(
+                "unknown-event-monster-map-point.run",
+                json.dumps(payload).encode("utf-8"),
+                content_type="application/json",
+            )
+        )
+
+        run_encounter = RunEncounter.objects.get(run_summary=run_file.summary)
+        assert run_encounter.act == 0
+        assert run_encounter.floor == 0
+        assert run_encounter.damage_taken == 15
+        assert run_encounter.encounter.type == Encounter.Type.MONSTER
+        assert run_encounter.encounter.name == "Mysterious Knight Event Encounter"
+
     def test_save_converts_elite_map_point_history_item_to_run_encounter(self):
         map_point_item = {
             "map_point_type": "elite",

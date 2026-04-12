@@ -298,13 +298,11 @@ class RunSummaryBuilderService:
         map_point_type = map_point.get("map_point_type")
         if not isinstance(map_point_type, str):
             raise ValueError("Le champ 'map_point_type' de map_point_history doit etre une chaine de caracteres.")
-        first_room = self._extract_single_room(map_point)
-        room_type = first_room.get("room_type")
-        if room_type == "shop":
+        if self._has_room_type(map_point, "shop"):
             encounter_type, encounter_name = self._extract_shop_encounter_from_rooms(map_point)
-        elif room_type == "monster":
+        elif self._has_room_type(map_point, "monster"):
             encounter_type, encounter_name = self._extract_monster_encounter_from_rooms(map_point)
-        elif room_type == "treasure":
+        elif self._has_room_type(map_point, "treasure"):
             encounter_type, encounter_name = self._extract_treasure_encounter_from_rooms(map_point)
         elif map_point_type == Encounter.Type.ANCIENT:
             encounter_type = Encounter.Type.ANCIENT
@@ -326,7 +324,7 @@ class RunSummaryBuilderService:
         return encounter, damage_taken
 
     def _extract_ancient_encounter_name_from_rooms(self, map_point: dict) -> str:
-        first_room = self._extract_single_room(map_point)
+        first_room = self._extract_room_by_type(map_point, "event")
         model_id = first_room.get("model_id")
         if not isinstance(model_id, str):
             raise ValueError("Le champ 'rooms[0].model_id' doit etre une chaine de caracteres.")
@@ -337,10 +335,7 @@ class RunSummaryBuilderService:
         return self._normalize_encounter_name(model_id[len(prefix):])
 
     def _extract_monster_encounter_from_rooms(self, map_point: dict) -> tuple[str, str]:
-        first_room = self._extract_single_room(map_point)
-        room_type = first_room.get("room_type")
-        if room_type != "monster":
-            raise ValueError("Le champ 'rooms[0].room_type' doit valoir 'monster' pour map_point_type='monster'.")
+        first_room = self._extract_room_by_type(map_point, "monster")
 
         model_id = first_room.get("model_id")
         if not isinstance(model_id, str):
@@ -360,31 +355,21 @@ class RunSummaryBuilderService:
         return Encounter.Type.MONSTER, self._normalize_encounter_name(raw_name)
 
     def _extract_shop_encounter_from_rooms(self, map_point: dict) -> tuple[str, str]:
-        first_room = self._extract_single_room(map_point)
-        room_type = first_room.get("room_type")
-        if room_type != "shop":
-            raise ValueError("Le champ 'rooms[0].room_type' doit valoir 'shop' pour map_point_type='shop'.")
+        self._extract_room_by_type(map_point, "shop")
         return Encounter.Type.SHOP, "Shop"
 
     def _extract_treasure_encounter_from_rooms(self, map_point: dict) -> tuple[str, str]:
-        first_room = self._extract_single_room(map_point)
-        room_type = first_room.get("room_type")
-        if room_type != "treasure":
-            raise ValueError("Le champ 'rooms[0].room_type' doit valoir 'treasure' pour map_point_type='treasure'.")
+        self._extract_room_by_type(map_point, "treasure")
         return Encounter.Type.TREASURE, "Treasure"
 
     def _extract_rest_site_encounter_from_rooms(self, map_point: dict) -> tuple[str, str]:
-        first_room = self._extract_single_room(map_point)
-        room_type = first_room.get("room_type")
-        if room_type != "rest_site":
-            raise ValueError("Le champ 'rooms[0].room_type' doit valoir 'rest_site' pour map_point_type='rest_site'.")
+        self._extract_room_by_type(map_point, "rest_site")
         return Encounter.Type.REST_SITE, "Rest Site"
 
     def _extract_room_encounter_from_event_room(self, map_point: dict, map_point_type: str) -> tuple[str, str]:
-        first_room = self._extract_single_room(map_point)
-        room_type = first_room.get("room_type")
-        if room_type != "event":
+        if not self._has_room_type(map_point, "event"):
             raise ValueError(f"Le map_point_type '{map_point_type}' n'est pas gere pour le moment.")
+        first_room = self._extract_room_by_type(map_point, "event")
 
         model_id = first_room.get("model_id")
         if not isinstance(model_id, str):
@@ -396,10 +381,7 @@ class RunSummaryBuilderService:
         return Encounter.Type.ROOM, self._normalize_encounter_name(model_id[len(prefix):])
 
     def _extract_elite_encounter_from_rooms(self, map_point: dict) -> tuple[str, str]:
-        first_room = self._extract_single_room(map_point)
-        room_type = first_room.get("room_type")
-        if room_type != "elite":
-            raise ValueError("Le champ 'rooms[0].room_type' doit valoir 'elite' pour map_point_type='elite'.")
+        first_room = self._extract_room_by_type(map_point, "elite")
 
         model_id = first_room.get("model_id")
         if not isinstance(model_id, str):
@@ -418,10 +400,7 @@ class RunSummaryBuilderService:
         return Encounter.Type.ELITE, self._normalize_encounter_name(raw_name)
 
     def _extract_boss_encounter_from_rooms(self, map_point: dict) -> tuple[str, str]:
-        first_room = self._extract_single_room(map_point)
-        room_type = first_room.get("room_type")
-        if room_type != "boss":
-            raise ValueError("Le champ 'rooms[0].room_type' doit valoir 'boss' pour map_point_type='boss'.")
+        first_room = self._extract_room_by_type(map_point, "boss")
 
         model_id = first_room.get("model_id")
         if not isinstance(model_id, str):
@@ -439,19 +418,39 @@ class RunSummaryBuilderService:
 
         return Encounter.Type.BOSS, self._normalize_encounter_name(raw_name)
 
-    def _extract_single_room(self, map_point: dict) -> dict:
+    def _has_room_type(self, map_point: dict, room_type: str) -> bool:
+        rooms = self._extract_rooms(map_point)
+        return any(self._room_matches_type(room, room_type) for room in rooms)
+
+    def _extract_room_by_type(self, map_point: dict, room_type: str) -> dict:
+        rooms = self._extract_rooms(map_point)
+        matching_rooms = [room for room in rooms if self._room_matches_type(room, room_type)]
+        if len(matching_rooms) == 0:
+            raise ValueError(f"Le champ 'rooms' de map_point_history doit contenir une room de type '{room_type}'.")
+        if len(matching_rooms) > 1:
+            raise ValueError(f"Le champ 'rooms' de map_point_history contient plusieurs rooms de type '{room_type}'.")
+        return matching_rooms[0]
+
+    def _room_matches_type(self, room: dict, room_type: str) -> bool:
+        explicit_room_type = room.get("room_type")
+        if explicit_room_type == room_type:
+            return True
+        if room_type == "event":
+            model_id = room.get("model_id")
+            return isinstance(model_id, str) and model_id.startswith("EVENT.")
+        return False
+
+    def _extract_rooms(self, map_point: dict) -> list[dict]:
         rooms = map_point.get("rooms")
         if not isinstance(rooms, list):
             raise ValueError("Le champ 'rooms' de map_point_history doit etre une liste.")
         if len(rooms) == 0:
             raise ValueError("Le champ 'rooms' de map_point_history doit contenir un element.")
-        if len(rooms) > 1:
-            raise ValueError("Le champ 'rooms' de map_point_history ne peut pas contenir plus d'un element.")
 
-        first_room = rooms[0]
-        if not isinstance(first_room, dict):
-            raise ValueError("Le premier element de 'rooms' doit etre un objet.")
-        return first_room
+        for room in rooms:
+            if not isinstance(room, dict):
+                raise ValueError("Chaque element de 'rooms' doit etre un objet.")
+        return rooms
 
     def _extract_damage_taken_from_player_stats(self, map_point: dict) -> int:
         player_stats = map_point.get("player_stats")
