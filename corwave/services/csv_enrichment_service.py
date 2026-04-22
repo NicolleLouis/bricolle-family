@@ -25,6 +25,22 @@ class CorwaveCsvEnrichmentService:
     """Enrich each CSV row with structured data extracted by OpenAI."""
 
     _OUTPUT_COLUMNS = ["article_type", "subject", "category", "summary", "relevance_score", "tag"]
+    _OUTPUT_COLUMN_HEADERS = {
+        "article_type": "Type",
+        "subject": "Topic",
+        "category": "Category",
+        "summary": "Summary",
+        "relevance_score": "Relevance",
+        "tag": "Tag",
+    }
+    _FREE_TEXT_AVAILABILITY_COLUMN = "Free text availability"
+    _TO_DISTRIBUTE_COLUMN = "To distribute"
+    _FREE_TEXT_AVAILABILITY_JOURNAL_KEYWORDS = [
+        "ASAIO Journal",
+        "JACC",
+        "Artificial Organs",
+        "JHLT",
+    ]
 
     def __init__(self) -> None:
         self._openai_extraction_service = OpenAIExtractionService()
@@ -103,6 +119,9 @@ class CorwaveCsvEnrichmentService:
                     f"OpenAI extraction failed at CSV line {source_line_number}: {extraction_error}"
                 ) from extraction_error
 
+            extracted_row[self._FREE_TEXT_AVAILABILITY_COLUMN] = self._build_free_text_availability(
+                current_row=current_row
+            )
             extracted_rows.append(extracted_row)
             if progress_callback is not None:
                 progress_callback(row_index + 1, total_rows)
@@ -141,6 +160,11 @@ class CorwaveCsvEnrichmentService:
 
         for original_row, extracted_row in zip(original_rows, extracted_rows):
             output_row = dict(original_row)
+            output_row[self._FREE_TEXT_AVAILABILITY_COLUMN] = extracted_row.get(
+                self._FREE_TEXT_AVAILABILITY_COLUMN,
+                "",
+            )
+            output_row[self._TO_DISTRIBUTE_COLUMN] = ""
             for extracted_key, output_column in extraction_column_map.items():
                 output_row[output_column] = extracted_row.get(extracted_key, "")
             writer.writerow(output_row)
@@ -153,10 +177,13 @@ class CorwaveCsvEnrichmentService:
         existing_columns: list[str],
     ) -> tuple[list[str], dict[str, str]]:
         self._validate_output_columns_do_not_exist(existing_columns=existing_columns)
-        output_columns: list[str] = []
+        output_columns: list[str] = [
+            self._FREE_TEXT_AVAILABILITY_COLUMN,
+            self._TO_DISTRIBUTE_COLUMN,
+        ]
         extraction_column_map: dict[str, str] = {}
         for extracted_key in self._OUTPUT_COLUMNS:
-            output_column_name = extracted_key
+            output_column_name = self._OUTPUT_COLUMN_HEADERS[extracted_key]
             output_columns.append(output_column_name)
             extraction_column_map[extracted_key] = output_column_name
 
@@ -166,7 +193,11 @@ class CorwaveCsvEnrichmentService:
         normalized_existing_columns = {(column_name or "").strip().lower() for column_name in existing_columns}
         conflicting_columns = [
             expected_column
-            for expected_column in self._OUTPUT_COLUMNS
+            for expected_column in [
+                self._FREE_TEXT_AVAILABILITY_COLUMN,
+                self._TO_DISTRIBUTE_COLUMN,
+                *self._OUTPUT_COLUMN_HEADERS.values(),
+            ]
             if expected_column.lower() in normalized_existing_columns
         ]
         if conflicting_columns:
@@ -174,6 +205,19 @@ class CorwaveCsvEnrichmentService:
             raise CorwaveCsvEnrichmentServiceError(
                 f"CSV already contains output columns: {conflicts}."
             )
+
+    def _build_free_text_availability(self, *, current_row: dict[str, str]) -> str:
+        pmcid = self._get_field_value(current_row=current_row, target_field_name="PMCID")
+        if pmcid.strip():
+            return "Yes"
+
+        journal_or_book = self._get_field_value(current_row=current_row, target_field_name="Journal/Book")
+        normalized_journal_or_book = journal_or_book.strip().lower()
+        for keyword in self._FREE_TEXT_AVAILABILITY_JOURNAL_KEYWORDS:
+            if keyword.lower() in normalized_journal_or_book:
+                return "Yes"
+
+        return "No"
 
     @staticmethod
     def _build_output_file_name(input_name: str) -> str:

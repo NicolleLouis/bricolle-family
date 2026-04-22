@@ -31,7 +31,11 @@ class FakeOpenAIExtractionService:
 
 class TestCorwaveCsvEnrichmentService:
     def test_enrich_csv_adds_fixed_classification_columns(self):
-        csv_content = "Title,Abstract,PMID\nTitle A,Abstract A,1\nTitle B,Abstract B,2\n".encode("utf-8")
+        csv_content = (
+            "Title,Abstract,PMID,PMCID,Journal/Book\n"
+            "Title A,Abstract A,1,,Random journal\n"
+            "Title B,Abstract B,2,PMC123456,Random journal\n"
+        ).encode("utf-8")
         fake_service = FakeOpenAIExtractionService(
             responses=[
                 {
@@ -64,25 +68,133 @@ class TestCorwaveCsvEnrichmentService:
 
         assert result.filename == "input_enriched.csv"
         assert output_rows[0]["PMID"] == "1"
-        assert output_rows[0]["article_type"] == "Review"
-        assert output_rows[0]["subject"] == "Clinical"
-        assert output_rows[0]["category"] == "LVAD"
-        assert output_rows[0]["summary"] == "Goal A"
-        assert output_rows[0]["relevance_score"] == "3"
-        assert output_rows[0]["tag"] == "empagliflozin"
-        assert output_rows[1]["article_type"] == "Clinical trial"
-        assert output_rows[1]["subject"] == "Epidemiology"
-        assert output_rows[1]["category"] == "HTx"
-        assert output_rows[1]["summary"] == "Goal B"
-        assert output_rows[1]["relevance_score"] == "2"
-        assert output_rows[1]["tag"] == "NuPulse"
+        assert output_rows[0]["Free text availability"] == "No"
+        assert output_rows[0]["To distribute"] == ""
+        assert output_rows[0]["Type"] == "Review"
+        assert output_rows[0]["Topic"] == "Clinical"
+        assert output_rows[0]["Category"] == "LVAD"
+        assert output_rows[0]["Summary"] == "Goal A"
+        assert output_rows[0]["Relevance"] == "3"
+        assert output_rows[0]["Tag"] == "empagliflozin"
+        assert output_rows[1]["Free text availability"] == "Yes"
+        assert output_rows[1]["To distribute"] == ""
+        assert output_rows[1]["Type"] == "Clinical trial"
+        assert output_rows[1]["Topic"] == "Epidemiology"
+        assert output_rows[1]["Category"] == "HTx"
+        assert output_rows[1]["Summary"] == "Goal B"
+        assert output_rows[1]["Relevance"] == "2"
+        assert output_rows[1]["Tag"] == "NuPulse"
 
         assert fake_service.calls[0]["title"] == "Title A"
         assert fake_service.calls[0]["abstract"] == "Abstract A"
         assert fake_service.calls[0]["include_summary"] is True
 
+    def test_enrich_csv_marks_free_text_available_when_journal_is_whitelisted(self):
+        csv_content = (
+            "Title,Abstract,PMCID,Journal/Book\n"
+            "Title A,Abstract A,,JACC: Heart Failure\n"
+        ).encode("utf-8")
+        fake_service = FakeOpenAIExtractionService(
+            responses=[
+                {
+                    "article_type": "Review",
+                    "subject": "Clinical",
+                    "category": "LVAD",
+                    "summary": "Goal A",
+                    "relevance_score": 3,
+                    "tag": "",
+                }
+            ]
+        )
+        service = CorwaveCsvEnrichmentService()
+        service._openai_extraction_service = fake_service
+
+        result = service.enrich_csv(
+            csv_file_name="input.csv",
+            csv_file_content=csv_content,
+        )
+
+        output_rows = list(csv.DictReader(io.StringIO(result.content)))
+
+        assert output_rows[0]["Free text availability"] == "Yes"
+
+    def test_enrich_csv_marks_free_text_unavailable_when_pmcid_and_journal_do_not_match(self):
+        csv_content = (
+            "Title,Abstract,PMCID,Journal/Book\n"
+            "Title A,Abstract A,,Some other journal\n"
+        ).encode("utf-8")
+        fake_service = FakeOpenAIExtractionService(
+            responses=[
+                {
+                    "article_type": "Review",
+                    "subject": "Clinical",
+                    "category": "LVAD",
+                    "summary": "Goal A",
+                    "relevance_score": 3,
+                    "tag": "",
+                }
+            ]
+        )
+        service = CorwaveCsvEnrichmentService()
+        service._openai_extraction_service = fake_service
+
+        result = service.enrich_csv(
+            csv_file_name="input.csv",
+            csv_file_content=csv_content,
+        )
+
+        output_rows = list(csv.DictReader(io.StringIO(result.content)))
+
+        assert output_rows[0]["Free text availability"] == "No"
+
     def test_enrich_csv_raises_error_when_output_column_already_exists(self):
-        csv_content = "Title,Abstract,article_type\nA,B,existing\n".encode("utf-8")
+        csv_content = "Title,Abstract,Type\nA,B,existing\n".encode("utf-8")
+        fake_service = FakeOpenAIExtractionService(
+            responses=[
+                {
+                    "article_type": "Review",
+                    "subject": "Clinical",
+                    "category": "LVAD",
+                    "summary": "Goal",
+                    "relevance_score": 3,
+                    "tag": "",
+                }
+            ]
+        )
+        service = CorwaveCsvEnrichmentService()
+        service._openai_extraction_service = fake_service
+
+        with pytest.raises(CorwaveCsvEnrichmentServiceError, match="already contains output columns"):
+            service.enrich_csv(
+                csv_file_name="input.csv",
+                csv_file_content=csv_content,
+            )
+
+    def test_enrich_csv_raises_error_when_free_text_availability_column_already_exists(self):
+        csv_content = "Title,Abstract,Free text availability\nA,B,Yes\n".encode("utf-8")
+        fake_service = FakeOpenAIExtractionService(
+            responses=[
+                {
+                    "article_type": "Review",
+                    "subject": "Clinical",
+                    "category": "LVAD",
+                    "summary": "Goal",
+                    "relevance_score": 3,
+                    "tag": "",
+                }
+            ]
+        )
+        service = CorwaveCsvEnrichmentService()
+        service._openai_extraction_service = fake_service
+
+        with pytest.raises(CorwaveCsvEnrichmentServiceError, match="already contains output columns"):
+            service.enrich_csv(
+                csv_file_name="input.csv",
+                csv_file_content=csv_content,
+            )
+
+    def test_enrich_csv_raises_error_when_to_distribute_column_already_exists(self):
+        csv_content = "Title,Abstract,To distribute\nA,B,\n".encode("utf-8")
         fake_service = FakeOpenAIExtractionService(
             responses=[
                 {
@@ -160,10 +272,10 @@ class TestCorwaveCsvEnrichmentService:
             csv_file_content=csv_content,
         )
         output_rows = list(csv.DictReader(io.StringIO(result.content)))
-        assert output_rows[0]["article_type"] == "Review"
-        assert output_rows[0]["summary"] == ""
-        assert output_rows[0]["relevance_score"] == "3"
-        assert output_rows[0]["tag"] == ""
+        assert output_rows[0]["Type"] == "Review"
+        assert output_rows[0]["Summary"] == ""
+        assert output_rows[0]["Relevance"] == "3"
+        assert output_rows[0]["Tag"] == ""
         assert fake_service.calls[0]["title"] == "A"
         assert fake_service.calls[0]["abstract"] == ""
         assert fake_service.calls[0]["include_summary"] is False

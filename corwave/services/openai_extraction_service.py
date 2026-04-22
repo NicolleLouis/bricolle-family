@@ -22,6 +22,7 @@ class OpenAIExtractionService:
                 "type": "string",
                 "enum": [
                     "Review",
+                    "Meta-Analysis",
                     "Case report",
                     "Prospective study",
                     "Retrospective study",
@@ -40,6 +41,7 @@ class OpenAIExtractionService:
             "category": {
                 "type": "string",
                 "enum": [
+                    "pediatric",
                     "LVAD",
                     "HTx",
                     "Xenotransplantation",
@@ -57,7 +59,6 @@ class OpenAIExtractionService:
                     "Cardiac surgery",
                     "Vascular",
                     "Trial design",
-                    "Pediatric",
                     "TET",
                     "Other",
                 ],
@@ -164,7 +165,7 @@ class OpenAIExtractionService:
     ) -> list[dict[str, str]]:
         abstract_for_prompt = abstract if abstract else "Not available."
         summary_instruction = (
-            "Also return a summary of maximum 15 words explaining the article goal. "
+            "Also return a summary of maximum 10 words explaining the article goal. "
             "If relevant, mention pulsatility or recovery in LVAD patients."
             if include_summary
             else "Do not return a summary field."
@@ -186,6 +187,7 @@ class OpenAIExtractionService:
                     "Classify this publication.\n\n"
                     "Article type options:\n"
                     "- Review\n"
+                    "- Meta-Analysis\n"
                     "- Case report\n"
                     "- Prospective study\n"
                     "- Retrospective study\n"
@@ -196,6 +198,7 @@ class OpenAIExtractionService:
                     "- Clinical\n"
                     "- Epidemiology\n\n"
                     "Category options:\n"
+                    "- pediatric\n"
                     "- LVAD\n"
                     "- HTx\n"
                     "- Xenotransplantation\n"
@@ -213,9 +216,11 @@ class OpenAIExtractionService:
                     "- Cardiac surgery\n"
                     "- Vascular\n"
                     "- Trial design\n"
-                    "- Pediatric\n"
                     "- TET\n"
                     "- Other\n\n"
+                    "Priority rule:\n"
+                    "If the publication is about a pediatric population or pediatric patients, choose "
+                    "pediatric even if another category would also apply.\n\n"
                     "Relevance score options:\n"
                     "- 0: Irrelevant (Non-cardiac topics like pure physics or oncology. "
                     "Exception with xenotransplantation: relevance can be 3 if the paper describes "

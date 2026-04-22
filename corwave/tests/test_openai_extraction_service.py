@@ -78,6 +78,15 @@ class TestOpenAIExtractionService:
         request_payload = mocked_post.call_args.kwargs["json"]
         assert request_payload["response_format"]["type"] == "json_schema"
         assert request_payload["response_format"]["json_schema"]["name"] == "publication_classification"
+        assert request_payload["response_format"]["json_schema"]["schema"]["properties"]["article_type"]["enum"] == [
+            "Review",
+            "Meta-Analysis",
+            "Case report",
+            "Prospective study",
+            "Retrospective study",
+            "Clinical trial",
+            "Preclinical trial",
+        ]
         assert request_payload["response_format"]["json_schema"]["schema"]["required"] == [
             "article_type",
             "subject",
@@ -85,6 +94,40 @@ class TestOpenAIExtractionService:
             "relevance_score",
             "tag",
         ]
+        assert request_payload["response_format"]["json_schema"]["schema"]["properties"]["category"]["enum"][0] == "pediatric"
+
+    def test_classify_publication_prioritizes_pediatric_in_prompt(self) -> None:
+        mocked_response = Mock()
+        mocked_response.raise_for_status.return_value = None
+        mocked_response.json.return_value = {
+            "choices": [
+                {
+                    "message": {
+                        "content": json.dumps(
+                            {
+                                "article_type": "Clinical trial",
+                                "subject": "Clinical",
+                                "category": "pediatric",
+                                "relevance_score": 3,
+                                "tag": "",
+                            }
+                        )
+                    }
+                }
+            ]
+        }
+        service = OpenAIExtractionService(api_key="test-api-key", model="test-model")
+
+        with patch("corwave.services.openai_extraction_service.requests.post", return_value=mocked_response) as mocked_post:
+            service.classify_publication(
+                title="Title",
+                abstract="Abstract",
+            )
+
+        request_payload = mocked_post.call_args.kwargs["json"]
+        user_message = request_payload["messages"][1]["content"]
+        assert "Priority rule:" in user_message
+        assert "pediatric even if another category would also apply" in user_message
 
     def test_classify_publication_uses_expected_json_schema_with_summary(self) -> None:
         mocked_response = Mock()
@@ -117,6 +160,7 @@ class TestOpenAIExtractionService:
             )
 
         request_payload = mocked_post.call_args.kwargs["json"]
+        assert "maximum 10 words" in request_payload["messages"][1]["content"]
         assert request_payload["response_format"]["json_schema"]["schema"]["required"] == [
             "article_type",
             "subject",
