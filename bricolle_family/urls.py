@@ -33,6 +33,7 @@ urlpatterns = [
     path("seven_and_half/", include("seven_and_half.urls")),
     path("corwave/", include("corwave.urls")),
     path("slay_the_spire2/", include("slay_the_spire2.urls")),
+    path("albion_online/", include("albion_online.urls")),
 ]
 
 if settings.ENV == 'local':

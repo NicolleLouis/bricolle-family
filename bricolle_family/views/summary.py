@@ -22,6 +22,7 @@ class SummaryView:
             {"name": "Civilization 7", "url": "/civilization7/", "color": "#d35400"},
             {"name": "Seven and Half", "url": "/seven_and_half/", "color": "#1f6f8b"},
             {"name": "Slay The Spire 2", "url": "/slay_the_spire2/", "color": "#8b5cf6"},
+            {"name": "Albion Online", "url": "/albion_online/", "color": "#8c6d3f"},
         ]
         return render(request, "bricolle_family/summary.html", {"modules": modules})
 

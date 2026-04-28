@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "seven_and_half",
     "corwave",
     "slay_the_spire2",
+    "albion_online.apps.AlbionOnlineConfig",
     "capitalism.apps.CapitalismConfig",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -211,6 +212,11 @@ if DEBUG:
                 "handlers": ["console"],
                 "level": "INFO",
                 "propagate": False,
+            },
+            "albion_online": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": True,
             },
         },
     }

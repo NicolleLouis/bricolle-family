@@ -1,0 +1,26 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light px-3">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'albion_online:home' %}">Albion Online</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#albionOnlineNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="albionOnlineNavbar">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'albion_online:home' %}">🧥 Leather Jacket</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'albion_online:settings' %}">⚙️ Settings</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home' %}">🦝 Accueil global</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/albion_online/">🐯 Admin</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
