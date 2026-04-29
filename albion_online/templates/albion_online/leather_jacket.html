@@ -8,7 +8,7 @@
         <div class="d-flex justify-content-between align-items-center gap-3 shadow-sm border rounded-3 bg-light px-3 py-2">
             <div>
                 <h1 class="h3 mb-1">Leather Jacket</h1>
-                <p class="text-muted mb-0">Mercenary Jacket market tracker with one-click price refresh.</p>
+                <p class="text-muted mb-0">Leather Jacket market tracker with one-click price refresh.</p>
             </div>
             <form method="post" action="{% url 'albion_online:leather_jacket' %}" class="ms-auto">
                 {% csrf_token %}
@@ -28,57 +28,78 @@
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header bg-white">
-            <h2 class="h5 mb-0">Mercenary Jacket variants</h2>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-striped align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th scope="col">Object</th>
-                        {% for city_code, city_label in city_headers %}
-                            <th scope="col">{{ city_label }}</th>
-                        {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for jacket_row in jacket_rows %}
-                        <tr class="market-row" role="button" tabindex="0" data-detail-target="all" data-object-title="{{ jacket_row.object.display_name }}" style="cursor: pointer;">
-                            <th scope="row">
-                                <div class="fw-semibold">{{ jacket_row.object.display_name }}</div>
-                            </th>
-                            {% for city_summary in jacket_row.city_summaries %}
-                                <td class="market-city-cell" role="button" tabindex="0" data-detail-target="{{ city_summary.city }}" data-city-label="{{ city_summary.label }}" style="cursor: pointer;">
-                                    <div class="d-flex flex-column gap-2">
-                                        {% if city_summary.is_hidden %}
-                                            <div class="d-flex justify-content-center align-items-center fw-semibold">🕒</div>
-                                        {% elif city_summary.craft_margin is not None %}
-                                            {% if city_summary.craft_margin > 0 %}
-                                                <span class="badge bg-success fs-6">+{{ city_summary.craft_margin|compact_price }} {% if city_summary.craft_margin_percent is not None %}({{ city_summary.craft_margin_percent|format_percent }}){% endif %}</span>
-                                            {% else %}
-                                                <span
-                                                    class="d-flex align-items-center justify-content-center border border-danger-subtle rounded-2 text-danger mx-auto"
-                                                    style="width: 1.75rem; min-width: 1.75rem; height: 1.75rem; opacity: 0.45; font-size: 0.85rem; line-height: 1;"
-                                                    aria-label="Not profitable"
-                                                >✕</span>
-                                            {% endif %}
-                                        {% else %}
-                                            <div class="fw-semibold">-</div>
-                                        {% endif %}
-                                    </div>
-                                </td>
+    {% for city_table in city_tables %}
+        <div class="card">
+            <div class="card-header bg-white">
+                <h2 class="h5 mb-0">{{ city_table.label }}</h2>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Tier</th>
+                            {% for jacket_type in jacket_types %}
+                                <th scope="col">{{ jacket_type.label }}</th>
                             {% endfor %}
                         </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="{{ table_columns_count }}" class="text-center text-muted py-4">No mercenary jacket objects found.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for table_row in city_table.rows %}
+                            <tr>
+                                <th
+                                    scope="row"
+                                    class="market-tier-cell text-nowrap"
+                                    role="button"
+                                    tabindex="0"
+                                    data-detail-target="{{ city_table.city }}"
+                                    data-detail-key="{{ table_row.detail_key }}"
+                                    data-object-title="{{ table_row.detail_title }}"
+                                    style="cursor: pointer;"
+                                >{{ table_row.display_notation }}</th>
+                                {% for cell in table_row.cells %}
+                                    <td
+                                        {% if cell.jacket_row %}
+                                            class="market-city-cell"
+                                            role="button"
+                                            tabindex="0"
+                                            data-detail-target="{{ city_table.city }}"
+                                            data-detail-key="{{ cell.jacket_row.detail_key }}"
+                                            data-object-title="{{ cell.jacket_row.object.display_name }}"
+                                            style="cursor: pointer;"
+                                        {% endif %}
+                                    >
+                                        <div class="d-flex justify-content-center align-items-center">
+                                            {% if not cell.city_summary %}
+                                                <div class="fw-semibold">-</div>
+                                            {% elif cell.city_summary.is_hidden %}
+                                                <div class="d-flex justify-content-center align-items-center fw-semibold">🕒</div>
+                                            {% elif cell.city_summary.craft_margin is not None %}
+                                                {% if cell.city_summary.craft_margin > 0 %}
+                                                    <span class="badge bg-success fs-6">+{{ cell.city_summary.craft_margin|compact_price }} {% if cell.city_summary.craft_margin_percent is not None %}({{ cell.city_summary.craft_margin_percent|format_percent }}){% endif %}</span>
+                                                {% else %}
+                                                    <span
+                                                        class="d-flex align-items-center justify-content-center border border-danger-subtle rounded-2 text-danger mx-auto"
+                                                        style="width: 1.75rem; min-width: 1.75rem; height: 1.75rem; opacity: 0.45; font-size: 0.85rem; line-height: 1;"
+                                                        aria-label="Not profitable"
+                                                    >✕</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <div class="fw-semibold">-</div>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="{{ table_columns_count }}" class="text-center text-muted py-4">No leather jacket objects found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+    {% endfor %}
 </div>
 
 <div class="offcanvas offcanvas-end" tabindex="-1" id="marketDetailPanel" aria-labelledby="marketDetailPanelLabel" style="width: min(90vw, 900px);">
@@ -91,7 +112,7 @@
     </div>
     <div class="offcanvas-body">
         {% for jacket_row in jacket_rows %}
-            <div class="market-detail-group d-none" data-market-object="{{ jacket_row.object.display_name }}">
+            <div class="market-detail-group d-none" data-detail-key="{{ jacket_row.detail_key }}">
                 {% for city_detail in jacket_row.city_details %}
                     <section class="mb-4" data-market-city="{{ city_detail.city }}">
                         <h3 class="h6 mb-2">{{ city_detail.label }}</h3>
@@ -179,6 +200,101 @@
                 {% endfor %}
             </div>
         {% endfor %}
+        {% for city_table in city_tables %}
+            {% for table_row in city_table.rows %}
+                <div class="market-detail-group d-none" data-detail-key="{{ table_row.detail_key }}">
+                    <section class="mb-4" data-market-city="{{ city_table.city }}">
+                        <h3 class="h6 mb-3">{{ city_table.label }}</h3>
+
+                        <h4 class="h6 text-muted mb-2">Inputs</h4>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Input</th>
+                                        <th scope="col">Qty</th>
+                                        <th scope="col">Sell</th>
+                                        <th scope="col">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for input_detail in table_row.input_details %}
+                                        <tr>
+                                            <th scope="row">{{ input_detail.label }}</th>
+                                            <td>{{ input_detail.quantity }}</td>
+                                            <td>
+                                                {% if input_detail.sell_price is not None %}
+                                                    {% if input_detail.sell_price_freshness and input_detail.sell_price_freshness.class_name != "bg-success" %}
+                                                        <span class="badge {{ input_detail.sell_price_freshness.class_name }} fs-6">{{ input_detail.sell_price|compact_price }}</span>
+                                                    {% else %}
+                                                        <span class="fw-semibold">{{ input_detail.sell_price|compact_price }}</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                            <td>{% if input_detail.total_cost is not None %}{{ input_detail.total_cost|compact_price }}{% else %}-{% endif %}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-muted">No recipe inputs found.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h4 class="h6 text-muted mb-2">Outputs</h4>
+                        {% for output_detail in table_row.output_details %}
+                            <div class="mb-4">
+                                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                    <h5 class="h6 mb-0">{{ output_detail.jacket_row.object.display_name }}</h5>
+                                    {% if output_detail.city_detail.craft_margin is not None %}
+                                        {% if output_detail.city_detail.craft_margin < 0 %}
+                                            <span class="badge bg-danger">{{ output_detail.city_detail.craft_margin|compact_price }}</span>
+                                        {% elif output_detail.city_detail.craft_margin > 0 %}
+                                            <span class="badge bg-success">+{{ output_detail.city_detail.craft_margin|compact_price }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">0</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Quality</th>
+                                                <th scope="col">Sell</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for quality_detail in output_detail.city_detail.quality_details %}
+                                                <tr>
+                                                    <th scope="row">{{ quality_detail.label }}</th>
+                                                    <td>
+                                                        {% if quality_detail.sell_price is not None %}
+                                                            {% if quality_detail.sell_price_freshness and quality_detail.sell_price_freshness.class_name != "bg-success" %}
+                                                                <span class="badge {{ quality_detail.sell_price_freshness.class_name }} fs-6">{{ quality_detail.sell_price|compact_price }}</span>
+                                                            {% else %}
+                                                                <span class="fw-semibold">{{ quality_detail.sell_price|compact_price }}</span>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p class="text-muted mb-0">No outputs found.</p>
+                        {% endfor %}
+                    </section>
+                </div>
+            {% endfor %}
+        {% endfor %}
     </div>
 </div>
 
@@ -197,9 +313,9 @@
         });
     };
 
-    const showDetails = (objectTitle, cityCode) => {
+    const showDetails = (detailKey, objectTitle, cityCode) => {
         hideAllGroups();
-        const group = detailGroups.find((item) => item.dataset.marketObject === objectTitle);
+        const group = detailGroups.find((item) => item.dataset.detailKey === detailKey);
         if (!group) {
             return;
         }
@@ -222,34 +338,30 @@
         offcanvas.show();
     };
 
-    document.querySelectorAll('.market-row').forEach((row) => {
-        row.addEventListener('click', () => {
-            showDetails(row.dataset.objectTitle, 'all');
-        });
-        row.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                showDetails(row.dataset.objectTitle, 'all');
-            }
-        });
-    });
-
     document.querySelectorAll('.market-city-cell').forEach((cell) => {
         cell.addEventListener('click', (event) => {
             event.stopPropagation();
-            const row = cell.closest('.market-row');
-            if (row) {
-                showDetails(row.dataset.objectTitle, cell.dataset.detailTarget);
-            }
+            showDetails(cell.dataset.detailKey, cell.dataset.objectTitle, cell.dataset.detailTarget);
         });
         cell.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
                 event.stopPropagation();
-                const row = cell.closest('.market-row');
-                if (row) {
-                    showDetails(row.dataset.objectTitle, cell.dataset.detailTarget);
-                }
+                showDetails(cell.dataset.detailKey, cell.dataset.objectTitle, cell.dataset.detailTarget);
+            }
+        });
+    });
+
+    document.querySelectorAll('.market-tier-cell').forEach((cell) => {
+        cell.addEventListener('click', (event) => {
+            event.stopPropagation();
+            showDetails(cell.dataset.detailKey, cell.dataset.objectTitle, cell.dataset.detailTarget);
+        });
+        cell.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                event.stopPropagation();
+                showDetails(cell.dataset.detailKey, cell.dataset.objectTitle, cell.dataset.detailTarget);
             }
         });
     });

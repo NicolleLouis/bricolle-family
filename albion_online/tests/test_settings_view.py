@@ -25,6 +25,8 @@ class TestSettingsView:
         assert b"Settings" in response.content
         assert b"Regenerate Recipes" in response.content
         assert b"mercenary_jacket" in response.content
+        assert b"hunter_jacket" in response.content
+        assert b"assassin_jacket" in response.content
 
     def test_post_triggers_recipe_regeneration(self, authenticated_client, monkeypatch):
         settings_view = import_module("albion_online.views.settings_page")

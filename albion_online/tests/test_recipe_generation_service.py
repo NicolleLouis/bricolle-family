@@ -39,9 +39,9 @@ class TestRecipeGenerationService:
                 ],
             },
         )
-        mercenary_jacket_definition = RecipeDefinition.objects.get(key="mercenary_jacket")
-        mercenary_jacket_definition.is_active = False
-        mercenary_jacket_definition.save(update_fields=["is_active"])
+        RecipeDefinition.objects.filter(
+            key__in=["mercenary_jacket", "hunter_jacket", "assassin_jacket"],
+        ).update(is_active=False)
 
         first_created_recipes = RecipeGenerationService().refresh_recipes()
 

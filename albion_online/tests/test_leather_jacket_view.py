@@ -110,7 +110,7 @@ class TestLeatherJacketView:
 
         assert response.status_code == 200
         assert b"marketDetailPanel" in response.content
-        assert b"data-detail-target=\"all\"" in response.content
+        assert b"market-tier-cell" in response.content
         assert b"data-detail-target=\"BRIDGEWATCH\"" in response.content
         assert b"data-market-city=\"BRIDGEWATCH\"" in response.content
         assert b"Normal" in response.content
@@ -119,10 +119,15 @@ class TestLeatherJacketView:
         assert b"Excellent" in response.content
         assert b"Masterpiece" in response.content
         assert b"Refresh Price" in response.content
-        assert b"Mercenary Jacket variants" in response.content
+        assert b"Leather Jacket market tracker" in response.content
+        assert b"Mercenary" in response.content
+        assert b"Hunter" in response.content
+        assert b"Assassin" in response.content
         assert b"Mercenary Jacket 4.2" in response.content
         assert b"TEST_T4_ARMOR_LEATHER_SET1_MARKET" not in response.content
-        assert b"T4.2" not in response.content
+        assert b"T4.2" in response.content
+        assert b"Inputs" in response.content
+        assert b"Outputs" in response.content
         assert b"Bridgewatch" in response.content
         assert b"Caerleon" in response.content
         assert b"Martlock" in response.content
@@ -148,7 +153,7 @@ class TestLeatherJacketView:
                 called["refresh"] = True
                 return [object()]
 
-        monkeypatch.setattr(leather_jacket_view, "MercenaryJacketPriceRefreshService", lambda: FakeService())
+        monkeypatch.setattr(leather_jacket_view, "LeatherJacketPriceRefreshService", lambda: FakeService())
 
         response = authenticated_client.post(reverse("albion_online:leather_jacket"))
 
