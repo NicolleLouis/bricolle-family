@@ -82,6 +82,18 @@ class TestRunFileModel:
         assert run_file.summary.killed_by.name == "Knights"
         assert run_file.summary.killed_by.type == Encounter.Type.ELITE
 
+    def test_save_populates_killed_by_from_normal_encounter(self):
+        run_file = RunFile.objects.create(
+            file=SimpleUploadedFile(
+                "normal-encounter.run",
+                b'{"win": false, "was_abandoned": false, "start_time": 1772916641, "ascension": 1, "killed_by_encounter": "ENCOUNTER.LOUSE_PROGENITOR_NORMAL", "killed_by_event": "NONE.NONE"}',
+                content_type="application/json",
+            )
+        )
+
+        assert run_file.summary.killed_by.name == "Louse Progenitor"
+        assert run_file.summary.killed_by.type == Encounter.Type.MONSTER
+
     def test_save_populates_killed_by_from_event(self):
         run_file = RunFile.objects.create(
             file=SimpleUploadedFile(

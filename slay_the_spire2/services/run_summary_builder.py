@@ -99,6 +99,7 @@ class RunSummaryBuilderService:
 
     def _convert_encounter_type(self, raw_type: str) -> str:
         converted_types = {
+            "NORMAL": Encounter.Type.MONSTER,
             "ELITE": Encounter.Type.ELITE,
             "BOSS": Encounter.Type.BOSS,
         }
