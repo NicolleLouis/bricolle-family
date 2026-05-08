@@ -10,10 +10,22 @@
                 <h1 class="h3 mb-1">Leather Jacket</h1>
                 <p class="text-muted mb-0">Leather Jacket market tracker with one-click price refresh.</p>
             </div>
-            <form method="post" action="{% url 'albion_online:leather_jacket' %}" class="ms-auto">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary">Refresh Price</button>
-            </form>
+            <div class="d-flex flex-wrap align-items-center justify-content-end gap-2 ms-auto">
+                <form method="get" action="{% url 'albion_online:leather_jacket' %}" class="d-flex align-items-center gap-2">
+                    <label for="cityFilter" class="form-label mb-0 text-muted small">City</label>
+                    <select id="cityFilter" name="city" class="form-select form-select-sm" onchange="this.form.submit()">
+                        {% for city_filter_option in city_filter_options %}
+                            <option value="{{ city_filter_option.value }}" {% if city_filter_option.value == selected_city_filter %}selected{% endif %}>
+                                {{ city_filter_option.label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+                <form method="post" action="{% url 'albion_online:leather_jacket' %}?city={{ selected_city_filter }}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Refresh Price</button>
+                </form>
+            </div>
         </div>
     </div>
 

@@ -106,9 +106,11 @@ class TestLeatherJacketView:
                     buy_price_max_date=timestamp,
                 )
 
-        response = authenticated_client.get(reverse("albion_online:leather_jacket"))
+        response = authenticated_client.get(f"{reverse('albion_online:leather_jacket')}?city=all")
 
         assert response.status_code == 200
+        assert b'name="city"' in response.content
+        assert b'value="all" selected' in response.content
         assert b"marketDetailPanel" in response.content
         assert b"market-tier-cell" in response.content
         assert b"data-detail-target=\"BRIDGEWATCH\"" in response.content
@@ -123,6 +125,11 @@ class TestLeatherJacketView:
         assert b"Mercenary" in response.content
         assert b"Hunter" in response.content
         assert b"Assassin" in response.content
+        assert b"Stalker" in response.content
+        assert b"Hellion" in response.content
+        assert b"Specter" in response.content
+        assert b"Tenacity" in response.content
+        assert b"Mistwalker" in response.content
         assert b"Mercenary Jacket 4.2" in response.content
         assert b"TEST_T4_ARMOR_LEATHER_SET1_MARKET" not in response.content
         assert b"T4.2" in response.content
@@ -144,6 +151,22 @@ class TestLeatherJacketView:
         assert b"678" in response.content
         assert "Infos masquées car un des prix a plus d'un jour." not in response.content.decode()
 
+    def test_get_filters_to_fort_sterling_by_default(self, authenticated_client):
+        response = authenticated_client.get(reverse("albion_online:leather_jacket"))
+
+        assert response.status_code == 200
+        assert b'value="FORT_STERLING" selected' in response.content
+        assert b"<h2 class=\"h5 mb-0\">Fort Sterling</h2>" in response.content
+        assert b"<h2 class=\"h5 mb-0\">Bridgewatch</h2>" not in response.content
+
+    def test_get_can_filter_to_all_cities(self, authenticated_client):
+        response = authenticated_client.get(f"{reverse('albion_online:leather_jacket')}?city=all")
+
+        assert response.status_code == 200
+        assert b'value="all" selected' in response.content
+        assert b"<h2 class=\"h5 mb-0\">Fort Sterling</h2>" in response.content
+        assert b"<h2 class=\"h5 mb-0\">Bridgewatch</h2>" in response.content
+
     def test_post_refreshes_prices(self, authenticated_client, monkeypatch):
         called = {"refresh": False}
         leather_jacket_view = import_module("albion_online.views.leather_jacket")
@@ -155,7 +178,8 @@ class TestLeatherJacketView:
 
         monkeypatch.setattr(leather_jacket_view, "LeatherJacketPriceRefreshService", lambda: FakeService())
 
-        response = authenticated_client.post(reverse("albion_online:leather_jacket"))
+        response = authenticated_client.post(f"{reverse('albion_online:leather_jacket')}?city=all")
 
         assert response.status_code == 302
+        assert response.url == f"{reverse('albion_online:leather_jacket')}?city=all"
         assert called["refresh"] is True

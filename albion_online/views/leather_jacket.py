@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.db.models import Prefetch
 from django.shortcuts import redirect, render
+from django.urls import reverse
 
 from albion_online.constants.city import City
 from albion_online.constants.leather_jacket import LEATHER_JACKET_TYPES
@@ -12,6 +13,10 @@ from albion_online.services.mercenary_jacket_market_summary import (
 from albion_online.services.mercenary_jacket_price_refresh import (
     LeatherJacketPriceRefreshService,
 )
+
+
+ALL_CITY_FILTER = "all"
+DEFAULT_CITY_FILTER = City.FORT_STERLING
 
 
 def _build_leather_jacket_rows():
@@ -47,7 +52,7 @@ def _find_jacket_type(aodp_id):
     return {"key": "unknown", "label": "Unknown", "aodp_id_fragment": ""}
 
 
-def _build_city_tables(jacket_rows):
+def _build_city_tables(jacket_rows, selected_city_filter=DEFAULT_CITY_FILTER):
     table_rows_by_city = []
     notations = sorted(
         {jacket_row["object"].tier_enchantment_notation for jacket_row in jacket_rows},
@@ -58,7 +63,7 @@ def _build_city_tables(jacket_rows):
         for jacket_row in jacket_rows
     }
 
-    for city, city_label in City.choices:
+    for city, city_label in _build_city_choices(selected_city_filter):
         rows = []
         for notation in notations:
             cells = []
@@ -100,6 +105,28 @@ def _build_city_tables(jacket_rows):
     return table_rows_by_city
 
 
+def _build_city_choices(selected_city_filter):
+    if selected_city_filter == ALL_CITY_FILTER:
+        return City.choices
+    return [(city, city_label) for city, city_label in City.choices if city == selected_city_filter]
+
+
+def _build_selected_city_filter(request):
+    selected_city_filter = request.GET.get("city", DEFAULT_CITY_FILTER)
+    if selected_city_filter == ALL_CITY_FILTER:
+        return ALL_CITY_FILTER
+    if selected_city_filter in City.values:
+        return selected_city_filter
+    return DEFAULT_CITY_FILTER
+
+
+def _build_city_filter_options():
+    return [
+        {"value": ALL_CITY_FILTER, "label": "All"},
+        *[{"value": city, "label": city_label} for city, city_label in City.choices],
+    ]
+
+
 def _find_city_summary(jacket_row, city):
     for city_summary in jacket_row["city_summaries"]:
         if city_summary.city == city:
@@ -122,22 +149,25 @@ def _sort_notation(notation):
 
 
 def leather_jacket(request):
+    selected_city_filter = _build_selected_city_filter(request)
     if request.method == "POST":
         created_prices = LeatherJacketPriceRefreshService().refresh_prices()
         messages.success(
             request,
             f"{len(created_prices)} price entries refreshed for leather jackets.",
         )
-        return redirect("albion_online:leather_jacket")
+        return redirect(f"{reverse('albion_online:leather_jacket')}?city={selected_city_filter}")
 
     jacket_rows = _build_leather_jacket_rows()
     return render(
         request,
         "albion_online/leather_jacket.html",
         {
-            "city_tables": _build_city_tables(jacket_rows),
+            "city_filter_options": _build_city_filter_options(),
+            "city_tables": _build_city_tables(jacket_rows, selected_city_filter),
             "jacket_rows": jacket_rows,
             "jacket_types": LEATHER_JACKET_TYPES,
+            "selected_city_filter": selected_city_filter,
             "table_columns_count": len(LEATHER_JACKET_TYPES) + 1,
         },
     )

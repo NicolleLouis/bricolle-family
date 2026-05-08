@@ -61,6 +61,8 @@ class RecipeGenerationService:
             input_filter["tier"] = output_object.tier
         if recipe_input_definition.get("enchantment_mode") == "same_as_output":
             input_filter["enchantment"] = output_object.enchantment
+        if recipe_input_definition.get("enchantment_mode") == "none":
+            input_filter["enchantment"] = 0
 
         matching_objects = list(Object.objects.filter(**input_filter).order_by("aodp_id"))
         if not matching_objects:

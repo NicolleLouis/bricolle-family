@@ -20,6 +20,41 @@ LEATHER_JACKET_TYPES = (
         "recipe_name": "Assassin Jacket recipes",
         "aodp_id_fragment": "ARMOR_LEATHER_SET3",
     },
+    {
+        "key": "stalker",
+        "label": "Stalker",
+        "recipe_key": "stalker_jacket",
+        "recipe_name": "Stalker Jacket recipes",
+        "aodp_id_fragment": "ARMOR_LEATHER_MORGANA",
+    },
+    {
+        "key": "hellion",
+        "label": "Hellion",
+        "recipe_key": "hellion_jacket",
+        "recipe_name": "Hellion Jacket recipes",
+        "aodp_id_fragment": "ARMOR_LEATHER_HELL",
+    },
+    {
+        "key": "specter",
+        "label": "Specter",
+        "recipe_key": "specter_jacket",
+        "recipe_name": "Specter Jacket recipes",
+        "aodp_id_fragment": "ARMOR_LEATHER_UNDEAD",
+    },
+    {
+        "key": "tenacity",
+        "label": "Tenacity",
+        "recipe_key": "tenacity_jacket",
+        "recipe_name": "Jacket of Tenacity recipes",
+        "aodp_id_fragment": "ARMOR_LEATHER_AVALON",
+    },
+    {
+        "key": "mistwalker",
+        "label": "Mistwalker",
+        "recipe_key": "mistwalker_jacket",
+        "recipe_name": "Mistwalker Jacket recipes",
+        "aodp_id_fragment": "ARMOR_LEATHER_FEY",
+    },
 )
 
 LEATHER_JACKET_TYPE_BY_KEY = {jacket_type["key"]: jacket_type for jacket_type in LEATHER_JACKET_TYPES}
