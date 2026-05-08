@@ -27,6 +27,14 @@
                 </form>
             </div>
         </div>
+        <ul class="nav nav-tabs mt-3">
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'albion_online:leather_jacket' %}?city={{ selected_city_filter }}">Market table</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'albion_online:leather_jacket_profitability' %}?city={{ selected_city_filter }}">Profitable crafts</a>
+            </li>
+        </ul>
     </div>
 
     <div class="row g-3">

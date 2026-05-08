@@ -3,10 +3,14 @@ from django.db.models import Q
 from django.db.models import Prefetch
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from urllib.parse import urlencode
 
 from albion_online.constants.city import City
 from albion_online.constants.leather_jacket import LEATHER_JACKET_TYPES
 from albion_online.models import Object, Recipe
+from albion_online.services.leather_jacket_profitability import (
+    LeatherJacketProfitabilityService,
+)
 from albion_online.services.mercenary_jacket_market_summary import (
     MercenaryJacketMarketSummaryService,
 )
@@ -16,7 +20,14 @@ from albion_online.services.mercenary_jacket_price_refresh import (
 
 
 ALL_CITY_FILTER = "all"
+ALL_JACKET_TYPE_FILTER = "all"
+DEFAULT_MINIMUM_PERCENTAGE_FILTER = 20.0
+DEFAULT_SORT_BY_FILTER = "percentage"
 DEFAULT_CITY_FILTER = City.FORT_STERLING
+SORT_BY_OPTIONS = (
+    {"value": "percentage", "label": "Profit %"},
+    {"value": "flat", "label": "Flat amount"},
+)
 
 
 def _build_leather_jacket_rows():
@@ -127,6 +138,16 @@ def _build_city_filter_options():
     ]
 
 
+def _build_jacket_type_filter_options():
+    return [
+        {"value": ALL_JACKET_TYPE_FILTER, "label": "All"},
+        *[
+            {"value": jacket_type["key"], "label": jacket_type["label"]}
+            for jacket_type in LEATHER_JACKET_TYPES
+        ],
+    ]
+
+
 def _find_city_summary(jacket_row, city):
     for city_summary in jacket_row["city_summaries"]:
         if city_summary.city == city:
@@ -148,15 +169,66 @@ def _sort_notation(notation):
     return (int(tier), int(enchantment))
 
 
+def _build_selected_jacket_type_filter(request):
+    selected_jacket_type_filter = request.GET.get("jacket_type", ALL_JACKET_TYPE_FILTER)
+    if selected_jacket_type_filter == ALL_JACKET_TYPE_FILTER:
+        return ALL_JACKET_TYPE_FILTER
+    if selected_jacket_type_filter in {jacket_type["key"] for jacket_type in LEATHER_JACKET_TYPES}:
+        return selected_jacket_type_filter
+    return ALL_JACKET_TYPE_FILTER
+
+
+def _build_minimum_percentage_filter(request):
+    raw_value = request.GET.get("min_percentage", str(DEFAULT_MINIMUM_PERCENTAGE_FILTER))
+    try:
+        return float(raw_value.replace(",", "."))
+    except (AttributeError, ValueError):
+        return DEFAULT_MINIMUM_PERCENTAGE_FILTER
+
+
+def _build_minimum_flat_filter(request):
+    raw_value = request.GET.get("min_flat", "").strip()
+    if not raw_value:
+        return None
+    try:
+        return int(raw_value)
+    except ValueError:
+        return None
+
+
+def _build_selected_sort_by_filter(request):
+    selected_sort_by = request.GET.get("sort", DEFAULT_SORT_BY_FILTER)
+    if selected_sort_by in {option["value"] for option in SORT_BY_OPTIONS}:
+        return selected_sort_by
+    return DEFAULT_SORT_BY_FILTER
+
+
+def _build_query_string(**query_params):
+    filtered_query_params = {key: value for key, value in query_params.items() if value not in (None, "")}
+    return urlencode(filtered_query_params)
+
+
+def _refresh_prices_and_redirect(request, redirect_url_name, **query_params):
+    created_prices = LeatherJacketPriceRefreshService().refresh_prices()
+    messages.success(
+        request,
+        f"{len(created_prices)} price entries refreshed for leather jackets.",
+    )
+    query_string = _build_query_string(**query_params)
+    redirect_url = reverse(redirect_url_name)
+    if query_string:
+        return redirect(f"{redirect_url}?{query_string}")
+    return redirect(redirect_url)
+
+
 def leather_jacket(request):
     selected_city_filter = _build_selected_city_filter(request)
     if request.method == "POST":
-        created_prices = LeatherJacketPriceRefreshService().refresh_prices()
-        messages.success(
+        return _refresh_prices_and_redirect(
             request,
-            f"{len(created_prices)} price entries refreshed for leather jackets.",
+            "albion_online:leather_jacket",
+            city=selected_city_filter,
         )
-        return redirect(f"{reverse('albion_online:leather_jacket')}?city={selected_city_filter}")
 
     jacket_rows = _build_leather_jacket_rows()
     return render(
@@ -169,5 +241,57 @@ def leather_jacket(request):
             "jacket_types": LEATHER_JACKET_TYPES,
             "selected_city_filter": selected_city_filter,
             "table_columns_count": len(LEATHER_JACKET_TYPES) + 1,
+        },
+    )
+
+
+def leather_jacket_profitability(request):
+    selected_city_filter = _build_selected_city_filter(request)
+    selected_jacket_type_filter = _build_selected_jacket_type_filter(request)
+    minimum_percentage_filter = _build_minimum_percentage_filter(request)
+    minimum_flat_filter = _build_minimum_flat_filter(request)
+    selected_sort_by_filter = _build_selected_sort_by_filter(request)
+
+    if request.method == "POST":
+        return _refresh_prices_and_redirect(
+            request,
+            "albion_online:leather_jacket_profitability",
+            city=selected_city_filter,
+            jacket_type=selected_jacket_type_filter,
+            min_percentage=minimum_percentage_filter,
+            min_flat=minimum_flat_filter,
+            sort=selected_sort_by_filter,
+        )
+
+    jacket_rows = _build_leather_jacket_rows()
+    profitable_rows = LeatherJacketProfitabilityService().build_rows(
+        jacket_rows,
+        selected_city_filter=selected_city_filter,
+        selected_jacket_type_filter=selected_jacket_type_filter,
+        minimum_percentage=minimum_percentage_filter,
+        minimum_flat=minimum_flat_filter,
+        sort_by=selected_sort_by_filter,
+    )
+    return render(
+        request,
+        "albion_online/leather_jacket_profitability.html",
+        {
+            "city_filter_options": _build_city_filter_options(),
+            "jacket_type_filter_options": _build_jacket_type_filter_options(),
+            "minimum_flat_filter": minimum_flat_filter,
+            "minimum_percentage_filter": minimum_percentage_filter,
+            "refresh_query_string": _build_query_string(
+                city=selected_city_filter,
+                jacket_type=selected_jacket_type_filter,
+                min_percentage=minimum_percentage_filter,
+                min_flat=minimum_flat_filter,
+                sort=selected_sort_by_filter,
+            ),
+            "jacket_rows": jacket_rows,
+            "profitable_rows": profitable_rows,
+            "selected_city_filter": selected_city_filter,
+            "selected_jacket_type_filter": selected_jacket_type_filter,
+            "selected_sort_by_filter": selected_sort_by_filter,
+            "sort_by_options": SORT_BY_OPTIONS,
         },
     )
