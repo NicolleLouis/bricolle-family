@@ -142,7 +142,14 @@
     </div>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="marketDetailPanel" aria-labelledby="marketDetailPanelLabel" style="width: min(90vw, 900px);">
+<div
+    class="offcanvas offcanvas-end"
+    tabindex="-1"
+    id="marketDetailPanel"
+    aria-labelledby="marketDetailPanelLabel"
+    style="width: min(90vw, 900px);"
+    data-detail-panel-url="{{ detail_panel_url }}"
+>
     <div class="offcanvas-header border-bottom">
         <div>
             <h2 class="h5 mb-1" id="marketDetailPanelLabel">Market details</h2>
@@ -150,96 +157,8 @@
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-    <div class="offcanvas-body">
-        {% for jacket_row in jacket_rows %}
-            <div class="market-detail-group d-none" data-detail-key="{{ jacket_row.detail_key }}">
-                {% for city_detail in jacket_row.city_details %}
-                    <section class="mb-4" data-market-city="{{ city_detail.city }}">
-                        <h3 class="h6 mb-2">{{ city_detail.label }}</h3>
-                        <div class="mb-3">
-                            <span class="text-muted small">Craft cost:</span>
-                            <span class="fw-semibold">{{ city_detail.craft_cost|default:"-"|compact_price }}</span>
-                            {% if city_detail.craft_margin is not None %}
-                                <span class="ms-2 text-muted small">Margin:</span>
-                                {% if city_detail.craft_margin < 0 %}
-                                    <span class="badge bg-danger">{{ city_detail.craft_margin|compact_price }}</span>
-                                {% elif city_detail.craft_margin > 0 %}
-                                    <span class="badge bg-success">+{{ city_detail.craft_margin|compact_price }}</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">0</span>
-                                {% endif %}
-                            {% endif %}
-                        </div>
-
-                        <div class="table-responsive mb-3">
-                            <table class="table table-sm align-middle">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Input</th>
-                                        <th scope="col">Qty</th>
-                                        <th scope="col">Sell</th>
-                                        <th scope="col">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for input_detail in city_detail.input_details %}
-                                        <tr>
-                                            <th scope="row">{{ input_detail.label }}</th>
-                                            <td>{{ input_detail.quantity }}</td>
-                                            <td>
-                                                {% if input_detail.sell_price is not None %}
-                                                    {% if input_detail.sell_price_freshness and input_detail.sell_price_freshness.class_name != "bg-success" %}
-                                                        <span class="badge {{ input_detail.sell_price_freshness.class_name }} fs-6">{{ input_detail.sell_price|compact_price }}</span>
-                                                    {% else %}
-                                                        <span class="fw-semibold">{{ input_detail.sell_price|compact_price }}</span>
-                                                    {% endif %}
-                                                {% else %}
-                                                    -
-                                                {% endif %}
-                                            </td>
-                                            <td>{% if input_detail.total_cost is not None %}{{ input_detail.total_cost|compact_price }}{% else %}-{% endif %}</td>
-                                        </tr>
-                                    {% empty %}
-                                        <tr>
-                                            <td colspan="4" class="text-muted">No recipe inputs found.</td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table table-sm align-middle">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Quality</th>
-                                        <th scope="col">Sell</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for quality_detail in city_detail.quality_details %}
-                                        <tr>
-                                            <th scope="row">{{ quality_detail.label }}</th>
-                                            <td>
-                                                {% if quality_detail.sell_price is not None %}
-                                                    {% if quality_detail.sell_price_freshness and quality_detail.sell_price_freshness.class_name != "bg-success" %}
-                                                        <span class="badge {{ quality_detail.sell_price_freshness.class_name }} fs-6">{{ quality_detail.sell_price|compact_price }}</span>
-                                                    {% else %}
-                                                        <span class="fw-semibold">{{ quality_detail.sell_price|compact_price }}</span>
-                                                    {% endif %}
-                                                {% else %}
-                                                    -
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-                {% endfor %}
-            </div>
-        {% endfor %}
+    <div class="offcanvas-body" id="marketDetailPanelBody">
+        <div class="text-muted">Select a row to load details.</div>
     </div>
 </div>
 
@@ -249,23 +168,43 @@
     const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvasElement);
     const titleElement = document.getElementById('marketDetailPanelLabel');
     const subtitleElement = document.getElementById('marketDetailPanelSubtitle');
-    const detailGroups = Array.from(document.querySelectorAll('.market-detail-group'));
+    const bodyElement = document.getElementById('marketDetailPanelBody');
+    const detailPanelUrl = offcanvasElement.dataset.detailPanelUrl;
 
     const hideAllGroups = () => {
-        detailGroups.forEach((group) => {
+        bodyElement.querySelectorAll('.market-detail-group').forEach((group) => {
             group.classList.add('d-none');
             group.querySelectorAll('[data-market-city]').forEach((section) => section.classList.remove('d-none'));
         });
     };
 
-    const showDetails = (detailKey, objectTitle, cityCode) => {
+    const loadDetails = async (detailKey) => {
+        const response = await fetch(`${detailPanelUrl}?detail_key=${encodeURIComponent(detailKey)}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+        if (!response.ok) {
+            bodyElement.innerHTML = '<div class="text-danger">Unable to load details.</div>';
+            return;
+        }
+        bodyElement.innerHTML = await response.text();
         hideAllGroups();
-        const group = detailGroups.find((item) => item.dataset.detailKey === detailKey);
+    };
+
+    const showDetails = async (detailKey, objectTitle, cityCode) => {
+        titleElement.textContent = objectTitle;
+        subtitleElement.textContent = 'Loading...';
+        bodyElement.innerHTML = '<div class="text-muted">Loading details...</div>';
+        offcanvas.show();
+
+        await loadDetails(detailKey);
+        const group = bodyElement.querySelector(`.market-detail-group[data-detail-key="${detailKey}"]`);
         if (!group) {
+            subtitleElement.textContent = 'Details unavailable';
             return;
         }
 
-        titleElement.textContent = objectTitle;
         if (cityCode === 'all') {
             subtitleElement.textContent = 'All cities';
             group.classList.remove('d-none');
@@ -280,10 +219,9 @@
             }
         }
 
-        offcanvas.show();
     };
 
-    document.querySelectorAll('.market-profitability-row').forEach((row) => {
+    document.querySelectorAll('[data-detail-key]').forEach((row) => {
         row.addEventListener('click', (event) => {
             event.stopPropagation();
             showDetails(row.dataset.detailKey, row.dataset.objectTitle, row.dataset.detailTarget);

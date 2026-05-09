@@ -1,9 +1,13 @@
 from django.contrib import messages
+from django.core.cache import cache
 from django.db.models import Q
 from django.db.models import Prefetch
+from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse
 from urllib.parse import urlencode
+import time
 
 from albion_online.constants.city import City
 from albion_online.constants.leather_jacket import LEATHER_JACKET_TYPES
@@ -28,6 +32,12 @@ SORT_BY_OPTIONS = (
     {"value": "percentage", "label": "Profit %"},
     {"value": "flat", "label": "Flat amount"},
 )
+CACHE_VERSION_KEY = "albion_online:leather_jacket:version"
+CACHED_JACKET_ROWS_KEY = "albion_online:leather_jacket:jacket_rows:{version}"
+CACHED_PROFITABLE_ROWS_KEY = (
+    "albion_online:leather_jacket:profitable_rows:{version}:{city}:{jacket_type}:{min_percentage}:{min_flat}:{sort}"
+)
+CACHED_DETAIL_GROUP_KEY = "albion_online:leather_jacket:detail_group:{version}:{detail_key}:{city}"
 
 
 def _build_leather_jacket_rows():
@@ -54,6 +64,59 @@ def _build_leather_jacket_rows():
         jacket_row["jacket_type_label"] = jacket_type["label"]
         jacket_row["detail_key"] = f"{jacket_type['key']}:{jacket_row['object'].tier_enchantment_notation}"
     return jacket_rows
+
+
+def _get_cache_version():
+    cache_version = cache.get(CACHE_VERSION_KEY)
+    if cache_version is None:
+        cache_version = "initial"
+        cache.set(CACHE_VERSION_KEY, cache_version, None)
+    return cache_version
+
+
+def _invalidate_leather_jacket_cache():
+    cache.set(CACHE_VERSION_KEY, str(time.time()), None)
+
+
+def _get_cached_jacket_rows():
+    cache_version = _get_cache_version()
+    cache_key = CACHED_JACKET_ROWS_KEY.format(version=cache_version)
+    jacket_rows = cache.get(cache_key)
+    if jacket_rows is None:
+        jacket_rows = _build_leather_jacket_rows()
+        cache.set(cache_key, jacket_rows, None)
+    return jacket_rows
+
+
+def _get_cached_profitable_rows(
+    jacket_rows,
+    selected_city_filter,
+    selected_jacket_type_filter,
+    minimum_percentage_filter,
+    minimum_flat_filter,
+    selected_sort_by_filter,
+):
+    cache_version = _get_cache_version()
+    cache_key = CACHED_PROFITABLE_ROWS_KEY.format(
+        version=cache_version,
+        city=selected_city_filter,
+        jacket_type=selected_jacket_type_filter,
+        min_percentage=minimum_percentage_filter,
+        min_flat=minimum_flat_filter,
+        sort=selected_sort_by_filter,
+    )
+    profitable_rows = cache.get(cache_key)
+    if profitable_rows is None:
+        profitable_rows = LeatherJacketProfitabilityService().build_rows(
+            jacket_rows,
+            selected_city_filter=selected_city_filter,
+            selected_jacket_type_filter=selected_jacket_type_filter,
+            minimum_percentage=minimum_percentage_filter,
+            minimum_flat=minimum_flat_filter,
+            sort_by=selected_sort_by_filter,
+        )
+        cache.set(cache_key, profitable_rows, None)
+    return profitable_rows
 
 
 def _find_jacket_type(aodp_id):
@@ -210,6 +273,7 @@ def _build_query_string(**query_params):
 
 def _refresh_prices_and_redirect(request, redirect_url_name, **query_params):
     created_prices = LeatherJacketPriceRefreshService().refresh_prices()
+    _invalidate_leather_jacket_cache()
     messages.success(
         request,
         f"{len(created_prices)} price entries refreshed for leather jackets.",
@@ -230,16 +294,16 @@ def leather_jacket(request):
             city=selected_city_filter,
         )
 
-    jacket_rows = _build_leather_jacket_rows()
+    jacket_rows = _get_cached_jacket_rows()
     return render(
         request,
         "albion_online/leather_jacket.html",
         {
             "city_filter_options": _build_city_filter_options(),
             "city_tables": _build_city_tables(jacket_rows, selected_city_filter),
-            "jacket_rows": jacket_rows,
             "jacket_types": LEATHER_JACKET_TYPES,
             "selected_city_filter": selected_city_filter,
+            "detail_panel_url": reverse("albion_online:leather_jacket_detail_panel"),
             "table_columns_count": len(LEATHER_JACKET_TYPES) + 1,
         },
     )
@@ -263,14 +327,14 @@ def leather_jacket_profitability(request):
             sort=selected_sort_by_filter,
         )
 
-    jacket_rows = _build_leather_jacket_rows()
-    profitable_rows = LeatherJacketProfitabilityService().build_rows(
+    jacket_rows = _get_cached_jacket_rows()
+    profitable_rows = _get_cached_profitable_rows(
         jacket_rows,
-        selected_city_filter=selected_city_filter,
-        selected_jacket_type_filter=selected_jacket_type_filter,
-        minimum_percentage=minimum_percentage_filter,
-        minimum_flat=minimum_flat_filter,
-        sort_by=selected_sort_by_filter,
+        selected_city_filter,
+        selected_jacket_type_filter,
+        minimum_percentage_filter,
+        minimum_flat_filter,
+        selected_sort_by_filter,
     )
     return render(
         request,
@@ -287,11 +351,47 @@ def leather_jacket_profitability(request):
                 min_flat=minimum_flat_filter,
                 sort=selected_sort_by_filter,
             ),
-            "jacket_rows": jacket_rows,
             "profitable_rows": profitable_rows,
+            "detail_panel_url": reverse("albion_online:leather_jacket_detail_panel"),
             "selected_city_filter": selected_city_filter,
             "selected_jacket_type_filter": selected_jacket_type_filter,
             "selected_sort_by_filter": selected_sort_by_filter,
             "sort_by_options": SORT_BY_OPTIONS,
         },
     )
+
+
+def leather_jacket_detail_panel(request):
+    detail_key = request.GET.get("detail_key")
+    if not detail_key:
+        return HttpResponseNotFound("Missing detail key.")
+
+    selected_city_filter = request.GET.get("city", ALL_CITY_FILTER)
+    if selected_city_filter != ALL_CITY_FILTER and selected_city_filter not in City.values:
+        selected_city_filter = ALL_CITY_FILTER
+
+    cache_version = _get_cache_version()
+    cache_key = CACHED_DETAIL_GROUP_KEY.format(
+        version=cache_version,
+        detail_key=detail_key,
+        city=selected_city_filter,
+    )
+    cached_html = cache.get(cache_key)
+    if cached_html is not None:
+        return HttpResponse(cached_html)
+
+    jacket_rows = _get_cached_jacket_rows()
+    jacket_row = next((row for row in jacket_rows if row["detail_key"] == detail_key), None)
+    if jacket_row is None:
+        return HttpResponseNotFound("Detail not found.")
+
+    detail_html = render_to_string(
+        "albion_online/leather_jacket_detail_group.html",
+        {
+            "jacket_row": jacket_row,
+            "selected_city_filter": selected_city_filter,
+        },
+        request=request,
+    )
+    cache.set(cache_key, detail_html, None)
+    return HttpResponse(detail_html)

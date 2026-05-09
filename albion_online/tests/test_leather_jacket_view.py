@@ -112,14 +112,10 @@ class TestLeatherJacketView:
         assert b'name="city"' in response.content
         assert b'value="all" selected' in response.content
         assert b"marketDetailPanel" in response.content
+        assert b"marketDetailPanelBody" in response.content
         assert b"market-tier-cell" in response.content
         assert b"data-detail-target=\"BRIDGEWATCH\"" in response.content
-        assert b"data-market-city=\"BRIDGEWATCH\"" in response.content
-        assert b"Normal" in response.content
-        assert b"Good" in response.content
-        assert b"Outstanding" in response.content
-        assert b"Excellent" in response.content
-        assert b"Masterpiece" in response.content
+        assert b"data-detail-panel-url" in response.content
         assert b"Refresh Price" in response.content
         assert b"Leather Jacket market tracker" in response.content
         assert b"Mercenary" in response.content
@@ -133,23 +129,7 @@ class TestLeatherJacketView:
         assert b"Mercenary Jacket 4.2" in response.content
         assert b"TEST_T4_ARMOR_LEATHER_SET1_MARKET" not in response.content
         assert b"T4.2" in response.content
-        assert b"Inputs" in response.content
-        assert b"Outputs" in response.content
-        assert b"Bridgewatch" in response.content
-        assert b"Caerleon" in response.content
-        assert b"Martlock" in response.content
-        assert b"+127 (+184.1%)" in response.content
-        assert "✕" in response.content.decode()
-        assert "🕒" in response.content.decode()
-        assert b"Craft cost:" in response.content
-        assert b"68" in response.content
-        assert b"69" in response.content
-        assert b"bg-warning" in response.content
-        assert b"Buy" not in response.content
-        assert b"Sell price min date" not in response.content
-        assert b"Buy price max date" not in response.content
-        assert b"678" in response.content
-        assert "Infos masquées car un des prix a plus d'un jour." not in response.content.decode()
+        assert b"Select a row to load details." in response.content
 
     def test_get_filters_to_fort_sterling_by_default(self, authenticated_client):
         response = authenticated_client.get(reverse("albion_online:leather_jacket"))
@@ -166,6 +146,61 @@ class TestLeatherJacketView:
         assert b'value="all" selected' in response.content
         assert b"<h2 class=\"h5 mb-0\">Fort Sterling</h2>" in response.content
         assert b"<h2 class=\"h5 mb-0\">Bridgewatch</h2>" in response.content
+
+    def test_detail_panel_endpoint_returns_fragment(self, authenticated_client):
+        now = timezone.now()
+        object_instance = Object.objects.create(
+            aodp_id="TEST_T4_ARMOR_LEATHER_SET1_DETAIL",
+            name="Adept's Mercenary Jacket",
+            type_id=ObjectType.ARMOR,
+            tier=4,
+            enchantment=2,
+            equipment_category="CHEST",
+            crafting_tree="leather_chest",
+        )
+        leather = Object.objects.create(
+            aodp_id="TEST_T4_LEATHER_LEVEL1_DETAIL@2",
+            name="Adept's Leather",
+            type_id=ObjectType.LEATHER,
+            tier=4,
+            enchantment=2,
+            crafting_tree="leather_chest",
+        )
+        recipe = Recipe.objects.create(output=object_instance, output_quantity=1)
+        RecipeInput.objects.create(recipe=recipe, object=leather, quantity=16)
+
+        for city, sell_price_min, buy_price_max in [
+            (City.BRIDGEWATCH, 100, 400),
+            (City.CAERLEON, 1000, 1300),
+        ]:
+            for quality in range(3):
+                Price.objects.create(
+                    object=object_instance,
+                    city=city,
+                    quality=quality,
+                    sell_price_min=sell_price_min,
+                    sell_price_min_date=now,
+                    buy_price_max=buy_price_max,
+                    buy_price_max_date=now,
+                )
+                Price.objects.create(
+                    object=leather,
+                    city=city,
+                    quality=quality,
+                    sell_price_min=5,
+                    sell_price_min_date=now,
+                    buy_price_max=9,
+                    buy_price_max_date=now,
+                )
+
+        response = authenticated_client.get(
+            f"{reverse('albion_online:leather_jacket_detail_panel')}?detail_key=mercenary:4.2"
+        )
+
+        assert response.status_code == 200
+        assert b'data-detail-key="mercenary:4.2"' in response.content
+        assert b"Bridgewatch" in response.content
+        assert b"Craft cost:" in response.content
 
     def test_post_refreshes_prices(self, authenticated_client, monkeypatch):
         called = {"refresh": False}
