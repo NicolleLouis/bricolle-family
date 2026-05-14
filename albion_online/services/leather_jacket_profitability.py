@@ -1,4 +1,7 @@
-class LeatherJacketProfitabilityService:
+from albion_online.services.market_profitability_core import AlbionMarketProfitabilityCore
+
+
+class LeatherJacketProfitabilityService(AlbionMarketProfitabilityCore):
     def build_rows(
         self,
         jacket_rows,
@@ -88,8 +91,3 @@ class LeatherJacketProfitabilityService:
             row["object_name"],
             row["tier_enchantment_notation"] or "",
         )
-
-    def _build_craft_margin_percent(self, craft_margin, craft_cost):
-        if craft_margin is None or craft_cost in (None, 0):
-            return None
-        return (craft_margin / craft_cost) * 100

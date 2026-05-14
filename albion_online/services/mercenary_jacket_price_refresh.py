@@ -2,23 +2,19 @@ from django.db.models import Q
 
 from albion_online.constants.leather_jacket import LEATHER_JACKET_TYPES
 from albion_online.models import Object, Price
+from albion_online.services.market_price_refresh_core import GroupedPriceRefreshCore
 from albion_online.services.price_fetcher import AlbionOnlineDataPriceFetcher
 
 
-class LeatherJacketPriceRefreshService:
+class LeatherJacketPriceRefreshService(GroupedPriceRefreshCore):
     def __init__(self, fetcher=None):
-        self._fetcher = fetcher or AlbionOnlineDataPriceFetcher()
+        super().__init__(fetcher or AlbionOnlineDataPriceFetcher())
 
     def refresh_prices(self) -> list[Price]:
         input_objects = list(self._get_recipe_input_objects())
-        created_prices = []
-        for jacket_type in LEATHER_JACKET_TYPES:
-            jacket_objects = list(self._get_jacket_objects(jacket_type["aodp_id_fragment"]))
-            if jacket_objects:
-                created_prices.extend(self._fetcher.fetch_current_prices(jacket_objects))
-        if input_objects:
-            created_prices.extend(self._fetcher.fetch_current_prices(input_objects))
-        return created_prices
+        price_groups = [self._get_jacket_objects(jacket_type["aodp_id_fragment"]) for jacket_type in LEATHER_JACKET_TYPES]
+        price_groups.append(input_objects)
+        return self.refresh_prices_from_groups(price_groups)
 
     def _get_jacket_objects(self, aodp_id_fragment):
         return Object.objects.filter(
