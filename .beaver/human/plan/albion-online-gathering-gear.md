@@ -120,7 +120,7 @@ Risks:
 
 ### GEAR-003 - Implement gathering gear refresh and summary flow
 
-Status: `not started`
+Status: `done`
 
 Goal:
 - Build the gathering gear backend flow for price refresh, market summary, detail side panel data, and profitability calculations.

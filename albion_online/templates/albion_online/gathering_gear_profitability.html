@@ -1,0 +1,230 @@
+{% extends "albion_online/base.html" %}
+{% load price_format %}
+{% load math_format %}
+
+{% block content %}
+<div class="d-flex flex-column gap-4">
+    <div class="position-sticky top-0 bg-white pt-2 pb-3" style="z-index: 1020;">
+        <div class="d-flex justify-content-between align-items-center gap-3 shadow-sm border rounded-3 bg-light px-3 py-2">
+            <div>
+                <h1 class="h3 mb-1">Profitable crafts</h1>
+                <p class="text-muted mb-0">Only rows with a positive margin, ordered by profit.</p>
+            </div>
+            <form method="post" action="{% url 'albion_online:gathering_gear_profitability' %}?{{ refresh_query_string }}" class="ms-auto">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">Refresh Price</button>
+            </form>
+        </div>
+        <ul class="nav nav-tabs mt-3">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'albion_online:gathering_gear' %}?city={{ selected_city_filter }}&resource={{ selected_resource_filter }}">Market table</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'albion_online:gathering_gear_profitability' %}?{{ refresh_query_string }}">Profitable crafts</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="get" action="{% url 'albion_online:gathering_gear_profitability' %}" class="row g-3 align-items-end">
+                <div class="col-12 col-md-3">
+                    <label for="cityFilter" class="form-label">City</label>
+                    <select id="cityFilter" name="city" class="form-select">
+                        {% for city_filter_option in city_filter_options %}
+                            <option value="{{ city_filter_option.value }}" {% if city_filter_option.value == selected_city_filter %}selected{% endif %}>
+                                {{ city_filter_option.label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-2">
+                    <label for="minimumPercentageFilter" class="form-label">Min %</label>
+                    <input
+                        id="minimumPercentageFilter"
+                        type="number"
+                        name="min_percentage"
+                        class="form-control"
+                        step="0.1"
+                        value="{{ minimum_percentage_filter }}"
+                    >
+                </div>
+                <div class="col-12 col-md-2">
+                    <label for="minimumFlatFilter" class="form-label">Min flat</label>
+                    <input
+                        id="minimumFlatFilter"
+                        type="number"
+                        name="min_flat"
+                        class="form-control"
+                        step="1"
+                        value="{{ minimum_flat_filter|default_if_none:'' }}"
+                    >
+                </div>
+                <div class="col-12 col-md-2">
+                    <label for="sortFilter" class="form-label">Sort by</label>
+                    <select id="sortFilter" name="sort" class="form-select">
+                        {% for sort_option in sort_by_options %}
+                            <option value="{{ sort_option.value }}" {% if sort_option.value == selected_sort_by_filter %}selected{% endif %}>
+                                {{ sort_option.label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-outline-primary">Apply filters</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-lg-4">
+            <div class="card h-100 shadow-sm border-success-subtle">
+                <div class="card-body">
+                    <p class="text-uppercase text-muted small mb-2">Profitable rows</p>
+                    <div class="display-6 mb-0">{{ profitable_rows|length }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Final object</th>
+                        <th scope="col">Tier + enchant</th>
+                        <th scope="col">City</th>
+                        <th scope="col">Rentability %</th>
+                        <th scope="col">Flat amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profitable_row in profitable_rows %}
+                        <tr
+                            class="table-success market-profitability-row"
+                            role="button"
+                            tabindex="0"
+                            data-detail-target="{{ profitable_row.city }}"
+                            data-detail-key="{{ profitable_row.detail_key }}"
+                            data-object-title="{{ profitable_row.object_title }}"
+                            style="cursor: pointer;"
+                        >
+                            <th scope="row" class="text-nowrap">{{ profitable_row.object_name }}</th>
+                            <td class="text-nowrap">{{ profitable_row.tier_enchantment_notation }}</td>
+                            <td>{{ profitable_row.city_label }}</td>
+                            <td>
+                                <span class="badge bg-success fs-6">{{ profitable_row.craft_margin_percent|format_percent }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success fs-6">+{{ profitable_row.craft_margin|compact_price }}</span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">No profitable crafts found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div
+    class="offcanvas offcanvas-end"
+    tabindex="-1"
+    id="marketDetailPanel"
+    aria-labelledby="marketDetailPanelLabel"
+    style="width: min(90vw, 900px);"
+    data-detail-panel-url="{{ detail_panel_url }}"
+>
+    <div class="offcanvas-header border-bottom">
+        <div>
+            <h2 class="h5 mb-1" id="marketDetailPanelLabel">Market details</h2>
+            <p class="text-muted mb-0" id="marketDetailPanelSubtitle">All cities</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body" id="marketDetailPanelBody">
+        <div class="text-muted">Select a row to load details.</div>
+    </div>
+</div>
+
+<script>
+(() => {
+    const offcanvasElement = document.getElementById('marketDetailPanel');
+    const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvasElement);
+    const titleElement = document.getElementById('marketDetailPanelLabel');
+    const subtitleElement = document.getElementById('marketDetailPanelSubtitle');
+    const bodyElement = document.getElementById('marketDetailPanelBody');
+    const detailPanelUrl = offcanvasElement.dataset.detailPanelUrl;
+
+    const hideAllGroups = () => {
+        bodyElement.querySelectorAll('.market-detail-group').forEach((group) => {
+            group.classList.add('d-none');
+            group.querySelectorAll('[data-market-city]').forEach((section) => section.classList.remove('d-none'));
+        });
+    };
+
+    const loadDetails = async (detailKey) => {
+        const response = await fetch(`${detailPanelUrl}?detail_key=${encodeURIComponent(detailKey)}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+        if (!response.ok) {
+            bodyElement.innerHTML = '<div class="text-danger">Unable to load details.</div>';
+            return;
+        }
+        bodyElement.innerHTML = await response.text();
+        hideAllGroups();
+    };
+
+    const showDetails = async (detailKey, objectTitle, cityCode) => {
+        titleElement.textContent = objectTitle;
+        subtitleElement.textContent = 'Loading...';
+        bodyElement.innerHTML = '<div class="text-muted">Loading details...</div>';
+        offcanvas.show();
+
+        await loadDetails(detailKey);
+        const group = bodyElement.querySelector(`.market-detail-group[data-detail-key="${detailKey}"]`);
+        if (!group) {
+            subtitleElement.textContent = 'Details unavailable';
+            return;
+        }
+
+        if (cityCode === 'all') {
+            subtitleElement.textContent = 'All cities';
+            group.classList.remove('d-none');
+        } else {
+            const citySection = group.querySelector(`[data-market-city="${cityCode}"]`);
+            const cityLabel = citySection ? citySection.querySelector('h3')?.textContent : cityCode;
+            subtitleElement.textContent = cityLabel || cityCode;
+            if (citySection) {
+                group.classList.remove('d-none');
+                group.querySelectorAll('[data-market-city]').forEach((section) => section.classList.add('d-none'));
+                citySection.classList.remove('d-none');
+            }
+        }
+    };
+
+    document.querySelectorAll('[data-detail-key]').forEach((cell) => {
+        cell.addEventListener('click', (event) => {
+            event.stopPropagation();
+            showDetails(cell.dataset.detailKey, cell.dataset.objectTitle, cell.dataset.detailTarget);
+        });
+        cell.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                event.stopPropagation();
+                showDetails(cell.dataset.detailKey, cell.dataset.objectTitle, cell.dataset.detailTarget);
+            }
+        });
+    });
+
+    offcanvasElement.addEventListener('hidden.bs.offcanvas', hideAllGroups);
+})();
+</script>
+{% endblock %}

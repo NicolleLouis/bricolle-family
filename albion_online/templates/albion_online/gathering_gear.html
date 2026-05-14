@@ -1,0 +1,228 @@
+{% extends "albion_online/base.html" %}
+{% load price_format %}
+{% load math_format %}
+
+{% block content %}
+<div class="d-flex flex-column gap-4">
+    <div class="position-sticky top-0 bg-white pt-2 pb-3" style="z-index: 1020;">
+        <div class="d-flex justify-content-between align-items-center gap-3 shadow-sm border rounded-3 bg-light px-3 py-2">
+            <div>
+                <h1 class="h3 mb-1">Gathering Gear</h1>
+                <p class="text-muted mb-0">{{ selected_resource_label }} market tracker with one-click price refresh.</p>
+            </div>
+            <div class="d-flex flex-wrap align-items-center justify-content-end gap-2 ms-auto">
+                <form method="get" action="{% url 'albion_online:gathering_gear' %}" class="d-flex align-items-center gap-2">
+                    <label for="cityFilter" class="form-label mb-0 text-muted small">City</label>
+                    <select id="cityFilter" name="city" class="form-select form-select-sm" onchange="this.form.submit()">
+                        {% for city_filter_option in city_filter_options %}
+                            <option value="{{ city_filter_option.value }}" {% if city_filter_option.value == selected_city_filter %}selected{% endif %}>
+                                {{ city_filter_option.label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <label for="resourceFilter" class="form-label mb-0 text-muted small">Resource</label>
+                    <select id="resourceFilter" name="resource" class="form-select form-select-sm" onchange="this.form.submit()">
+                        {% for resource_filter_option in resource_filter_options %}
+                            <option value="{{ resource_filter_option.value }}" {% if resource_filter_option.value == selected_resource_filter %}selected{% endif %}>
+                                {{ resource_filter_option.label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+                <form method="post" action="{% url 'albion_online:gathering_gear' %}?city={{ selected_city_filter }}&resource={{ selected_resource_filter }}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Refresh Price</button>
+                </form>
+            </div>
+        </div>
+        <ul class="nav nav-tabs mt-3">
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'albion_online:gathering_gear' %}?city={{ selected_city_filter }}&resource={{ selected_resource_filter }}">Market table</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'albion_online:gathering_gear_profitability' %}?city={{ selected_city_filter }}">Profitable crafts</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <p class="text-uppercase text-muted small mb-2">Tracked variants</p>
+                    <div class="display-6 mb-0">{{ gear_rows|length }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% for city_table in city_tables %}
+        <div class="card">
+            <div class="card-header bg-white">
+                <h2 class="h5 mb-0">{{ city_table.label }}</h2>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Tier</th>
+                            {% for gear_variant_column in gear_variant_columns %}
+                                <th scope="col">{{ gear_variant_column.label }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for table_row in city_table.rows %}
+                            <tr>
+                                <th
+                                    scope="row"
+                                    class="market-tier-cell text-nowrap"
+                                    role="button"
+                                    tabindex="0"
+                                    data-detail-target="{{ city_table.city }}"
+                                    data-detail-key="{{ table_row.detail_key }}"
+                                    data-object-title="{{ table_row.detail_title }}"
+                                    style="cursor: pointer;"
+                                >{{ table_row.display_notation }}</th>
+                                {% for cell in table_row.cells %}
+                                    <td
+                                        {% if cell.gear_row %}
+                                            class="market-city-cell"
+                                            role="button"
+                                            tabindex="0"
+                                            data-detail-target="{{ city_table.city }}"
+                                            data-detail-key="{{ cell.gear_row.detail_key }}"
+                                            data-object-title="{{ cell.gear_row.object.display_name }}"
+                                            style="cursor: pointer;"
+                                        {% endif %}
+                                    >
+                                        <div class="d-flex justify-content-center align-items-center">
+                                            {% if not cell.city_summary %}
+                                                <div class="fw-semibold">-</div>
+                                            {% elif cell.city_summary.is_hidden %}
+                                                <div class="d-flex justify-content-center align-items-center fw-semibold">🕒</div>
+                                            {% elif cell.city_summary.craft_margin is not None %}
+                                                {% if cell.city_summary.craft_margin > 0 %}
+                                                    <span class="badge bg-success fs-6">+{{ cell.city_summary.craft_margin|compact_price }} {% if cell.city_summary.craft_margin_percent is not None %}({{ cell.city_summary.craft_margin_percent|format_percent }}){% endif %}</span>
+                                                {% else %}
+                                                    <span
+                                                        class="d-flex align-items-center justify-content-center border border-danger-subtle rounded-2 text-danger mx-auto"
+                                                        style="width: 1.75rem; min-width: 1.75rem; height: 1.75rem; opacity: 0.45; font-size: 0.85rem; line-height: 1;"
+                                                        aria-label="Not profitable"
+                                                    >✕</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <div class="fw-semibold">-</div>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="{{ table_columns_count }}" class="text-center text-muted py-4">No gathering gear objects found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<div
+    class="offcanvas offcanvas-end"
+    tabindex="-1"
+    id="marketDetailPanel"
+    aria-labelledby="marketDetailPanelLabel"
+    style="width: min(90vw, 900px);"
+    data-detail-panel-url="{{ detail_panel_url }}"
+>
+    <div class="offcanvas-header border-bottom">
+        <div>
+            <h2 class="h5 mb-1" id="marketDetailPanelLabel">Market details</h2>
+            <p class="text-muted mb-0" id="marketDetailPanelSubtitle">All cities</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body" id="marketDetailPanelBody">
+        <div class="text-muted">Select a row to load details.</div>
+    </div>
+</div>
+
+<script>
+(() => {
+    const offcanvasElement = document.getElementById('marketDetailPanel');
+    const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvasElement);
+    const titleElement = document.getElementById('marketDetailPanelLabel');
+    const subtitleElement = document.getElementById('marketDetailPanelSubtitle');
+    const bodyElement = document.getElementById('marketDetailPanelBody');
+    const detailPanelUrl = offcanvasElement.dataset.detailPanelUrl;
+
+    const hideAllGroups = () => {
+        bodyElement.querySelectorAll('.market-detail-group').forEach((group) => {
+            group.classList.add('d-none');
+            group.querySelectorAll('[data-market-city]').forEach((section) => section.classList.remove('d-none'));
+        });
+    };
+
+    const loadDetails = async (detailKey) => {
+        const response = await fetch(`${detailPanelUrl}?detail_key=${encodeURIComponent(detailKey)}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+        if (!response.ok) {
+            bodyElement.innerHTML = '<div class="text-danger">Unable to load details.</div>';
+            return;
+        }
+        bodyElement.innerHTML = await response.text();
+        hideAllGroups();
+    };
+
+    const showDetails = async (detailKey, objectTitle, cityCode) => {
+        titleElement.textContent = objectTitle;
+        subtitleElement.textContent = 'Loading...';
+        bodyElement.innerHTML = '<div class="text-muted">Loading details...</div>';
+        offcanvas.show();
+
+        await loadDetails(detailKey);
+        const group = bodyElement.querySelector(`.market-detail-group[data-detail-key="${detailKey}"]`);
+        if (!group) {
+            subtitleElement.textContent = 'Details unavailable';
+            return;
+        }
+
+        if (cityCode === 'all') {
+            subtitleElement.textContent = 'All cities';
+            group.classList.remove('d-none');
+        } else {
+            const citySection = group.querySelector(`[data-market-city="${cityCode}"]`);
+            const cityLabel = citySection ? citySection.querySelector('h3')?.textContent : cityCode;
+            subtitleElement.textContent = cityLabel || cityCode;
+            if (citySection) {
+                group.classList.remove('d-none');
+                group.querySelectorAll('[data-market-city]').forEach((section) => section.classList.add('d-none'));
+                citySection.classList.remove('d-none');
+            }
+        }
+    };
+
+    document.querySelectorAll('[data-detail-key]').forEach((cell) => {
+        cell.addEventListener('click', (event) => {
+            event.stopPropagation();
+            showDetails(cell.dataset.detailKey, cell.dataset.objectTitle, cell.dataset.detailTarget);
+        });
+        cell.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                event.stopPropagation();
+                showDetails(cell.dataset.detailKey, cell.dataset.objectTitle, cell.dataset.detailTarget);
+            }
+        });
+    });
+
+    offcanvasElement.addEventListener('hidden.bs.offcanvas', hideAllGroups);
+})();
+</script>
+{% endblock %}

@@ -70,6 +70,45 @@ GATHERING_GEAR_RESOURCE_GROUPS = (
     },
 )
 
+GATHERING_GEAR_RESOURCE_GROUPS_BY_KEY = {
+    resource_group["key"]: resource_group for resource_group in GATHERING_GEAR_RESOURCE_GROUPS
+}
+
+GATHERING_GEAR_RESOURCE_FILTER_OPTIONS = (
+    {"value": GATHERING_GEAR_ALL_FILTER_VALUE, "label": "All"},
+    *[
+        {"value": resource_group["key"], "label": resource_group["label"]}
+        for resource_group in GATHERING_GEAR_RESOURCE_GROUPS
+    ],
+)
+
+GATHERING_GEAR_VARIANT_COLUMNS = (
+    {
+        "key": "head",
+        "label": "Cap",
+        "object_type": ObjectType.HEAD,
+    },
+    {
+        "key": "armor",
+        "label": "Garb",
+        "object_type": ObjectType.ARMOR,
+    },
+    {
+        "key": "shoe",
+        "label": "Workboot",
+        "object_type": ObjectType.SHOES,
+    },
+    {
+        "key": "backpack",
+        "label": "Backpack",
+        "object_type": ObjectType.BACKPACK,
+    },
+)
+
+GATHERING_GEAR_VARIANT_COLUMNS_BY_OBJECT_TYPE = {
+    variant_column["object_type"]: variant_column for variant_column in GATHERING_GEAR_VARIANT_COLUMNS
+}
+
 
 def _build_standard_recipe_definition(resource_group, slot_definition):
     return {

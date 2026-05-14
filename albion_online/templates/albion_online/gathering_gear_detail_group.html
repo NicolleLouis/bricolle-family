@@ -1,0 +1,89 @@
+{% load price_format %}
+
+<div class="market-detail-group" data-detail-key="{{ gear_row.detail_key }}">
+    {% for city_detail in gear_row.city_details %}
+        <section class="mb-4" data-market-city="{{ city_detail.city }}">
+            <h3 class="h6 mb-2">{{ city_detail.label }}</h3>
+            <div class="mb-3">
+                <span class="text-muted small">Craft cost:</span>
+                <span class="fw-semibold">{{ city_detail.craft_cost|default:"-"|compact_price }}</span>
+                {% if city_detail.craft_margin is not None %}
+                    <span class="ms-2 text-muted small">Margin:</span>
+                    {% if city_detail.craft_margin < 0 %}
+                        <span class="badge bg-danger">{{ city_detail.craft_margin|compact_price }}</span>
+                    {% elif city_detail.craft_margin > 0 %}
+                        <span class="badge bg-success">+{{ city_detail.craft_margin|compact_price }}</span>
+                    {% else %}
+                        <span class="badge bg-secondary">0</span>
+                    {% endif %}
+                {% endif %}
+            </div>
+
+            <div class="table-responsive mb-3">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Input</th>
+                            <th scope="col">Qty</th>
+                            <th scope="col">Sell</th>
+                            <th scope="col">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for input_detail in city_detail.input_details %}
+                            <tr>
+                                <th scope="row">{{ input_detail.label }}</th>
+                                <td>{{ input_detail.quantity }}</td>
+                                <td>
+                                    {% if input_detail.sell_price is not None %}
+                                        {% if input_detail.sell_price_freshness and input_detail.sell_price_freshness.class_name != "bg-success" %}
+                                            <span class="badge {{ input_detail.sell_price_freshness.class_name }} fs-6">{{ input_detail.sell_price|compact_price }}</span>
+                                        {% else %}
+                                            <span class="fw-semibold">{{ input_detail.sell_price|compact_price }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>{% if input_detail.total_cost is not None %}{{ input_detail.total_cost|compact_price }}{% else %}-{% endif %}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-muted">No recipe inputs found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Quality</th>
+                            <th scope="col">Sell</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for quality_detail in city_detail.quality_details %}
+                            <tr>
+                                <th scope="row">{{ quality_detail.label }}</th>
+                                <td>
+                                    {% if quality_detail.sell_price is not None %}
+                                        {% if quality_detail.sell_price_freshness and quality_detail.sell_price_freshness.class_name != "bg-success" %}
+                                            <span class="badge {{ quality_detail.sell_price_freshness.class_name }} fs-6">{{ quality_detail.sell_price|compact_price }}</span>
+                                        {% else %}
+                                            <span class="fw-semibold">{{ quality_detail.sell_price|compact_price }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    {% endfor %}
+</div>
