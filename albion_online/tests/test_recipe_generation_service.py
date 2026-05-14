@@ -6,8 +6,60 @@ from albion_online.constants.object_type import ObjectType
 from albion_online.services.recipe_generation import RecipeGenerationService
 
 
+GATHERING_GEAR_RECIPE_KEYS = (
+    "miner_head",
+    "miner_chest",
+    "miner_shoe",
+    "miner_backpack",
+    "harvester_head",
+    "harvester_chest",
+    "harvester_shoe",
+    "harvester_backpack",
+    "lumberjack_head",
+    "lumberjack_chest",
+    "lumberjack_shoe",
+    "lumberjack_backpack",
+    "quarrier_head",
+    "quarrier_chest",
+    "quarrier_shoe",
+    "quarrier_backpack",
+    "skinner_head",
+    "skinner_chest",
+    "skinner_shoe",
+    "skinner_backpack",
+)
+
+
 @pytest.mark.django_db
 class TestRecipeGenerationService:
+    def test_refresh_recipes_builds_gathering_gear_seed_definitions(self):
+        assert RecipeDefinition.objects.filter(key__in=GATHERING_GEAR_RECIPE_KEYS).count() == len(
+            GATHERING_GEAR_RECIPE_KEYS
+        )
+
+        created_recipes = RecipeGenerationService().refresh_recipes()
+
+        ore_head_recipe = Recipe.objects.get(
+            definition__key="miner_head",
+            output__aodp_id="T4_HEAD_GATHERER_ORE",
+        )
+        ore_backpack_recipe = Recipe.objects.get(
+            definition__key="miner_backpack",
+            output__aodp_id="T4_BACKPACK_GATHERER_ORE",
+        )
+
+        ore_head_inputs = {
+            recipe_input.object.aodp_id: recipe_input.quantity for recipe_input in ore_head_recipe.inputs.all()
+        }
+        ore_backpack_inputs = {
+            recipe_input.object.aodp_id: recipe_input.quantity for recipe_input in ore_backpack_recipe.inputs.all()
+        }
+
+        assert created_recipes
+        assert Recipe.objects.filter(definition__key__in=GATHERING_GEAR_RECIPE_KEYS).exists()
+        assert ore_head_inputs == {"T4_METALBAR": 8}
+        assert ore_backpack_inputs == {"T4_CLOTH": 4, "T4_LEATHER": 4}
+
     def test_refresh_recipes_deletes_and_rebuilds_existing_recipes(self):
         output_object = Object.objects.create(
             aodp_id="TEST_RECIPE_OUTPUT_GENERATION",
