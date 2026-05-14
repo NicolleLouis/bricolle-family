@@ -23,4 +23,5 @@ class TestHomeView:
         assert b"Albion Online" in response.content
         assert b"Leather Jacket" in response.content
         assert b"Gathering Gear" in response.content
+        assert reverse("albion_online:leather_jacket").encode() in response.content
         assert reverse("albion_online:gathering_gear").encode() in response.content
