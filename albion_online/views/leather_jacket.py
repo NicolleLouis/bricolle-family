@@ -15,6 +15,9 @@ from albion_online.models import Object, Recipe
 from albion_online.services.leather_jacket_profitability import (
     LeatherJacketProfitabilityService,
 )
+from albion_online.services.craft_profitability_done import (
+    CraftProfitabilityDoneService,
+)
 from albion_online.services.mercenary_jacket_market_summary import (
     MercenaryJacketMarketSummaryService,
 )
@@ -35,7 +38,7 @@ SORT_BY_OPTIONS = (
 CACHE_VERSION_KEY = "albion_online:leather_jacket:version"
 CACHED_JACKET_ROWS_KEY = "albion_online:leather_jacket:jacket_rows:{version}"
 CACHED_PROFITABLE_ROWS_KEY = (
-    "albion_online:leather_jacket:profitable_rows:{version}:{city}:{jacket_type}:{min_percentage}:{min_flat}:{sort}"
+    "albion_online:leather_jacket:profitable_rows:{version}:{city}:{jacket_type}:{min_percentage}:{min_flat}:{sort}:{done_signature}"
 )
 CACHED_DETAIL_GROUP_KEY = "albion_online:leather_jacket:detail_group:{version}:{detail_key}:{city}"
 
@@ -95,6 +98,8 @@ def _get_cached_profitable_rows(
     minimum_percentage_filter,
     minimum_flat_filter,
     selected_sort_by_filter,
+    recently_done_keys,
+    done_signature,
 ):
     cache_version = _get_cache_version()
     cache_key = CACHED_PROFITABLE_ROWS_KEY.format(
@@ -104,6 +109,7 @@ def _get_cached_profitable_rows(
         min_percentage=minimum_percentage_filter,
         min_flat=minimum_flat_filter,
         sort=selected_sort_by_filter,
+        done_signature=done_signature,
     )
     profitable_rows = cache.get(cache_key)
     if profitable_rows is None:
@@ -114,6 +120,7 @@ def _get_cached_profitable_rows(
             minimum_percentage=minimum_percentage_filter,
             minimum_flat=minimum_flat_filter,
             sort_by=selected_sort_by_filter,
+            recently_done_keys=recently_done_keys,
         )
         cache.set(cache_key, profitable_rows, None)
     return profitable_rows
@@ -192,6 +199,14 @@ def _build_selected_city_filter(request):
     if selected_city_filter in City.values:
         return selected_city_filter
     return DEFAULT_CITY_FILTER
+
+
+def _build_recently_done_craft_state(jacket_rows, selected_city_filter):
+    craft_objects = [jacket_row["object"] for jacket_row in jacket_rows]
+    return CraftProfitabilityDoneService().build_recently_done_state(
+        craft_objects,
+        selected_city_filter,
+    )
 
 
 def _build_city_filter_options():
@@ -328,6 +343,10 @@ def leather_jacket_profitability(request):
         )
 
     jacket_rows = _get_cached_jacket_rows()
+    recently_done_keys, done_signature = _build_recently_done_craft_state(
+        jacket_rows,
+        selected_city_filter,
+    )
     profitable_rows = _get_cached_profitable_rows(
         jacket_rows,
         selected_city_filter,
@@ -335,6 +354,8 @@ def leather_jacket_profitability(request):
         minimum_percentage_filter,
         minimum_flat_filter,
         selected_sort_by_filter,
+        recently_done_keys,
+        done_signature,
     )
     return render(
         request,
@@ -357,6 +378,8 @@ def leather_jacket_profitability(request):
             "selected_jacket_type_filter": selected_jacket_type_filter,
             "selected_sort_by_filter": selected_sort_by_filter,
             "sort_by_options": SORT_BY_OPTIONS,
+            "profitability_mark_done_url": reverse("albion_online:craft_profitability_mark_done"),
+            "profitability_return_url": f"{reverse('albion_online:leather_jacket_profitability')}?{_build_query_string(city=selected_city_filter, jacket_type=selected_jacket_type_filter, min_percentage=minimum_percentage_filter, min_flat=minimum_flat_filter, sort=selected_sort_by_filter)}",
         },
     )
 

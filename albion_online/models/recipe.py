@@ -82,11 +82,11 @@ class RecipeInput(models.Model):
         return f"{self.quantity} x {self.object.name or self.object.aodp_id}"
 
 
-class GatheringGearProfitabilityDoneCraft(models.Model):
+class CraftProfitabilityDone(models.Model):
     object = models.ForeignKey(
         Object,
         on_delete=models.CASCADE,
-        related_name="gathering_gear_profitability_done_crafts",
+        related_name="craft_profitability_done_records",
     )
     city = models.CharField(max_length=16, choices=City.choices, db_index=True)
     completed_at = models.DateTimeField(default=timezone.now, db_index=True)
@@ -104,8 +104,8 @@ class GatheringGearProfitabilityDoneCraft(models.Model):
         return f"{self.object} - {self.city} - {self.completed_at.isoformat()}"
 
 
-@admin.register(GatheringGearProfitabilityDoneCraft)
-class GatheringGearProfitabilityDoneCraftAdmin(admin.ModelAdmin):
+@admin.register(CraftProfitabilityDone)
+class CraftProfitabilityDoneAdmin(admin.ModelAdmin):
     list_display = ("object", "city", "completed_at")
     list_filter = ("city", "completed_at")
     search_fields = ("object__aodp_id", "object__name")

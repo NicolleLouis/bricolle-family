@@ -41,7 +41,10 @@ class GatheringGearProfitabilityService(AlbionMarketProfitabilityCore):
         return city_detail.city == selected_city_filter
 
     def _is_recently_done(self, gear_row, city_detail, recently_done_keys) -> bool:
-        return (city_detail.city, gear_row["object"].id) in recently_done_keys
+        object_identity = getattr(gear_row["object"], "id", None)
+        if object_identity is None:
+            object_identity = getattr(gear_row["object"], "pk", None)
+        return (city_detail.city, object_identity) in recently_done_keys
 
     def _is_profitable(self, city_detail, minimum_percentage, minimum_flat) -> bool:
         craft_margin_percent = self._build_craft_margin_percent(city_detail.craft_margin, city_detail.craft_cost)

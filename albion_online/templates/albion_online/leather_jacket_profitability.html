@@ -108,6 +108,7 @@
                         <th scope="col">City</th>
                         <th scope="col">Rentability %</th>
                         <th scope="col">Flat amount</th>
+                        <th scope="col">Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -130,10 +131,25 @@
                             <td>
                                 <span class="badge bg-success fs-6">+{{ profitable_row.craft_margin|compact_price }}</span>
                             </td>
+                            <td class="text-nowrap">
+                                <form method="post" action="{{ profitability_mark_done_url }}?{{ refresh_query_string }}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="object_aodp_id" value="{{ profitable_row.object.aodp_id }}">
+                                    <input type="hidden" name="row_city" value="{{ profitable_row.city }}">
+                                    <input type="hidden" name="return_url" value="{{ profitability_return_url }}">
+                                    <button
+                                        type="submit"
+                                        class="btn btn-sm btn-outline-success"
+                                        onclick="event.stopPropagation();"
+                                    >
+                                        Done
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-4">No profitable crafts found.</td>
+                            <td colspan="6" class="text-center text-muted py-4">No profitable crafts found.</td>
                         </tr>
                     {% endfor %}
                 </tbody>

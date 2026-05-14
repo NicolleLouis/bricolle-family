@@ -10,7 +10,7 @@ from django.utils import timezone
 from albion_online.constants.city import City
 from albion_online.constants.object_type import ObjectType
 from albion_online.models import (
-    GatheringGearProfitabilityDoneCraft,
+    CraftProfitabilityDone,
     Object,
     Price,
     Recipe,
@@ -260,19 +260,17 @@ class TestGatheringGearView:
         sample_objects = _create_ore_gathering_gear_sample()
 
         post_response = authenticated_client.post(
-            f"{reverse('albion_online:gathering_gear_mark_done')}?city=BRIDGEWATCH&resource=ore",
+            f"{reverse('albion_online:craft_profitability_mark_done')}?city=BRIDGEWATCH&resource=ore",
             data={
                 "object_aodp_id": sample_objects["miner_cap"].aodp_id,
                 "row_city": City.BRIDGEWATCH,
+                "return_url": f"{reverse('albion_online:gathering_gear_profitability')}?city=BRIDGEWATCH&resource=ore",
             },
         )
 
         assert post_response.status_code == 302
-        assert post_response.url == (
-            f"{reverse('albion_online:gathering_gear_profitability')}"
-            "?city=BRIDGEWATCH&resource=ore&min_percentage=20.0&sort=percentage"
-        )
-        assert GatheringGearProfitabilityDoneCraft.objects.filter(
+        assert post_response.url == f"{reverse('albion_online:gathering_gear_profitability')}?city=BRIDGEWATCH&resource=ore"
+        assert CraftProfitabilityDone.objects.filter(
             object=sample_objects["miner_cap"],
             city=City.BRIDGEWATCH,
         ).exists()
@@ -284,7 +282,7 @@ class TestGatheringGearView:
 
     def test_done_profitability_row_reappears_after_twelve_hours(self, authenticated_client):
         sample_objects = _create_ore_gathering_gear_sample()
-        GatheringGearProfitabilityDoneCraft.objects.create(
+        CraftProfitabilityDone.objects.create(
             object=sample_objects["miner_cap"],
             city=City.BRIDGEWATCH,
             completed_at=timezone.now() - timedelta(hours=13),

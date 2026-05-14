@@ -10,7 +10,9 @@ class LeatherJacketProfitabilityService(AlbionMarketProfitabilityCore):
         minimum_percentage,
         minimum_flat,
         sort_by,
+        recently_done_keys=None,
     ) -> list[dict]:
+        recently_done_keys = recently_done_keys or set()
         rows = []
         for jacket_row in jacket_rows:
             if not self._matches_jacket_type_filter(jacket_row, selected_jacket_type_filter):
@@ -18,6 +20,8 @@ class LeatherJacketProfitabilityService(AlbionMarketProfitabilityCore):
 
             for city_detail in jacket_row["city_details"]:
                 if not self._matches_city_filter(city_detail, selected_city_filter):
+                    continue
+                if self._is_recently_done(jacket_row, city_detail, recently_done_keys):
                     continue
                 if not self._is_profitable(city_detail, minimum_percentage, minimum_flat):
                     continue
@@ -35,6 +39,12 @@ class LeatherJacketProfitabilityService(AlbionMarketProfitabilityCore):
         if selected_city_filter == "all":
             return True
         return city_detail.city == selected_city_filter
+
+    def _is_recently_done(self, jacket_row, city_detail, recently_done_keys) -> bool:
+        object_identity = getattr(jacket_row["object"], "id", None)
+        if object_identity is None:
+            object_identity = getattr(jacket_row["object"], "pk", None)
+        return (city_detail.city, object_identity) in recently_done_keys
 
     def _is_profitable(self, city_detail, minimum_percentage, minimum_flat) -> bool:
         craft_margin_percent = self._build_craft_margin_percent(city_detail.craft_margin, city_detail.craft_cost)

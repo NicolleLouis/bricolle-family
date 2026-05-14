@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from albion_online.constants.city import City
 from albion_online.constants.object_type import ObjectType
-from albion_online.models import Object, Price, Recipe, RecipeInput
+from albion_online.models import CraftProfitabilityDone, Object, Price, Recipe, RecipeInput
 
 
 def _add_price_series(albion_object, city, sell_price_min, buy_price_max, timestamp):
@@ -125,3 +125,41 @@ class TestLeatherJacketProfitabilityView:
         assert b'value="flat" selected' in response.content
         assert response.content.index(b"Hunter Jacket") < response.content.index(b"Mercenary Jacket")
         assert b"+214" in response.content
+
+    def test_marking_a_profitability_row_done_hides_it_for_twelve_hours(self, authenticated_client):
+        _seed_profitability_data()
+
+        post_response = authenticated_client.post(
+            f"{reverse('albion_online:craft_profitability_mark_done')}?city=BRIDGEWATCH&jacket_type=all",
+            data={
+                "object_aodp_id": "TEST_T4_ARMOR_LEATHER_SET1_PROFITABILITY",
+                "row_city": City.BRIDGEWATCH,
+                "return_url": f"{reverse('albion_online:leather_jacket_profitability')}?city=BRIDGEWATCH&jacket_type=all",
+            },
+        )
+
+        assert post_response.status_code == 302
+        assert post_response.url == f"{reverse('albion_online:leather_jacket_profitability')}?city=BRIDGEWATCH&jacket_type=all"
+        assert CraftProfitabilityDone.objects.filter(
+            object__aodp_id="TEST_T4_ARMOR_LEATHER_SET1_PROFITABILITY",
+            city=City.BRIDGEWATCH,
+        ).exists()
+
+        response = authenticated_client.get(f"{reverse('albion_online:leather_jacket_profitability')}?city=BRIDGEWATCH")
+
+        assert response.status_code == 200
+        assert b"Mercenary Jacket" not in response.content
+
+    def test_done_profitability_row_reappears_after_twelve_hours(self, authenticated_client):
+        _seed_profitability_data()
+        mercenary_jacket = Object.objects.get(aodp_id="TEST_T4_ARMOR_LEATHER_SET1_PROFITABILITY")
+        CraftProfitabilityDone.objects.create(
+            object=mercenary_jacket,
+            city=City.BRIDGEWATCH,
+            completed_at=timezone.now() - timedelta(hours=13),
+        )
+
+        response = authenticated_client.get(f"{reverse('albion_online:leather_jacket_profitability')}?city=BRIDGEWATCH")
+
+        assert response.status_code == 200
+        assert b"Mercenary Jacket" in response.content
