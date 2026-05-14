@@ -1,10 +1,30 @@
 {% extends "albion_online/base.html" %}
 
 {% block content %}
-<div class="p-4 bg-light rounded-3">
-    <h1 class="mb-3">Albion Online</h1>
-    <p class="mb-0">
-        Module de suivi Albion Online. Les premières fonctionnalités seront ajoutées ici au fil du cadrage.
-    </p>
+<div class="d-flex flex-column gap-4">
+    <div class="p-4 p-lg-5 bg-light rounded-4 shadow-sm border">
+        <div class="row align-items-center g-4">
+            <div class="col-12 col-lg-8">
+                <p class="text-uppercase text-muted small mb-2">Albion Online</p>
+                <h1 class="display-6 mb-3">Market trackers and profitability tools.</h1>
+                <p class="lead mb-0">
+                    Choose a feature to inspect market data, refresh prices, and review profitability.
+                </p>
+            </div>
+            <div class="col-12 col-lg-4">
+                <div class="d-grid gap-2">
+                    <a class="btn btn-primary btn-lg" href="{% url 'albion_online:leather_jacket' %}">
+                        Leather Jacket
+                    </a>
+                    <a class="btn btn-outline-primary btn-lg" href="{% url 'albion_online:gathering_gear' %}">
+                        Gathering Gear
+                    </a>
+                    <a class="btn btn-outline-secondary" href="{% url 'albion_online:settings' %}">
+                        Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

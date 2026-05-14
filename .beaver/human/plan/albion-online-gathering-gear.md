@@ -173,7 +173,7 @@ Risks:
 
 ### GEAR-004 - Add gathering gear templates and navigation
 
-Status: `not started`
+Status: `ongoing`
 
 Goal:
 - Add the frontend pages, templates, and navigation entry for gathering gear, including the market table, profitability tab, and side panel UX.

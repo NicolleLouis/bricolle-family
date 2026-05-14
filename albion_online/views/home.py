@@ -1,1 +1,5 @@
-from albion_online.views.leather_jacket import leather_jacket as home
+from django.shortcuts import render
+
+
+def home(request):
+    return render(request, "albion_online/home.html")

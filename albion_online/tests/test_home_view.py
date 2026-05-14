@@ -21,3 +21,6 @@ class TestHomeView:
 
         assert response.status_code == 200
         assert b"Albion Online" in response.content
+        assert b"Leather Jacket" in response.content
+        assert b"Gathering Gear" in response.content
+        assert reverse("albion_online:gathering_gear").encode() in response.content
