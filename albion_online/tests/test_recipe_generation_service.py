@@ -43,6 +43,10 @@ class TestRecipeGenerationService:
             definition__key="miner_head",
             output__aodp_id="T4_HEAD_GATHERER_ORE",
         )
+        ore_garb_recipe = Recipe.objects.get(
+            definition__key="miner_chest",
+            output__aodp_id="T4_ARMOR_GATHERER_ORE",
+        )
         ore_backpack_recipe = Recipe.objects.get(
             definition__key="miner_backpack",
             output__aodp_id="T4_BACKPACK_GATHERER_ORE",
@@ -51,6 +55,9 @@ class TestRecipeGenerationService:
         ore_head_inputs = {
             recipe_input.object.aodp_id: recipe_input.quantity for recipe_input in ore_head_recipe.inputs.all()
         }
+        ore_garb_inputs = {
+            recipe_input.object.aodp_id: recipe_input.quantity for recipe_input in ore_garb_recipe.inputs.all()
+        }
         ore_backpack_inputs = {
             recipe_input.object.aodp_id: recipe_input.quantity for recipe_input in ore_backpack_recipe.inputs.all()
         }
@@ -58,6 +65,7 @@ class TestRecipeGenerationService:
         assert created_recipes
         assert Recipe.objects.filter(definition__key__in=GATHERING_GEAR_RECIPE_KEYS).exists()
         assert ore_head_inputs == {"T4_METALBAR": 8}
+        assert ore_garb_inputs == {"T4_METALBAR": 16}
         assert ore_backpack_inputs == {"T4_CLOTH": 4, "T4_LEATHER": 4}
 
     def test_refresh_recipes_deletes_and_rebuilds_existing_recipes(self):
