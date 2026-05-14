@@ -223,7 +223,7 @@ Risks:
 
 ### GEAR-005 - Add targeted tests and finalize cleanup
 
-Status: `not started`
+Status: `done`
 
 Goal:
 - Close the implementation with targeted tests around the new page, the migration-backed seeds, and the shared behavior between features.
