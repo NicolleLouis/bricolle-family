@@ -67,7 +67,7 @@ Risks:
 
 ### GEAR-002 - Add gathering gear constants and seed recipes
 
-Status: `not started`
+Status: `done`
 
 Goal:
 - Add the `Gathering Gear` domain constants and the data migrations that seed all recipe definitions described in the architecture.

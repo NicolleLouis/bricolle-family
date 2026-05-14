@@ -39,18 +39,7 @@ class TestRecipeGenerationService:
                 ],
             },
         )
-        RecipeDefinition.objects.filter(
-            key__in=[
-                "mercenary_jacket",
-                "hunter_jacket",
-                "assassin_jacket",
-                "stalker_jacket",
-                "hellion_jacket",
-                "specter_jacket",
-                "tenacity_jacket",
-                "mistwalker_jacket",
-            ],
-        ).update(is_active=False)
+        RecipeDefinition.objects.exclude(key="test_mercenary_jacket").update(is_active=False)
 
         first_created_recipes = RecipeGenerationService().refresh_recipes()
 
