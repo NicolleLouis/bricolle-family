@@ -4,7 +4,7 @@ from urllib.parse import urlencode
 from django.contrib import messages
 from django.core.cache import cache
 from django.db.models import Prefetch, Q
-from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -378,24 +378,6 @@ def gathering_gear_profitability(request):
             "profitability_return_url": f"{reverse('albion_online:gathering_gear_profitability')}?{_build_query_string(city=selected_city_filter, resource=selected_resource_filter, min_percentage=minimum_percentage_filter, min_flat=minimum_flat_filter, sort=selected_sort_by_filter)}",
         },
     )
-
-
-def gathering_gear_mark_done(request):
-    if request.method != "POST":
-        return HttpResponseNotAllowed(["POST"])
-
-    object_aodp_id = request.POST.get("object_aodp_id")
-    row_city = request.POST.get("row_city")
-    return_url = request.POST.get("return_url")
-    if not object_aodp_id or row_city not in City.values:
-        return HttpResponseNotFound("Missing profitability craft identifiers.")
-
-    if CraftProfitabilityDoneService().mark_done(object_aodp_id, row_city) is None:
-        return HttpResponseNotFound("Craft not found.")
-    messages.success(request, "Craft marked as done for 12 hours.")
-    if return_url and return_url.startswith("/"):
-        return redirect(return_url)
-    return redirect(reverse("albion_online:gathering_gear_profitability"))
 
 
 def gathering_gear_detail_panel(request):
