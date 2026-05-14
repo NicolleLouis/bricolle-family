@@ -18,7 +18,7 @@ class FakeFetcher:
 
 @pytest.mark.django_db
 class TestGatheringGearPriceRefreshService:
-    def test_refresh_prices_fetches_selected_resource_group_and_recipe_inputs(self):
+    def test_refresh_prices_fetches_all_resource_groups_and_recipe_inputs(self):
         fetcher = FakeFetcher()
         miner_cap = Object.objects.create(
             aodp_id="TEST_T4_HEAD_GATHERER_ORE_REFRESH",
@@ -82,6 +82,27 @@ class TestGatheringGearPriceRefreshService:
             tier=4,
             enchantment=2,
         )
+        wood = Object.objects.create(
+            aodp_id="TEST_T4_WOOD_REFRESH@2",
+            name="Adept's Wood",
+            type_id=ObjectType.ORE,
+            tier=4,
+            enchantment=2,
+        )
+        stone = Object.objects.create(
+            aodp_id="TEST_T4_ROCK_REFRESH@2",
+            name="Adept's Stone",
+            type_id=ObjectType.ORE,
+            tier=4,
+            enchantment=2,
+        )
+        hide = Object.objects.create(
+            aodp_id="TEST_T4_HIDE_REFRESH@2",
+            name="Adept's Hide",
+            type_id=ObjectType.ORE,
+            tier=4,
+            enchantment=2,
+        )
         ore = Object.objects.create(
             aodp_id="TEST_T4_ORE_REFRESH@2",
             name="Adept's Ore",
@@ -101,15 +122,52 @@ class TestGatheringGearPriceRefreshService:
         RecipeInput.objects.create(recipe=miner_backpack_recipe, object=leather, quantity=4)
         fiber_cap_recipe = Recipe.objects.create(output=fiber_cap, output_quantity=1)
         RecipeInput.objects.create(recipe=fiber_cap_recipe, object=ore, quantity=8)
+        wood_cap = Object.objects.create(
+            aodp_id="TEST_T4_HEAD_GATHERER_WOOD_REFRESH",
+            name="Adept's Lumberjack Cap",
+            type_id=ObjectType.HEAD,
+            tier=4,
+            enchantment=2,
+            crafting_tree="gatherer_wood_head",
+        )
+        stone_cap = Object.objects.create(
+            aodp_id="TEST_T4_HEAD_GATHERER_ROCK_REFRESH",
+            name="Adept's Quarrier Cap",
+            type_id=ObjectType.HEAD,
+            tier=4,
+            enchantment=2,
+            crafting_tree="gatherer_rock_head",
+        )
+        hide_cap = Object.objects.create(
+            aodp_id="TEST_T4_HEAD_GATHERER_HIDE_REFRESH",
+            name="Adept's Skinner Cap",
+            type_id=ObjectType.HEAD,
+            tier=4,
+            enchantment=2,
+            crafting_tree="gatherer_hide_head",
+        )
+        wood_cap_recipe = Recipe.objects.create(output=wood_cap, output_quantity=1)
+        RecipeInput.objects.create(recipe=wood_cap_recipe, object=ore, quantity=8)
+        stone_cap_recipe = Recipe.objects.create(output=stone_cap, output_quantity=1)
+        RecipeInput.objects.create(recipe=stone_cap_recipe, object=ore, quantity=8)
+        hide_cap_recipe = Recipe.objects.create(output=hide_cap, output_quantity=1)
+        RecipeInput.objects.create(recipe=hide_cap_recipe, object=ore, quantity=8)
 
         GatheringGearPriceRefreshService(fetcher=fetcher).refresh_prices(selected_resource_filter="ore")
 
-        assert len(fetcher.requested_objects_batches) == 2
-        assert miner_cap in fetcher.requested_objects_batches[0]
-        assert miner_garb in fetcher.requested_objects_batches[0]
-        assert miner_workboot in fetcher.requested_objects_batches[0]
-        assert miner_backpack in fetcher.requested_objects_batches[0]
-        assert fiber_cap not in fetcher.requested_objects_batches[0]
-        assert metalbar in fetcher.requested_objects_batches[-1]
-        assert cloth in fetcher.requested_objects_batches[-1]
-        assert leather in fetcher.requested_objects_batches[-1]
+        assert len(fetcher.requested_objects_batches) == 6
+        flattened_requested_objects = {
+            object_instance for batch in fetcher.requested_objects_batches for object_instance in batch
+        }
+        assert miner_cap in flattened_requested_objects
+        assert miner_garb in flattened_requested_objects
+        assert miner_workboot in flattened_requested_objects
+        assert miner_backpack in flattened_requested_objects
+        assert fiber_cap in flattened_requested_objects
+        assert wood_cap in flattened_requested_objects
+        assert stone_cap in flattened_requested_objects
+        assert hide_cap in flattened_requested_objects
+        assert metalbar in flattened_requested_objects
+        assert cloth in flattened_requested_objects
+        assert leather in flattened_requested_objects
+        assert ore in flattened_requested_objects

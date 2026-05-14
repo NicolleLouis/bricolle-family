@@ -11,20 +11,14 @@ class GatheringGearPriceRefreshService(GroupedPriceRefreshCore):
         super().__init__(fetcher or AlbionOnlineDataPriceFetcher())
 
     def refresh_prices(self, selected_resource_filter="all") -> list[Price]:
-        selected_resource_groups = self._build_selected_resource_groups(selected_resource_filter)
-        output_groups = [self._get_output_objects(resource_group["aodp_id_fragment"]) for resource_group in selected_resource_groups]
+        selected_resource_groups = GATHERING_GEAR_RESOURCE_GROUPS
+        output_groups = [
+            self._get_output_objects(resource_group["aodp_id_fragment"])
+            for resource_group in selected_resource_groups
+        ]
         input_objects = list(self._get_recipe_input_objects(selected_resource_groups))
         output_groups.append(input_objects)
         return self.refresh_prices_from_groups(output_groups)
-
-    def _build_selected_resource_groups(self, selected_resource_filter):
-        if selected_resource_filter == "all":
-            return GATHERING_GEAR_RESOURCE_GROUPS
-        return tuple(
-            resource_group
-            for resource_group in GATHERING_GEAR_RESOURCE_GROUPS
-            if resource_group["key"] == selected_resource_filter
-        ) or GATHERING_GEAR_RESOURCE_GROUPS[:1]
 
     def _get_output_objects(self, aodp_id_fragment):
         return Object.objects.filter(
