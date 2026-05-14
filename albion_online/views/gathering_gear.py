@@ -1,13 +1,15 @@
 import time
+from datetime import timedelta
 from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.core.cache import cache
 from django.db.models import Prefetch, Q
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseNotFound
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils import timezone
 
 from albion_online.constants.city import City
 from albion_online.constants.gathering_gear import (
@@ -18,7 +20,7 @@ from albion_online.constants.gathering_gear import (
     GATHERING_GEAR_RESOURCE_GROUPS_BY_KEY,
     GATHERING_GEAR_VARIANT_COLUMNS,
 )
-from albion_online.models import Object, Recipe
+from albion_online.models import GatheringGearProfitabilityDoneCraft, Object, Recipe
 from albion_online.services.gathering_gear_market_summary import (
     GatheringGearMarketSummaryService,
 )
@@ -41,9 +43,10 @@ SORT_BY_OPTIONS = (
 CACHE_VERSION_KEY = "albion_online:gathering_gear:version"
 CACHED_GEAR_ROWS_KEY = "albion_online:gathering_gear:gear_rows:{version}:{resource}"
 CACHED_PROFITABLE_ROWS_KEY = (
-    "albion_online:gathering_gear:profitable_rows:{version}:{resource}:{city}:{min_percentage}:{min_flat}:{sort}"
+    "albion_online:gathering_gear:profitable_rows:{version}:{resource}:{city}:{min_percentage}:{min_flat}:{sort}:{done_signature}"
 )
 CACHED_DETAIL_GROUP_KEY = "albion_online:gathering_gear:detail_group:{version}:{detail_key}:{city}"
+GATHERING_GEAR_DONE_WINDOW = timedelta(hours=12)
 
 
 def _build_gathering_gear_rows(selected_resource_filter):
@@ -103,6 +106,8 @@ def _get_cached_profitable_rows(
     minimum_percentage_filter,
     minimum_flat_filter,
     selected_sort_by_filter,
+    recently_done_keys,
+    done_signature,
 ):
     cache_version = _get_cache_version()
     cache_key = CACHED_PROFITABLE_ROWS_KEY.format(
@@ -112,6 +117,7 @@ def _get_cached_profitable_rows(
         min_percentage=minimum_percentage_filter,
         min_flat=minimum_flat_filter,
         sort=selected_sort_by_filter,
+        done_signature=done_signature,
     )
     profitable_rows = cache.get(cache_key)
     if profitable_rows is None:
@@ -122,6 +128,7 @@ def _get_cached_profitable_rows(
             minimum_percentage=minimum_percentage_filter,
             minimum_flat=minimum_flat_filter,
             sort_by=selected_sort_by_filter,
+            recently_done_keys=recently_done_keys,
         )
         cache.set(cache_key, profitable_rows, None)
     return profitable_rows
@@ -260,6 +267,54 @@ def _build_selected_sort_by_filter(request):
     return DEFAULT_SORT_BY_FILTER
 
 
+def _build_recently_done_craft_state(selected_city_filter, selected_resource_filter):
+    cutoff = timezone.now() - GATHERING_GEAR_DONE_WINDOW
+    done_crafts = (
+        GatheringGearProfitabilityDoneCraft.objects.select_related("object")
+        .filter(completed_at__gte=cutoff)
+        .order_by("city", "object__aodp_id", "completed_at", "pk")
+    )
+
+    if selected_city_filter != ALL_CITY_FILTER:
+        done_crafts = done_crafts.filter(city=selected_city_filter)
+
+    selected_resource_groups = _build_selected_resource_groups(selected_resource_filter)
+    selected_resource_query = Q()
+    for resource_group in selected_resource_groups:
+        selected_resource_query |= Q(object__aodp_id__contains=resource_group["aodp_id_fragment"])
+    done_crafts = done_crafts.filter(selected_resource_query)
+
+    recently_done_keys = {
+        (done_craft.city, done_craft.object_id)
+        for done_craft in done_crafts
+    }
+    done_signature = "|".join(
+        f"{done_craft.city}:{done_craft.object.aodp_id}:{done_craft.completed_at.isoformat()}"
+        for done_craft in done_crafts
+    ) or "none"
+    return recently_done_keys, done_signature
+
+
+def _build_profitability_refresh_redirect(
+    selected_city_filter,
+    selected_resource_filter,
+    minimum_percentage_filter,
+    minimum_flat_filter,
+    selected_sort_by_filter,
+):
+    query_string = _build_query_string(
+        city=selected_city_filter,
+        resource=selected_resource_filter,
+        min_percentage=minimum_percentage_filter,
+        min_flat=minimum_flat_filter,
+        sort=selected_sort_by_filter,
+    )
+    redirect_url = reverse("albion_online:gathering_gear_profitability")
+    if query_string:
+        return f"{redirect_url}?{query_string}"
+    return redirect_url
+
+
 def _build_query_string(**query_params):
     filtered_query_params = {key: value for key, value in query_params.items() if value not in (None, "")}
     return urlencode(filtered_query_params)
@@ -316,6 +371,10 @@ def gathering_gear_profitability(request):
     minimum_percentage_filter = _build_minimum_percentage_filter(request)
     minimum_flat_filter = _build_minimum_flat_filter(request)
     selected_sort_by_filter = _build_selected_sort_by_filter(request)
+    recently_done_keys, done_signature = _build_recently_done_craft_state(
+        selected_city_filter,
+        selected_resource_filter,
+    )
 
     if request.method == "POST":
         return _refresh_prices_and_redirect(
@@ -336,6 +395,8 @@ def gathering_gear_profitability(request):
         minimum_percentage_filter,
         minimum_flat_filter,
         selected_sort_by_filter,
+        recently_done_keys,
+        done_signature,
     )
     return render(
         request,
@@ -358,6 +419,39 @@ def gathering_gear_profitability(request):
             "selected_sort_by_filter": selected_sort_by_filter,
             "sort_by_options": SORT_BY_OPTIONS,
         },
+    )
+
+
+def gathering_gear_mark_done(request):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    object_aodp_id = request.POST.get("object_aodp_id")
+    row_city = request.POST.get("row_city")
+    if not object_aodp_id or row_city not in City.values:
+        return HttpResponseNotFound("Missing profitability craft identifiers.")
+
+    gear_object = Object.objects.filter(aodp_id=object_aodp_id).first()
+    if gear_object is None:
+        return HttpResponseNotFound("Craft not found.")
+
+    GatheringGearProfitabilityDoneCraft.objects.update_or_create(
+        object=gear_object,
+        city=row_city,
+        defaults={
+            "completed_at": timezone.now(),
+        },
+    )
+    _invalidate_gathering_gear_cache()
+    messages.success(request, "Craft marked as done for 12 hours.")
+    return redirect(
+        _build_profitability_refresh_redirect(
+            _build_selected_city_filter(request),
+            _build_selected_resource_filter_for_profitability(request),
+            _build_minimum_percentage_filter(request),
+            _build_minimum_flat_filter(request),
+            _build_selected_sort_by_filter(request),
+        )
     )
 
 

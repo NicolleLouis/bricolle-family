@@ -1,7 +1,9 @@
 from django.contrib import admin
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.utils import timezone
 
+from albion_online.constants.city import City
 from albion_online.models.object import Object
 
 
@@ -78,6 +80,36 @@ class RecipeInput(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.object.name or self.object.aodp_id}"
+
+
+class GatheringGearProfitabilityDoneCraft(models.Model):
+    object = models.ForeignKey(
+        Object,
+        on_delete=models.CASCADE,
+        related_name="gathering_gear_profitability_done_crafts",
+    )
+    city = models.CharField(max_length=16, choices=City.choices, db_index=True)
+    completed_at = models.DateTimeField(default=timezone.now, db_index=True)
+
+    class Meta:
+        ordering = ("-completed_at", "city", "object")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("object", "city"),
+                name="albion_unique_gathering_gear_profitability_done_craft",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.object} - {self.city} - {self.completed_at.isoformat()}"
+
+
+@admin.register(GatheringGearProfitabilityDoneCraft)
+class GatheringGearProfitabilityDoneCraftAdmin(admin.ModelAdmin):
+    list_display = ("object", "city", "completed_at")
+    list_filter = ("city", "completed_at")
+    search_fields = ("object__aodp_id", "object__name")
+    autocomplete_fields = ("object",)
 
 
 class RecipeInputInline(admin.TabularInline):
