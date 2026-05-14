@@ -1,5 +1,6 @@
 from importlib import import_module
 from datetime import timedelta
+import re
 
 import pytest
 from django.contrib.auth.models import User
@@ -150,13 +151,21 @@ class TestGatheringGearView:
     def test_get_returns_page(self, authenticated_client):
         sample_objects = _create_ore_gathering_gear_sample()
 
-        response = authenticated_client.get(f"{reverse('albion_online:gathering_gear')}?city=all&resource=ore")
+        response = authenticated_client.get(f"{reverse('albion_online:gathering_gear')}?city=all&resource=all")
+        response_content = response.content.decode()
+        resource_filter_match = re.search(
+            r'<select id="resourceFilter"[^>]*>(.*?)</select>',
+            response_content,
+            flags=re.S,
+        )
 
         assert response.status_code == 200
         assert b'name="city"' in response.content
         assert b'name="resource"' in response.content
-        assert b'value="all" selected' in response.content
         assert b'value="ore" selected' in response.content
+        assert b"Ore market tracker" in response.content
+        assert resource_filter_match is not None
+        assert 'value="all"' not in resource_filter_match.group(1)
         assert b"marketDetailPanel" in response.content
         assert b"marketDetailPanelBody" in response.content
         assert b"market-tier-cell" in response.content
@@ -171,6 +180,15 @@ class TestGatheringGearView:
         assert b"TEST_T4_HEAD_GATHERER_ORE_VIEW" not in response.content
         assert b"T4.2" in response.content
         assert b"Select a row to load details." in response.content
+
+    def test_get_falls_back_to_ore_when_resource_is_invalid(self, authenticated_client):
+        _create_ore_gathering_gear_sample()
+
+        response = authenticated_client.get(f"{reverse('albion_online:gathering_gear')}?resource=all")
+
+        assert response.status_code == 200
+        assert b'value="ore" selected' in response.content
+        assert b"Ore market tracker" in response.content
 
     def test_get_filters_to_fort_sterling_by_default(self, authenticated_client):
         _create_ore_gathering_gear_sample()

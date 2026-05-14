@@ -11,7 +11,6 @@ from django.urls import reverse
 
 from albion_online.constants.city import City
 from albion_online.constants.gathering_gear import (
-    GATHERING_GEAR_ALL_FILTER_VALUE,
     GATHERING_GEAR_DEFAULT_CITY_FILTER,
     GATHERING_GEAR_DEFAULT_RESOURCE_FILTER,
     GATHERING_GEAR_RESOURCE_FILTER_OPTIONS,
@@ -69,8 +68,6 @@ def _build_gathering_gear_rows(selected_resource_filter):
 
 
 def _build_selected_resource_groups(selected_resource_filter):
-    if selected_resource_filter == GATHERING_GEAR_ALL_FILTER_VALUE:
-        return GATHERING_GEAR_RESOURCE_GROUPS
     resource_group = GATHERING_GEAR_RESOURCE_GROUPS_BY_KEY.get(selected_resource_filter)
     if resource_group is not None:
         return (resource_group,)
@@ -201,20 +198,16 @@ def _build_selected_city_filter(request):
 
 def _build_selected_resource_filter(request):
     selected_resource_filter = request.GET.get("resource", GATHERING_GEAR_DEFAULT_RESOURCE_FILTER)
-    if selected_resource_filter == GATHERING_GEAR_ALL_FILTER_VALUE:
-        return GATHERING_GEAR_ALL_FILTER_VALUE
     if selected_resource_filter in GATHERING_GEAR_RESOURCE_GROUPS_BY_KEY:
         return selected_resource_filter
     return GATHERING_GEAR_DEFAULT_RESOURCE_FILTER
 
 
 def _build_selected_resource_filter_for_profitability(request):
-    selected_resource_filter = request.GET.get("resource", GATHERING_GEAR_ALL_FILTER_VALUE)
-    if selected_resource_filter == GATHERING_GEAR_ALL_FILTER_VALUE:
-        return GATHERING_GEAR_ALL_FILTER_VALUE
+    selected_resource_filter = request.GET.get("resource", GATHERING_GEAR_DEFAULT_RESOURCE_FILTER)
     if selected_resource_filter in GATHERING_GEAR_RESOURCE_GROUPS_BY_KEY:
         return selected_resource_filter
-    return GATHERING_GEAR_ALL_FILTER_VALUE
+    return GATHERING_GEAR_DEFAULT_RESOURCE_FILTER
 
 
 def _build_resource_filter_options():

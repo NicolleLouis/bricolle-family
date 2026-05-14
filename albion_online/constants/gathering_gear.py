@@ -2,7 +2,6 @@ from albion_online.constants.city import City
 from albion_online.constants.object_type import ObjectType
 
 
-GATHERING_GEAR_ALL_FILTER_VALUE = "all"
 GATHERING_GEAR_DEFAULT_CITY_FILTER = City.FORT_STERLING
 GATHERING_GEAR_DEFAULT_RESOURCE_FILTER = "ore"
 
@@ -75,7 +74,6 @@ GATHERING_GEAR_RESOURCE_GROUPS_BY_KEY = {
 }
 
 GATHERING_GEAR_RESOURCE_FILTER_OPTIONS = (
-    {"value": GATHERING_GEAR_ALL_FILTER_VALUE, "label": "All"},
     *[
         {"value": resource_group["key"], "label": resource_group["label"]}
         for resource_group in GATHERING_GEAR_RESOURCE_GROUPS
