@@ -75,9 +75,9 @@ class TestArtifactSalvageMarketSummaryService:
         first_row = rune_section["artifact_rows"][0]
         assert first_row["label"] == "Bloodforged Blade"
         assert first_row["cells"][0]["current_price"] == 900
-        assert first_row["cells"][0]["price_state"] == "green"
+        assert first_row["cells"][0]["price_state"] == "green_pale"
         assert first_row["cells"][1]["current_price"] == 1000
-        assert first_row["cells"][1]["price_state"] == "green"
+        assert first_row["cells"][1]["price_state"] == "green_strong"
         assert first_row["cells"][2]["current_price"] is None
         assert first_row["cells"][2]["price_state"] is None
 
@@ -98,6 +98,7 @@ class TestArtifactSalvageMarketSummaryService:
 
         assert service._build_buy_order_price(100) == 829
         assert service._build_buy_order_price(0) == 0
-        assert service._build_price_state(828, 829) == "green"
-        assert service._build_price_state(829, 829) == "green"
+        assert service._build_price_state(828, 829) == "green_strong"
+        assert service._build_price_state(829, 829) == "green_pale"
+        assert service._build_price_state(994, 829) == "green_pale"
         assert service._build_price_state(996, 829) == "red"

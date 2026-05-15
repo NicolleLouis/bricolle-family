@@ -154,6 +154,8 @@ class ArtifactSalvageMarketSummaryService(AlbionMarketSummaryCore):
         if current_price is None or buy_order_price is None:
             return None
 
+        if current_price < buy_order_price:
+            return "green_strong"
         if current_price * 100 < buy_order_price * 120:
-            return "green"
+            return "green_pale"
         return "red"

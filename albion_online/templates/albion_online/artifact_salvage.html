@@ -2,6 +2,19 @@
 {% load price_format %}
 
 {% block content %}
+<style>
+    .artifact-salvage-price-green-pale {
+        background-color: #e6f4ea !important;
+    }
+
+    .artifact-salvage-price-green-strong {
+        background-color: #b7e4c7 !important;
+    }
+
+    .artifact-salvage-price-red {
+        background-color: #f8d7da !important;
+    }
+</style>
 <div class="d-flex flex-column gap-4">
     <div class="position-sticky top-0 bg-white pt-2 pb-3" style="z-index: 1020;">
         <div class="d-flex justify-content-between align-items-center gap-3 shadow-sm border rounded-3 bg-light px-3 py-2">
@@ -105,7 +118,7 @@
                             <tr>
                                 <th scope="row" class="text-nowrap">{{ artifact_row.label }}</th>
                                 {% for cell in artifact_row.cells %}
-                                    <td class="text-center {% if cell.price_state == 'green' %}table-success{% elif cell.price_state == 'red' %}table-danger{% endif %}">
+                                    <td class="text-center {% if cell.price_state == 'green_strong' %}artifact-salvage-price-green-strong{% elif cell.price_state == 'green_pale' %}artifact-salvage-price-green-pale{% elif cell.price_state == 'red' %}artifact-salvage-price-red{% endif %}">
                                         <div class="d-flex flex-column align-items-center gap-1">
                                             {% if cell.current_price is not None %}
                                                 <span class="fw-semibold">{{ cell.current_price|compact_price }}</span>
