@@ -258,7 +258,7 @@ Risks:
 
 ### ART-SALVAGE-006 - Review, tighten, and document the final behavior
 
-Status: `not started`
+Status: `done`
 
 Goal:
 - Verify the implementation is internally consistent and update the architecture or plan if any real-world mismatch appears.
