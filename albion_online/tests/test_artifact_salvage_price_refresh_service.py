@@ -102,21 +102,15 @@ class TestArtifactSalvagePriceRefreshService:
 
         created_prices = service.refresh_prices()
 
-        assert len(fetcher.requested_objects_batches) == len(fake_families)
-        assert fetcher.requested_objects_batches[0] == [
+        assert len(fetcher.requested_objects_batches) == 1
+        assert set(fetcher.requested_objects_batches[0]) == {
             rune_artifact.aodp_id,
             rune_shard.aodp_id,
-        ]
-        assert fetcher.requested_objects_batches[1] == [
             soul_artifact.aodp_id,
             soul_shard.aodp_id,
-        ]
-        assert fetcher.requested_objects_batches[2] == [
             relic_artifact.aodp_id,
             relic_shard.aodp_id,
-        ]
-        assert fetcher.requested_objects_batches[3] == [
             avalonian_artifact.aodp_id,
             avalonian_shard.aodp_id,
-        ]
+        }
         assert created_prices and len(created_prices) == 8
