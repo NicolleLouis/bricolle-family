@@ -1,22 +1,84 @@
 {% load price_format %}
+{% load math_format %}
 
 <div class="market-detail-group" data-detail-key="{{ jacket_row.detail_key }}">
     {% for city_detail in jacket_row.city_details %}
         <section class="mb-4" data-market-city="{{ city_detail.city }}">
             <h3 class="h6 mb-2">{{ city_detail.label }}</h3>
-            <div class="mb-3">
-                <span class="text-muted small">Craft cost:</span>
-                <span class="fw-semibold">{{ city_detail.craft_cost|default:"-"|compact_price }}</span>
-                {% if city_detail.craft_margin is not None %}
-                    <span class="ms-2 text-muted small">Margin:</span>
-                    {% if city_detail.craft_margin < 0 %}
-                        <span class="badge bg-danger">{{ city_detail.craft_margin|compact_price }}</span>
-                    {% elif city_detail.craft_margin > 0 %}
-                        <span class="badge bg-success">+{{ city_detail.craft_margin|compact_price }}</span>
-                    {% else %}
-                        <span class="badge bg-secondary">0</span>
-                    {% endif %}
-                {% endif %}
+            <div class="row g-3 mb-3">
+                <div class="col-12 col-lg-6">
+                    <div class="border rounded-3 bg-light p-3 h-100">
+                        <div class="d-flex justify-content-between gap-3">
+                            <span class="text-muted small">Raw input cost</span>
+                            <span class="fw-semibold">{{ city_detail.raw_input_cost|default:"-"|compact_price }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between gap-3">
+                            <span class="text-muted small">Resource return</span>
+                            <span class="fw-semibold">
+                                {% if city_detail.resource_return_amount is not None %}
+                                    -{{ city_detail.resource_return_amount|compact_price }}
+                                    {% if city_detail.resource_return_rate is not None %}
+                                        <span class="text-muted">({{ city_detail.resource_return_rate|format_percent }})</span>
+                                    {% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between gap-3">
+                            <span class="text-muted small">Buy tax</span>
+                            <span class="fw-semibold">
+                                {% if city_detail.buy_tax_amount is not None %}
+                                    +{{ city_detail.buy_tax_amount|compact_price }} <span class="text-muted">(2%)</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between gap-3">
+                            <span class="text-muted small">Craft cost real</span>
+                            <span class="fw-semibold">{{ city_detail.craft_cost|default:"-"|compact_price }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-6">
+                    <div class="border rounded-3 bg-light p-3 h-100">
+                        <div class="d-flex justify-content-between gap-3">
+                            <span class="text-muted small">Gross sell price</span>
+                            <span class="fw-semibold">{{ city_detail.sell_price|default:"-"|compact_price }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between gap-3">
+                            <span class="text-muted small">Sale fee</span>
+                            <span class="fw-semibold">
+                                {% if city_detail.sale_fee_amount is not None %}
+                                    -{{ city_detail.sale_fee_amount|compact_price }} <span class="text-muted">(4% + 2.5%)</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between gap-3">
+                            <span class="text-muted small">Net sell price</span>
+                            <span class="fw-semibold">{{ city_detail.net_sell_price|default:"-"|compact_price }}</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between gap-3">
+                            <span class="text-muted small">Margin</span>
+                            {% if city_detail.craft_margin is not None %}
+                                {% if city_detail.craft_margin < 0 %}
+                                    <span class="badge bg-danger">{{ city_detail.craft_margin|compact_price }}</span>
+                                {% elif city_detail.craft_margin > 0 %}
+                                    <span class="badge bg-success">+{{ city_detail.craft_margin|compact_price }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">0</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="fw-semibold">-</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="table-responsive mb-3">
@@ -26,6 +88,7 @@
                             <th scope="col">Input</th>
                             <th scope="col">Qty</th>
                             <th scope="col">Sell</th>
+                            <th scope="col">RRR</th>
                             <th scope="col">Total</th>
                         </tr>
                     </thead>
@@ -41,6 +104,14 @@
                                         {% else %}
                                             <span class="fw-semibold">{{ input_detail.sell_price|compact_price }}</span>
                                         {% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                                </td>
+                                <td>
+                                    {% if input_detail.resource_return_rate is not None and input_detail.resource_return_amount is not None %}
+                                        <span class="fw-semibold">{{ input_detail.resource_return_rate|format_percent }}</span>
+                                        <div class="text-muted small">-{{ input_detail.resource_return_amount|compact_price }}</div>
                                     {% else %}
                                         -
                                     {% endif %}
@@ -49,7 +120,7 @@
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="4" class="text-muted">No recipe inputs found.</td>
+                                <td colspan="5" class="text-muted">No recipe inputs found.</td>
                             </tr>
                         {% endfor %}
                     </tbody>

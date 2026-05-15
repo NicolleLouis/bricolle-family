@@ -111,8 +111,8 @@ class TestLeatherJacketProfitabilityView:
         assert b"data-detail-key=" in response.content
         assert response.content.index(b"Mercenary Jacket") < response.content.index(b"Hunter Jacket")
         assert b"Bridgewatch" in response.content
-        assert b"+127" in response.content
-        assert b"+214" in response.content
+        assert b"+118" in response.content
+        assert b"+192" in response.content
 
     def test_get_can_sort_by_flat_amount(self, authenticated_client):
         _seed_profitability_data()
@@ -124,7 +124,7 @@ class TestLeatherJacketProfitabilityView:
         assert response.status_code == 200
         assert b'value="flat" selected' in response.content
         assert response.content.index(b"Hunter Jacket") < response.content.index(b"Mercenary Jacket")
-        assert b"+214" in response.content
+        assert b"+192" in response.content
 
     def test_marking_a_profitability_row_done_hides_it_for_twelve_hours(self, authenticated_client):
         _seed_profitability_data()

@@ -221,12 +221,20 @@ class TestMercenaryJacketMarketSummaryService:
 
         assert bridgewatch_summary.sell_price == 200
         assert bridgewatch_summary.craft_cost == 69
-        assert bridgewatch_summary.craft_margin == 127
-        assert bridgewatch_summary.craft_margin_percent == 184.05797101449275
+        assert bridgewatch_summary.craft_margin == 118
+        assert bridgewatch_summary.craft_margin_percent == pytest.approx(171.0144927536232)
         assert bridgewatch_summary.craft_margin_class_name == "bg-success"
         assert bridgewatch_summary.sell_price_freshness["label"] == "Info fiable"
+        assert bridgewatch_detail.raw_input_cost == 80
+        assert bridgewatch_detail.resource_return_amount == 12
+        assert bridgewatch_detail.buy_tax_amount == 1
+        assert bridgewatch_detail.sale_fee_amount == 13
+        assert bridgewatch_detail.net_sell_price == 187
         assert bridgewatch_detail.input_details[0].label == "Leather 4.2"
         assert bridgewatch_detail.input_details[0].quantity == 16
+        assert bridgewatch_detail.input_details[0].raw_cost == 80
+        assert bridgewatch_detail.input_details[0].resource_return_rate == pytest.approx(0.153)
+        assert bridgewatch_detail.input_details[0].resource_return_amount == 12
         assert bridgewatch_detail.input_details[0].sell_price == 5
         assert bridgewatch_detail.input_details[0].total_cost == 68
         assert [quality_detail.label for quality_detail in bridgewatch_detail.quality_details] == [
@@ -238,8 +246,8 @@ class TestMercenaryJacketMarketSummaryService:
         ]
         assert caerleon_summary.sell_price == 1100
         assert caerleon_summary.craft_cost == 1382
-        assert caerleon_summary.craft_margin == -304
-        assert caerleon_summary.craft_margin_percent == -21.99710564399421
+        assert caerleon_summary.craft_margin == -354
+        assert caerleon_summary.craft_margin_percent == pytest.approx(-25.615050651230103)
         assert caerleon_summary.craft_margin_class_name == "bg-danger"
         assert caerleon_summary.sell_price_freshness["label"] == "Info > 1 heure"
         assert martlock_summary.is_hidden is True
@@ -251,7 +259,7 @@ class TestMercenaryJacketMarketSummaryService:
         martlock_detail = next(detail for detail in detail_row["city_details"] if detail.city == City.MARTLOCK)
         assert martlock_detail.is_hidden is True
         assert martlock_detail.craft_cost == 692
-        assert martlock_detail.craft_margin == 1366
+        assert martlock_detail.craft_margin == 1272
 
     def test_build_rows_applies_city_specific_resource_return_rate_from_object_type_group(self):
         now = timezone.now()
