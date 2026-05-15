@@ -116,7 +116,7 @@ Risks:
 
 ### ART-SALVAGE-003 - Wire artifact salvage refresh job and cache invalidation
 
-Status: `not started`
+Status: `done`
 
 Goal:
 - Make artifact salvage refreshable through the existing async job pipeline.
