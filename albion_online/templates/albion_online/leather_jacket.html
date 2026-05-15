@@ -48,6 +48,39 @@
         </div>
     </div>
 
+    {% if price_refresh_job %}
+        <div
+            class="alert {% if price_refresh_job.status == 'failed' %}alert-danger{% elif price_refresh_job.status == 'success' %}alert-success{% else %}alert-warning{% endif %}"
+            id="priceRefreshJobBanner"
+            data-price-refresh-job-id="{{ price_refresh_job.id }}"
+            data-price-refresh-job-status-url="{{ price_refresh_job_status_url }}"
+            data-price-refresh-job-status="{{ price_refresh_job.status }}"
+        >
+            <div class="d-flex justify-content-between align-items-center gap-3">
+                <div>
+                    <strong>
+                        {% if price_refresh_job.status == 'failed' %}
+                            Price refresh failed
+                        {% elif price_refresh_job.status == 'success' %}
+                            Prices are ready
+                        {% else %}
+                            Refresh in progress
+                        {% endif %}
+                    </strong>
+                    <div class="small">
+                        {% if price_refresh_job.status == 'failed' %}
+                            {{ price_refresh_job.error_message }}
+                        {% elif price_refresh_job.status == 'success' %}
+                            {{ price_refresh_job.refreshed_count }} price entries refreshed.
+                        {% else %}
+                            The page will refresh automatically when prices are ready.
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
     {% for city_table in city_tables %}
         <div class="card">
             <div class="card-header bg-white">
@@ -144,6 +177,41 @@
 
 <script>
 (() => {
+    const priceRefreshJobBanner = document.getElementById('priceRefreshJobBanner');
+    if (priceRefreshJobBanner) {
+        const priceRefreshJobStatusUrl = priceRefreshJobBanner.dataset.priceRefreshJobStatusUrl;
+        const refreshUrl = new URL(window.location.href);
+        refreshUrl.searchParams.delete('refresh_job_id');
+        const refreshPage = () => window.location.replace(refreshUrl.toString());
+        const refreshBanner = async () => {
+            const response = await fetch(priceRefreshJobStatusUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!response.ok) {
+                return;
+            }
+            const payload = await response.json();
+            if (payload.status === 'success') {
+                priceRefreshJobBanner.className = 'alert alert-success';
+                priceRefreshJobBanner.querySelector('strong').textContent = 'Prices are ready';
+                priceRefreshJobBanner.querySelector('.small').textContent = `${payload.refreshed_count} price entries refreshed.`;
+                window.setTimeout(refreshPage, 500);
+                return;
+            }
+            if (payload.status === 'failed') {
+                priceRefreshJobBanner.className = 'alert alert-danger';
+                priceRefreshJobBanner.querySelector('strong').textContent = 'Price refresh failed';
+                priceRefreshJobBanner.querySelector('.small').textContent = payload.error_message || 'Unknown error.';
+                return;
+            }
+            window.setTimeout(refreshBanner, 2000);
+        };
+
+        if (priceRefreshJobBanner.dataset.priceRefreshJobStatus !== 'success' && priceRefreshJobBanner.dataset.priceRefreshJobStatus !== 'failed') {
+            window.setTimeout(refreshBanner, 1000);
+        } else if (priceRefreshJobBanner.dataset.priceRefreshJobStatus === 'success') {
+            window.setTimeout(refreshPage, 500);
+        }
+    }
+
     const offcanvasElement = document.getElementById('marketDetailPanel');
     const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvasElement);
     const titleElement = document.getElementById('marketDetailPanelLabel');

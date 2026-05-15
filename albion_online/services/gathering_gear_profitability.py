@@ -18,14 +18,14 @@ class GatheringGearProfitabilityService(AlbionMarketProfitabilityCore):
             if not self._matches_gear_type_filter(gear_row, selected_gear_type_filter):
                 continue
 
-            for city_detail in gear_row["city_details"]:
-                if not self._matches_city_filter(city_detail, selected_city_filter):
+            for city_summary in self._iter_city_rows(gear_row):
+                if not self._matches_city_filter(city_summary, selected_city_filter):
                     continue
-                if self._is_recently_done(gear_row, city_detail, recently_done_keys):
+                if self._is_recently_done(gear_row, city_summary, recently_done_keys):
                     continue
-                if not self._is_profitable(city_detail, minimum_percentage, minimum_flat):
+                if not self._is_profitable(city_summary, minimum_percentage, minimum_flat):
                     continue
-                rows.append(self._build_row(gear_row, city_detail))
+                rows.append(self._build_row(gear_row, city_summary))
 
         rows.sort(key=self._build_sort_key(sort_by))
         return rows
@@ -34,6 +34,9 @@ class GatheringGearProfitabilityService(AlbionMarketProfitabilityCore):
         if selected_gear_type_filter == "all":
             return True
         return gear_row["gathering_gear_type_key"] == selected_gear_type_filter
+
+    def _iter_city_rows(self, gear_row):
+        return gear_row.get("city_summaries") or gear_row.get("city_details") or []
 
     def _matches_city_filter(self, city_detail, selected_city_filter) -> bool:
         if selected_city_filter == "all":

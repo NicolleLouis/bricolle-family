@@ -1,10 +1,9 @@
-import time
 from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.core.cache import cache
-from django.db.models import Prefetch, Q
-from django.http import HttpResponse, HttpResponseNotFound
+from django.db.models import Q
+from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -18,12 +17,12 @@ from albion_online.constants.gathering_gear import (
     GATHERING_GEAR_RESOURCE_GROUPS_BY_KEY,
     GATHERING_GEAR_VARIANT_COLUMNS,
 )
-from albion_online.models import Object, Recipe
+from albion_online.models import Object, PriceRefreshJob
 from albion_online.services.gathering_gear_market_summary import (
     GatheringGearMarketSummaryService,
 )
-from albion_online.services.gathering_gear_price_refresh import (
-    GatheringGearPriceRefreshService,
+from albion_online.services.market_summary_querysets import (
+    build_market_summary_object_queryset,
 )
 from albion_online.services.gathering_gear_profitability import (
     GatheringGearProfitabilityService,
@@ -31,6 +30,7 @@ from albion_online.services.gathering_gear_profitability import (
 from albion_online.services.craft_profitability_done import (
     CraftProfitabilityDoneService,
 )
+from albion_online.tasks import refresh_price_job
 DEFAULT_MINIMUM_PERCENTAGE_FILTER = 20.0
 DEFAULT_SORT_BY_FILTER = "percentage"
 ALL_CITY_FILTER = "all"
@@ -40,9 +40,10 @@ SORT_BY_OPTIONS = (
     {"value": "flat", "label": "Flat amount"},
 )
 CACHE_VERSION_KEY = "albion_online:gathering_gear:version"
-CACHED_GEAR_ROWS_KEY = "albion_online:gathering_gear:gear_rows:{version}:{resource}"
+CACHE_PAYLOAD_VERSION = "v2"
+CACHED_GEAR_ROWS_KEY = f"albion_online:gathering_gear:gear_rows:{{version}}:{CACHE_PAYLOAD_VERSION}:{{resource}}"
 CACHED_PROFITABLE_ROWS_KEY = (
-    "albion_online:gathering_gear:profitable_rows:{version}:{resource}:{city}:{min_percentage}:{min_flat}:{sort}:{done_signature}"
+    f"albion_online:gathering_gear:profitable_rows:{{version}}:{CACHE_PAYLOAD_VERSION}:{{resource}}:{{city}}:{{min_percentage}}:{{min_flat}}:{{sort}}:{{done_signature}}"
 )
 CACHED_DETAIL_GROUP_KEY = "albion_online:gathering_gear:detail_group:{version}:{detail_key}:{city}"
 
@@ -59,17 +60,7 @@ def _build_gathering_gear_objects(selected_resource_groups):
     for resource_group in selected_resource_groups:
         gear_filter |= Q(aodp_id__contains=resource_group["aodp_id_fragment"])
 
-    return (
-        Object.objects.filter(gear_filter, tier__gte=4)
-        .select_related("type")
-        .prefetch_related(
-            "prices",
-            Prefetch(
-                "output_recipes",
-                queryset=Recipe.objects.prefetch_related("inputs__object__prices"),
-            ),
-        )
-    )
+    return build_market_summary_object_queryset(Object.objects.filter(gear_filter, tier__gte=4))
 
 
 def _build_selected_resource_groups(selected_resource_filter):
@@ -85,10 +76,6 @@ def _get_cache_version():
         cache_version = "initial"
         cache.set(CACHE_VERSION_KEY, cache_version, None)
     return cache_version
-
-
-def _invalidate_gathering_gear_cache():
-    cache.set(CACHE_VERSION_KEY, str(time.time()), None)
 
 
 def _get_cached_gathering_gear_rows(selected_resource_filter):
@@ -207,6 +194,8 @@ def _build_selected_city_filter(request):
 
 def _build_selected_resource_filter(request):
     selected_resource_filter = request.GET.get("resource", GATHERING_GEAR_DEFAULT_RESOURCE_FILTER)
+    if selected_resource_filter == "stone":
+        selected_resource_filter = "rock"
     if selected_resource_filter in GATHERING_GEAR_RESOURCE_GROUPS_BY_KEY:
         return selected_resource_filter
     return GATHERING_GEAR_DEFAULT_RESOURCE_FILTER
@@ -214,6 +203,8 @@ def _build_selected_resource_filter(request):
 
 def _build_selected_resource_filter_for_profitability(request):
     selected_resource_filter = request.GET.get("resource", GATHERING_GEAR_DEFAULT_RESOURCE_FILTER)
+    if selected_resource_filter == "stone":
+        selected_resource_filter = "rock"
     if selected_resource_filter in GATHERING_GEAR_RESOURCE_GROUPS_BY_KEY:
         return selected_resource_filter
     return GATHERING_GEAR_DEFAULT_RESOURCE_FILTER
@@ -274,15 +265,31 @@ def _build_query_string(**query_params):
     return urlencode(filtered_query_params)
 
 
+def _queue_price_refresh_job(request, selected_resource_filter):
+    price_refresh_job = PriceRefreshJob.objects.create(
+        kind=PriceRefreshJob.Kind.GATHERING_GEAR,
+        context={"resource": selected_resource_filter},
+    )
+    refresh_price_job.delay(price_refresh_job_id=price_refresh_job.id)
+    messages.success(request, "Le refresh des prix a ete lance en asynchrone.")
+    return price_refresh_job
+
+
+def _build_refresh_job_status_payload(price_refresh_job):
+    return {
+        "id": price_refresh_job.id,
+        "kind": price_refresh_job.kind,
+        "status": price_refresh_job.status,
+        "refreshed_count": price_refresh_job.refreshed_count,
+        "error_message": price_refresh_job.error_message,
+        "finished_at": price_refresh_job.finished_at.isoformat() if price_refresh_job.finished_at else None,
+    }
+
+
 def _refresh_prices_and_redirect(request, redirect_url_name, **query_params):
     selected_resource_filter = query_params.get("resource", GATHERING_GEAR_DEFAULT_RESOURCE_FILTER)
-    created_prices = GatheringGearPriceRefreshService().refresh_prices(selected_resource_filter=selected_resource_filter)
-    _invalidate_gathering_gear_cache()
-    messages.success(
-        request,
-        f"{len(created_prices)} price entries refreshed for gathering gear.",
-    )
-    query_string = _build_query_string(**query_params)
+    price_refresh_job = _queue_price_refresh_job(request, selected_resource_filter)
+    query_string = _build_query_string(**{**query_params, "refresh_job_id": price_refresh_job.id})
     redirect_url = reverse(redirect_url_name)
     if query_string:
         return redirect(f"{redirect_url}?{query_string}")
@@ -300,6 +307,20 @@ def gathering_gear(request):
             resource=selected_resource_filter,
         )
 
+    refresh_job_id = request.GET.get("refresh_job_id")
+    refresh_job_id_int = None
+    if refresh_job_id:
+        try:
+            refresh_job_id_int = int(refresh_job_id)
+        except ValueError:
+            refresh_job_id_int = None
+    price_refresh_job = None
+    if refresh_job_id_int is not None:
+        price_refresh_job = PriceRefreshJob.objects.filter(
+            id=refresh_job_id_int,
+            kind=PriceRefreshJob.Kind.GATHERING_GEAR,
+        ).first()
+
     gear_rows = _get_cached_gathering_gear_rows(selected_resource_filter)
     return render(
         request,
@@ -315,6 +336,12 @@ def gathering_gear(request):
             "selected_resource_label": GATHERING_GEAR_RESOURCE_GROUPS_BY_KEY[selected_resource_filter]["label"],
             "detail_panel_url": reverse("albion_online:gathering_gear_detail_panel"),
             "table_columns_count": len(GATHERING_GEAR_VARIANT_COLUMNS) + 1,
+            "price_refresh_job": price_refresh_job,
+            "price_refresh_job_status_url": (
+                reverse("albion_online:price_refresh_job_status", kwargs={"job_id": refresh_job_id_int})
+                if refresh_job_id_int is not None
+                else None
+            ),
         },
     )
 
@@ -405,13 +432,24 @@ def gathering_gear_detail_panel(request):
     if gear_row is None:
         return HttpResponseNotFound("Detail not found.")
 
+    detail_row = GatheringGearMarketSummaryService().build_detail_row(gear_row["object"])
     detail_html = render_to_string(
         "albion_online/gathering_gear_detail_group.html",
         {
-            "gear_row": gear_row,
+            "gear_row": detail_row,
             "selected_city_filter": selected_city_filter,
         },
         request=request,
     )
     cache.set(cache_key, detail_html, None)
     return HttpResponse(detail_html)
+
+
+def price_refresh_job_status(request, job_id):
+    price_refresh_job = PriceRefreshJob.objects.filter(
+        id=job_id,
+        kind=PriceRefreshJob.Kind.GATHERING_GEAR,
+    ).first()
+    if price_refresh_job is None:
+        return JsonResponse({"status": "not_found"}, status=404)
+    return JsonResponse(_build_refresh_job_status_payload(price_refresh_job))

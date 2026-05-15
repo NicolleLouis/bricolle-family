@@ -1,17 +1,15 @@
 from django.contrib import messages
 from django.core.cache import cache
 from django.db.models import Q
-from django.db.models import Prefetch
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from urllib.parse import urlencode
-import time
 
 from albion_online.constants.city import City
 from albion_online.constants.leather_jacket import LEATHER_JACKET_TYPES
-from albion_online.models import Object, Recipe
+from albion_online.models import Object, PriceRefreshJob
 from albion_online.services.leather_jacket_profitability import (
     LeatherJacketProfitabilityService,
 )
@@ -21,9 +19,10 @@ from albion_online.services.craft_profitability_done import (
 from albion_online.services.mercenary_jacket_market_summary import (
     MercenaryJacketMarketSummaryService,
 )
-from albion_online.services.mercenary_jacket_price_refresh import (
-    LeatherJacketPriceRefreshService,
+from albion_online.services.market_summary_querysets import (
+    build_market_summary_object_queryset,
 )
+from albion_online.tasks import refresh_price_job
 
 
 ALL_CITY_FILTER = "all"
@@ -36,9 +35,10 @@ SORT_BY_OPTIONS = (
     {"value": "flat", "label": "Flat amount"},
 )
 CACHE_VERSION_KEY = "albion_online:leather_jacket:version"
-CACHED_JACKET_ROWS_KEY = "albion_online:leather_jacket:jacket_rows:{version}"
+CACHE_PAYLOAD_VERSION = "v2"
+CACHED_JACKET_ROWS_KEY = f"albion_online:leather_jacket:jacket_rows:{{version}}:{CACHE_PAYLOAD_VERSION}"
 CACHED_PROFITABLE_ROWS_KEY = (
-    "albion_online:leather_jacket:profitable_rows:{version}:{city}:{jacket_type}:{min_percentage}:{min_flat}:{sort}:{done_signature}"
+    f"albion_online:leather_jacket:profitable_rows:{{version}}:{CACHE_PAYLOAD_VERSION}:{{city}}:{{jacket_type}}:{{min_percentage}}:{{min_flat}}:{{sort}}:{{done_signature}}"
 )
 CACHED_DETAIL_GROUP_KEY = "albion_online:leather_jacket:detail_group:{version}:{detail_key}:{city}"
 
@@ -48,16 +48,8 @@ def _build_leather_jacket_rows():
     for jacket_type in LEATHER_JACKET_TYPES:
         jacket_filter |= Q(aodp_id__contains=jacket_type["aodp_id_fragment"])
 
-    leather_jackets = (
+    leather_jackets = build_market_summary_object_queryset(
         Object.objects.filter(jacket_filter, tier__gte=4)
-        .select_related("type")
-        .prefetch_related(
-            "prices",
-            Prefetch(
-                "output_recipes",
-                queryset=Recipe.objects.prefetch_related("inputs__object__prices"),
-            ),
-        )
     )
     jacket_rows = MercenaryJacketMarketSummaryService().build_rows(leather_jackets)
     for jacket_row in jacket_rows:
@@ -75,10 +67,6 @@ def _get_cache_version():
         cache_version = "initial"
         cache.set(CACHE_VERSION_KEY, cache_version, None)
     return cache_version
-
-
-def _invalidate_leather_jacket_cache():
-    cache.set(CACHE_VERSION_KEY, str(time.time()), None)
 
 
 def _get_cached_jacket_rows():
@@ -148,22 +136,9 @@ def _build_city_tables(jacket_rows, selected_city_filter=DEFAULT_CITY_FILTER):
         rows = []
         for notation in notations:
             cells = []
-            row_input_details = []
-            output_details = []
             for jacket_type in LEATHER_JACKET_TYPES:
                 jacket_row = rows_by_notation_and_type.get((notation, jacket_type["key"]))
                 city_summary = _find_city_summary(jacket_row, city) if jacket_row else None
-                city_detail = _find_city_detail(jacket_row, city) if jacket_row else None
-                if city_detail is not None and not row_input_details:
-                    row_input_details = city_detail.input_details
-                if jacket_row is not None and city_detail is not None:
-                    output_details.append(
-                        {
-                            "jacket_row": jacket_row,
-                            "jacket_type": jacket_type,
-                            "city_detail": city_detail,
-                        }
-                    )
                 cells.append(
                     {
                         "jacket_row": jacket_row,
@@ -177,8 +152,6 @@ def _build_city_tables(jacket_rows, selected_city_filter=DEFAULT_CITY_FILTER):
                     "display_notation": f"T{notation}",
                     "detail_key": f"{city}:{notation}",
                     "detail_title": f"T{notation} Leather Jackets",
-                    "input_details": row_input_details,
-                    "output_details": output_details,
                     "cells": cells,
                 }
             )
@@ -233,13 +206,6 @@ def _find_city_summary(jacket_row, city):
     return None
 
 
-def _find_city_detail(jacket_row, city):
-    for city_detail in jacket_row["city_details"]:
-        if city_detail.city == city:
-            return city_detail
-    return None
-
-
 def _sort_notation(notation):
     if notation is None:
         return (0, 0)
@@ -286,14 +252,31 @@ def _build_query_string(**query_params):
     return urlencode(filtered_query_params)
 
 
-def _refresh_prices_and_redirect(request, redirect_url_name, **query_params):
-    created_prices = LeatherJacketPriceRefreshService().refresh_prices()
-    _invalidate_leather_jacket_cache()
-    messages.success(
-        request,
-        f"{len(created_prices)} price entries refreshed for leather jackets.",
+def _queue_price_refresh_job(request, selected_city_filter):
+    price_refresh_job = PriceRefreshJob.objects.create(
+        kind=PriceRefreshJob.Kind.LEATHER_JACKET,
+        context={"city": selected_city_filter},
     )
-    query_string = _build_query_string(**query_params)
+    refresh_price_job.delay(price_refresh_job_id=price_refresh_job.id)
+    messages.success(request, "Le refresh des prix a ete lance en asynchrone.")
+    return price_refresh_job
+
+
+def _build_refresh_job_status_payload(price_refresh_job):
+    return {
+        "id": price_refresh_job.id,
+        "kind": price_refresh_job.kind,
+        "status": price_refresh_job.status,
+        "refreshed_count": price_refresh_job.refreshed_count,
+        "error_message": price_refresh_job.error_message,
+        "finished_at": price_refresh_job.finished_at.isoformat() if price_refresh_job.finished_at else None,
+    }
+
+
+def _refresh_prices_and_redirect(request, redirect_url_name, **query_params):
+    selected_city_filter = query_params.get("city", DEFAULT_CITY_FILTER)
+    price_refresh_job = _queue_price_refresh_job(request, selected_city_filter)
+    query_string = _build_query_string(**{**query_params, "refresh_job_id": price_refresh_job.id})
     redirect_url = reverse(redirect_url_name)
     if query_string:
         return redirect(f"{redirect_url}?{query_string}")
@@ -309,6 +292,20 @@ def leather_jacket(request):
             city=selected_city_filter,
         )
 
+    refresh_job_id = request.GET.get("refresh_job_id")
+    refresh_job_id_int = None
+    if refresh_job_id:
+        try:
+            refresh_job_id_int = int(refresh_job_id)
+        except ValueError:
+            refresh_job_id_int = None
+    price_refresh_job = None
+    if refresh_job_id_int is not None:
+        price_refresh_job = PriceRefreshJob.objects.filter(
+            id=refresh_job_id_int,
+            kind=PriceRefreshJob.Kind.LEATHER_JACKET,
+        ).first()
+
     jacket_rows = _get_cached_jacket_rows()
     return render(
         request,
@@ -320,6 +317,12 @@ def leather_jacket(request):
             "selected_city_filter": selected_city_filter,
             "detail_panel_url": reverse("albion_online:leather_jacket_detail_panel"),
             "table_columns_count": len(LEATHER_JACKET_TYPES) + 1,
+            "price_refresh_job": price_refresh_job,
+            "price_refresh_job_status_url": (
+                reverse("albion_online:price_refresh_job_status", kwargs={"job_id": refresh_job_id_int})
+                if refresh_job_id_int is not None
+                else None
+            ),
         },
     )
 
@@ -408,13 +411,24 @@ def leather_jacket_detail_panel(request):
     if jacket_row is None:
         return HttpResponseNotFound("Detail not found.")
 
+    detail_row = MercenaryJacketMarketSummaryService().build_detail_row(jacket_row["object"])
     detail_html = render_to_string(
         "albion_online/leather_jacket_detail_group.html",
         {
-            "jacket_row": jacket_row,
+            "jacket_row": detail_row,
             "selected_city_filter": selected_city_filter,
         },
         request=request,
     )
     cache.set(cache_key, detail_html, None)
     return HttpResponse(detail_html)
+
+
+def price_refresh_job_status(request, job_id):
+    price_refresh_job = PriceRefreshJob.objects.filter(
+        id=job_id,
+        kind=PriceRefreshJob.Kind.LEATHER_JACKET,
+    ).first()
+    if price_refresh_job is None:
+        return JsonResponse({"status": "not_found"}, status=404)
+    return JsonResponse(_build_refresh_job_status_payload(price_refresh_job))

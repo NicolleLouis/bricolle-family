@@ -207,15 +207,17 @@ class TestMercenaryJacketMarketSummaryService:
             buy_price_max_date=now - timedelta(days=2),
         )
 
-        rows = MercenaryJacketMarketSummaryService().build_rows([mercenary_jacket])
+        service = MercenaryJacketMarketSummaryService()
+        rows = service.build_rows([mercenary_jacket])
 
         assert len(rows) == 1
         city_summaries = rows[0]["city_summaries"]
+        detail_row = service.build_detail_row(mercenary_jacket)
 
         bridgewatch_summary = next(summary for summary in city_summaries if summary.city == City.BRIDGEWATCH)
         caerleon_summary = next(summary for summary in city_summaries if summary.city == City.CAERLEON)
         martlock_summary = next(summary for summary in city_summaries if summary.city == City.MARTLOCK)
-        bridgewatch_detail = next(detail for detail in rows[0]["city_details"] if detail.city == City.BRIDGEWATCH)
+        bridgewatch_detail = next(detail for detail in detail_row["city_details"] if detail.city == City.BRIDGEWATCH)
 
         assert bridgewatch_summary.sell_price == 200
         assert bridgewatch_summary.craft_cost == 69
@@ -246,7 +248,7 @@ class TestMercenaryJacketMarketSummaryService:
         assert martlock_summary.craft_margin is None
         assert martlock_summary.craft_margin_class_name is None
         assert martlock_summary.sell_price_freshness["label"] == "Info > 1 jour"
-        martlock_detail = next(detail for detail in rows[0]["city_details"] if detail.city == City.MARTLOCK)
+        martlock_detail = next(detail for detail in detail_row["city_details"] if detail.city == City.MARTLOCK)
         assert martlock_detail.is_hidden is True
         assert martlock_detail.craft_cost == 692
         assert martlock_detail.craft_margin == 1366
@@ -295,10 +297,15 @@ class TestMercenaryJacketMarketSummaryService:
             buy_price_max_date=now - timedelta(minutes=30),
         )
 
-        rows = MercenaryJacketMarketSummaryService().build_rows([mercenary_jacket])
+        service = MercenaryJacketMarketSummaryService()
+        rows = service.build_rows([mercenary_jacket])
 
         bridgewatch_summary = next(summary for summary in rows[0]["city_summaries"] if summary.city == City.BRIDGEWATCH)
-        bridgewatch_detail = next(detail for detail in rows[0]["city_details"] if detail.city == City.BRIDGEWATCH)
+        bridgewatch_detail = next(
+            detail
+            for detail in service.build_detail_row(mercenary_jacket)["city_details"]
+            if detail.city == City.BRIDGEWATCH
+        )
 
         assert bridgewatch_detail.input_details[0].total_cost == 101
         assert bridgewatch_summary.craft_cost == 103

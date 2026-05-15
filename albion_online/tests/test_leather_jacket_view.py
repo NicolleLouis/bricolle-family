@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from albion_online.constants.city import City
 from albion_online.constants.object_type import ObjectType
-from albion_online.models import Object, Price, Recipe, RecipeInput
+from albion_online.models import Object, Price, PriceRefreshJob, Recipe, RecipeInput
 
 
 @pytest.mark.django_db
@@ -203,18 +203,37 @@ class TestLeatherJacketView:
         assert b"Craft cost:" in response.content
 
     def test_post_refreshes_prices(self, authenticated_client, monkeypatch):
-        called = {"refresh": False}
         leather_jacket_view = import_module("albion_online.views.leather_jacket")
 
-        class FakeService:
-            def refresh_prices(self):
-                called["refresh"] = True
-                return [object()]
+        called = {"delay": None}
 
-        monkeypatch.setattr(leather_jacket_view, "LeatherJacketPriceRefreshService", lambda: FakeService())
+        class FakeDelay:
+            def delay(self, **kwargs):
+                called["delay"] = kwargs
+
+        monkeypatch.setattr(leather_jacket_view, "refresh_price_job", FakeDelay())
 
         response = authenticated_client.post(f"{reverse('albion_online:leather_jacket')}?city=all")
 
         assert response.status_code == 302
-        assert response.url == f"{reverse('albion_online:leather_jacket')}?city=all"
-        assert called["refresh"] is True
+        assert "refresh_job_id=" in response.url
+        assert response.url.startswith(f"{reverse('albion_online:leather_jacket')}?city=all")
+        assert called["delay"] is not None
+        job = PriceRefreshJob.objects.get()
+        assert job.kind == PriceRefreshJob.Kind.LEATHER_JACKET
+        assert job.status == PriceRefreshJob.Status.QUEUED
+
+    def test_price_refresh_job_status_returns_json(self, authenticated_client):
+        job = PriceRefreshJob.objects.create(
+            kind=PriceRefreshJob.Kind.LEATHER_JACKET,
+            status=PriceRefreshJob.Status.SUCCESS,
+            refreshed_count=12,
+        )
+
+        response = authenticated_client.get(
+            reverse("albion_online:price_refresh_job_status", kwargs={"job_id": job.id})
+        )
+
+        assert response.status_code == 200
+        assert response.json()["status"] == "success"
+        assert response.json()["refreshed_count"] == 12

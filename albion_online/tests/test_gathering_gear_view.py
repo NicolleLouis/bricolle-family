@@ -13,6 +13,7 @@ from albion_online.models import (
     CraftProfitabilityDone,
     Object,
     Price,
+    PriceRefreshJob,
     Recipe,
     RecipeInput,
 )
@@ -141,6 +142,122 @@ def _create_ore_gathering_gear_sample():
     }
 
 
+def _create_fish_gathering_gear_sample():
+    now = timezone.now()
+    fisherman_cap = Object.objects.create(
+        aodp_id="TEST_T4_HEAD_GATHERER_FISH_VIEW",
+        name="Adept's Fisherman Cap",
+        type_id=ObjectType.HEAD,
+        tier=4,
+        enchantment=2,
+        crafting_tree="gatherer_fish_head",
+    )
+    fisherman_garb = Object.objects.create(
+        aodp_id="TEST_T4_ARMOR_GATHERER_FISH_VIEW",
+        name="Adept's Fisherman Garb",
+        type_id=ObjectType.ARMOR,
+        tier=4,
+        enchantment=2,
+        equipment_category="CHEST",
+        crafting_tree="gatherer_fish_chest",
+    )
+    fisherman_workboot = Object.objects.create(
+        aodp_id="TEST_T4_SHOES_GATHERER_FISH_VIEW",
+        name="Adept's Fisherman Workboots",
+        type_id=ObjectType.SHOES,
+        tier=4,
+        enchantment=2,
+        equipment_category="SHOE",
+        crafting_tree="gatherer_fish_shoe",
+    )
+    fisherman_backpack = Object.objects.create(
+        aodp_id="TEST_T4_BACKPACK_GATHERER_FISH_VIEW",
+        name="Adept's Fisherman Backpack",
+        type_id=ObjectType.BACKPACK,
+        tier=4,
+        enchantment=2,
+    )
+    cloth = Object.objects.create(
+        aodp_id="TEST_T4_CLOTH_FISH_VIEW@2",
+        name="Adept's Cloth",
+        type_id=ObjectType.CLOTH,
+        tier=4,
+        enchantment=2,
+    )
+    leather = Object.objects.create(
+        aodp_id="TEST_T4_LEATHER_FISH_VIEW@2",
+        name="Adept's Leather",
+        type_id=ObjectType.LEATHER,
+        tier=4,
+        enchantment=2,
+    )
+
+    for gear_object in [fisherman_cap, fisherman_garb, fisherman_workboot, fisherman_backpack]:
+        for city, timestamp, quality_payloads in [
+            (
+                City.BRIDGEWATCH,
+                now - timedelta(minutes=30),
+                [(0, 100, 400), (1, 200, 500), (2, 300, 600)],
+            ),
+            (
+                City.FORT_STERLING,
+                now - timedelta(minutes=30),
+                [(0, 120, 420), (1, 220, 520), (2, 320, 620)],
+            ),
+        ]:
+            for quality, sell_price_min, buy_price_max in quality_payloads:
+                Price.objects.create(
+                    object=gear_object,
+                    city=city,
+                    quality=quality,
+                    sell_price_min=sell_price_min,
+                    sell_price_min_date=timestamp,
+                    buy_price_max=buy_price_max,
+                    buy_price_max_date=timestamp,
+                )
+
+    for input_object in [cloth, leather]:
+        for city, timestamp, quality_payloads in [
+            (
+                City.BRIDGEWATCH,
+                now - timedelta(minutes=30),
+                [(0, 4, 8), (1, 5, 9), (2, 6, 10)],
+            ),
+            (
+                City.FORT_STERLING,
+                now - timedelta(minutes=30),
+                [(0, 6, 10), (1, 7, 11), (2, 8, 12)],
+            ),
+        ]:
+            for quality, sell_price_min, buy_price_max in quality_payloads:
+                Price.objects.create(
+                    object=input_object,
+                    city=city,
+                    quality=quality,
+                    sell_price_min=sell_price_min,
+                    sell_price_min_date=timestamp,
+                    buy_price_max=buy_price_max,
+                    buy_price_max_date=timestamp,
+                )
+
+    fisherman_cap_recipe = Recipe.objects.create(output=fisherman_cap, output_quantity=1)
+    RecipeInput.objects.create(recipe=fisherman_cap_recipe, object=leather, quantity=8)
+    fisherman_garb_recipe = Recipe.objects.create(output=fisherman_garb, output_quantity=1)
+    RecipeInput.objects.create(recipe=fisherman_garb_recipe, object=leather, quantity=8)
+    fisherman_workboot_recipe = Recipe.objects.create(output=fisherman_workboot, output_quantity=1)
+    RecipeInput.objects.create(recipe=fisherman_workboot_recipe, object=leather, quantity=8)
+    fisherman_backpack_recipe = Recipe.objects.create(output=fisherman_backpack, output_quantity=1)
+    RecipeInput.objects.create(recipe=fisherman_backpack_recipe, object=cloth, quantity=4)
+    RecipeInput.objects.create(recipe=fisherman_backpack_recipe, object=leather, quantity=4)
+
+    return {
+        "fisherman_cap": fisherman_cap,
+        "fisherman_garb": fisherman_garb,
+        "fisherman_workboot": fisherman_workboot,
+        "fisherman_backpack": fisherman_backpack,
+    }
+
+
 @pytest.mark.django_db
 class TestGatheringGearView:
     @pytest.fixture
@@ -187,6 +304,16 @@ class TestGatheringGearView:
         assert b"T4.2" in response.content
         assert b"Select a row to load details." in response.content
 
+    def test_get_lists_fish_resource_filter_option(self, authenticated_client):
+        _create_fish_gathering_gear_sample()
+
+        response = authenticated_client.get(f"{reverse('albion_online:gathering_gear')}?resource=fish")
+
+        assert response.status_code == 200
+        assert b'value="fish" selected' in response.content
+        assert b"Fish market tracker" in response.content
+        assert b'data-detail-key="fish:HEAD:4.2"' in response.content
+
     def test_get_falls_back_to_ore_when_resource_is_invalid(self, authenticated_client):
         _create_ore_gathering_gear_sample()
 
@@ -195,6 +322,15 @@ class TestGatheringGearView:
         assert response.status_code == 200
         assert b'value="ore" selected' in response.content
         assert b"Ore market tracker" in response.content
+
+    def test_get_maps_stone_resource_filter_to_rock(self, authenticated_client):
+        _create_ore_gathering_gear_sample()
+
+        response = authenticated_client.get(f"{reverse('albion_online:gathering_gear')}?resource=stone")
+
+        assert response.status_code == 200
+        assert b'value="rock" selected' in response.content
+        assert b"Rock market tracker" in response.content
 
     def test_get_filters_to_fort_sterling_by_default(self, authenticated_client):
         _create_ore_gathering_gear_sample()
@@ -229,23 +365,42 @@ class TestGatheringGearView:
         assert b"Craft cost:" in response.content
 
     def test_post_refreshes_prices(self, authenticated_client, monkeypatch):
-        called = {"refresh": False}
         gathering_gear_view = import_module("albion_online.views.gathering_gear")
 
-        class FakeService:
-            def refresh_prices(self, selected_resource_filter="all"):
-                called["refresh"] = selected_resource_filter
-                return [object()]
+        called = {"delay": None}
 
-        monkeypatch.setattr(gathering_gear_view, "GatheringGearPriceRefreshService", lambda: FakeService())
+        class FakeDelay:
+            def delay(self, **kwargs):
+                called["delay"] = kwargs
+
+        monkeypatch.setattr(gathering_gear_view, "refresh_price_job", FakeDelay())
 
         response = authenticated_client.post(
             f"{reverse('albion_online:gathering_gear')}?city=all&resource=ore"
         )
 
         assert response.status_code == 302
-        assert response.url == f"{reverse('albion_online:gathering_gear')}?city=all&resource=ore"
-        assert called["refresh"] == "ore"
+        assert "refresh_job_id=" in response.url
+        assert response.url.startswith(f"{reverse('albion_online:gathering_gear')}?city=all&resource=ore")
+        assert called["delay"] is not None
+        job = PriceRefreshJob.objects.get()
+        assert job.kind == PriceRefreshJob.Kind.GATHERING_GEAR
+        assert job.status == PriceRefreshJob.Status.QUEUED
+
+    def test_price_refresh_job_status_returns_json(self, authenticated_client):
+        job = PriceRefreshJob.objects.create(
+            kind=PriceRefreshJob.Kind.GATHERING_GEAR,
+            status=PriceRefreshJob.Status.SUCCESS,
+            refreshed_count=34,
+        )
+
+        response = authenticated_client.get(
+            reverse("albion_online:price_refresh_job_status", kwargs={"job_id": job.id})
+        )
+
+        assert response.status_code == 200
+        assert response.json()["status"] == "success"
+        assert response.json()["refreshed_count"] == 34
 
     def test_profitability_page_omits_resource_filter(self, authenticated_client):
         _create_ore_gathering_gear_sample()

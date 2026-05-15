@@ -27,6 +27,10 @@ GATHERING_GEAR_RECIPE_KEYS = (
     "skinner_chest",
     "skinner_shoe",
     "skinner_backpack",
+    "fisherman_head",
+    "fisherman_chest",
+    "fisherman_shoe",
+    "fisherman_backpack",
 )
 
 
@@ -67,6 +71,41 @@ class TestRecipeGenerationService:
         assert ore_head_inputs == {"T4_METALBAR": 8}
         assert ore_garb_inputs == {"T4_METALBAR": 16}
         assert ore_backpack_inputs == {"T4_CLOTH": 4, "T4_LEATHER": 4}
+
+        fish_head_recipe = Recipe.objects.get(
+            definition__key="fisherman_head",
+            output__aodp_id="T4_HEAD_GATHERER_FISH",
+        )
+        fish_garb_recipe = Recipe.objects.get(
+            definition__key="fisherman_chest",
+            output__aodp_id="T4_ARMOR_GATHERER_FISH",
+        )
+        fish_workboot_recipe = Recipe.objects.get(
+            definition__key="fisherman_shoe",
+            output__aodp_id="T4_SHOES_GATHERER_FISH",
+        )
+        fish_backpack_recipe = Recipe.objects.get(
+            definition__key="fisherman_backpack",
+            output__aodp_id="T4_BACKPACK_GATHERER_FISH",
+        )
+
+        fish_head_inputs = {
+            recipe_input.object.aodp_id: recipe_input.quantity for recipe_input in fish_head_recipe.inputs.all()
+        }
+        fish_garb_inputs = {
+            recipe_input.object.aodp_id: recipe_input.quantity for recipe_input in fish_garb_recipe.inputs.all()
+        }
+        fish_workboot_inputs = {
+            recipe_input.object.aodp_id: recipe_input.quantity for recipe_input in fish_workboot_recipe.inputs.all()
+        }
+        fish_backpack_inputs = {
+            recipe_input.object.aodp_id: recipe_input.quantity for recipe_input in fish_backpack_recipe.inputs.all()
+        }
+
+        assert fish_head_inputs == {"T4_LEATHER": 8}
+        assert fish_garb_inputs == {"T4_LEATHER": 8}
+        assert fish_workboot_inputs == {"T4_LEATHER": 8}
+        assert fish_backpack_inputs == {"T4_CLOTH": 4, "T4_LEATHER": 4}
 
     def test_refresh_recipes_deletes_and_rebuilds_existing_recipes(self):
         output_object = Object.objects.create(

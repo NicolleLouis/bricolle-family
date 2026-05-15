@@ -52,8 +52,8 @@ GATHERING_GEAR_RESOURCE_GROUPS = (
         "main_input_type": ObjectType.ORE,
     },
     {
-        "key": "stone",
-        "label": "Stone",
+        "key": "rock",
+        "label": "Rock",
         "recipe_key_prefix": "quarrier",
         "item_prefix": "Quarrier",
         "aodp_id_fragment": "GATHERER_ROCK",
@@ -66,6 +66,14 @@ GATHERING_GEAR_RESOURCE_GROUPS = (
         "item_prefix": "Skinner",
         "aodp_id_fragment": "GATHERER_HIDE",
         "main_input_type": ObjectType.ORE,
+    },
+    {
+        "key": "fish",
+        "label": "Fish",
+        "recipe_key_prefix": "fisherman",
+        "item_prefix": "Fisherman",
+        "aodp_id_fragment": "GATHERER_FISH",
+        "main_input_type": ObjectType.LEATHER,
     },
 )
 

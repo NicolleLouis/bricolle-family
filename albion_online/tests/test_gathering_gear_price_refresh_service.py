@@ -146,16 +146,58 @@ class TestGatheringGearPriceRefreshService:
             enchantment=2,
             crafting_tree="gatherer_hide_head",
         )
+        fish_cap = Object.objects.create(
+            aodp_id="TEST_T4_HEAD_GATHERER_FISH_REFRESH",
+            name="Adept's Fisherman Cap",
+            type_id=ObjectType.HEAD,
+            tier=4,
+            enchantment=2,
+            crafting_tree="gatherer_fish_head",
+        )
+        fish_garb = Object.objects.create(
+            aodp_id="TEST_T4_ARMOR_GATHERER_FISH_REFRESH",
+            name="Adept's Fisherman Garb",
+            type_id=ObjectType.ARMOR,
+            tier=4,
+            enchantment=2,
+            equipment_category="CHEST",
+            crafting_tree="gatherer_fish_chest",
+        )
+        fish_workboot = Object.objects.create(
+            aodp_id="TEST_T4_SHOES_GATHERER_FISH_REFRESH",
+            name="Adept's Fisherman Workboots",
+            type_id=ObjectType.SHOES,
+            tier=4,
+            enchantment=2,
+            equipment_category="SHOE",
+            crafting_tree="gatherer_fish_shoe",
+        )
+        fish_backpack = Object.objects.create(
+            aodp_id="TEST_T4_BACKPACK_GATHERER_FISH_REFRESH",
+            name="Adept's Fisherman Backpack",
+            type_id=ObjectType.BACKPACK,
+            tier=4,
+            enchantment=0,
+        )
         wood_cap_recipe = Recipe.objects.create(output=wood_cap, output_quantity=1)
         RecipeInput.objects.create(recipe=wood_cap_recipe, object=ore, quantity=8)
         stone_cap_recipe = Recipe.objects.create(output=stone_cap, output_quantity=1)
         RecipeInput.objects.create(recipe=stone_cap_recipe, object=ore, quantity=8)
         hide_cap_recipe = Recipe.objects.create(output=hide_cap, output_quantity=1)
         RecipeInput.objects.create(recipe=hide_cap_recipe, object=ore, quantity=8)
+        fish_cap_recipe = Recipe.objects.create(output=fish_cap, output_quantity=1)
+        RecipeInput.objects.create(recipe=fish_cap_recipe, object=leather, quantity=8)
+        fish_garb_recipe = Recipe.objects.create(output=fish_garb, output_quantity=1)
+        RecipeInput.objects.create(recipe=fish_garb_recipe, object=leather, quantity=8)
+        fish_workboot_recipe = Recipe.objects.create(output=fish_workboot, output_quantity=1)
+        RecipeInput.objects.create(recipe=fish_workboot_recipe, object=leather, quantity=8)
+        fish_backpack_recipe = Recipe.objects.create(output=fish_backpack, output_quantity=1)
+        RecipeInput.objects.create(recipe=fish_backpack_recipe, object=cloth, quantity=4)
+        RecipeInput.objects.create(recipe=fish_backpack_recipe, object=leather, quantity=4)
 
         GatheringGearPriceRefreshService(fetcher=fetcher).refresh_prices(selected_resource_filter="ore")
 
-        assert len(fetcher.requested_objects_batches) == 6
+        assert len(fetcher.requested_objects_batches) == 7
         flattened_requested_objects = {
             object_instance for batch in fetcher.requested_objects_batches for object_instance in batch
         }
@@ -167,6 +209,10 @@ class TestGatheringGearPriceRefreshService:
         assert wood_cap in flattened_requested_objects
         assert stone_cap in flattened_requested_objects
         assert hide_cap in flattened_requested_objects
+        assert fish_cap in flattened_requested_objects
+        assert fish_garb in flattened_requested_objects
+        assert fish_workboot in flattened_requested_objects
+        assert fish_backpack in flattened_requested_objects
         assert metalbar in flattened_requested_objects
         assert cloth in flattened_requested_objects
         assert leather in flattened_requested_objects
