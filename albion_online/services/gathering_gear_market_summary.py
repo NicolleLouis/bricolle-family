@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from albion_online.constants.city import City
 from albion_online.constants.gathering_gear import GATHERING_GEAR_RESOURCE_GROUPS
+from albion_online.constants.object_type import ObjectType
 from albion_online.models import Price
 from albion_online.services.market_summary_core import AlbionMarketSummaryCore
 
@@ -34,6 +35,9 @@ class QualityPriceDetail:
 class InputPriceDetail:
     label: str
     quantity: int
+    raw_cost: int | None
+    resource_return_rate: float | None
+    resource_return_amount: int | None
     sell_price: int | None
     sell_price_freshness: dict[str, str] | None
     buy_price_freshness: dict[str, str] | None
@@ -45,6 +49,14 @@ class InputPriceDetail:
 class CityPriceDetail:
     city: str
     label: str
+    sell_price: int | None
+    raw_input_cost: int | None
+    input_cost_before_buy_tax: int | None
+    resource_return_rate: float | None
+    resource_return_amount: int | None
+    buy_tax_amount: int | None
+    sale_fee_amount: int | None
+    net_sell_price: int | None
     craft_cost: int | None
     craft_margin: int | None
     is_hidden: bool
@@ -53,45 +65,51 @@ class CityPriceDetail:
 
 
 class GatheringGearMarketSummaryService(AlbionMarketSummaryCore):
+    BUY_TAX_RATE = 0.02
+    SALE_TAX_RATE = 0.04
+    LISTING_TAX_RATE = 0.025
+    SALE_NET_FACTOR = 1 - SALE_TAX_RATE - LISTING_TAX_RATE
     RESOURCE_INPUT_TYPES = {
-        "CLOTH",
-        "LEATHER",
-        "METALBAR",
-        "ORE",
+        ObjectType.CLOTH,
+        ObjectType.LEATHER,
+        ObjectType.METALBAR,
+        ObjectType.ORE,
+        ObjectType.PLANKS,
+        ObjectType.STONEBLOCK,
     }
 
     def build_rows(self, objects) -> list[dict]:
-        rows = []
-        for albion_object in objects:
-            gear_type = self._find_gear_type(albion_object.aodp_id)
-            rows.append(
-                {
-                    "object": albion_object,
-                    "city_summaries": self._build_city_summaries(albion_object),
-                    "gathering_gear_type": gear_type,
-                    "gathering_gear_type_key": gear_type["key"],
-                    "gathering_gear_type_label": gear_type["label"],
-                    "detail_key": f"{gear_type['key']}:{albion_object.type_code}:{albion_object.tier_enchantment_notation}",
-                }
-            )
-        return rows
+        return [self._build_row(albion_object, include_details=False) for albion_object in objects]
 
     def build_detail_row(self, albion_object) -> dict:
+        return self._build_row(albion_object, include_details=True)
+
+    def _build_row(self, albion_object, include_details: bool) -> dict:
         gear_type = self._find_gear_type(albion_object.aodp_id)
-        return {
+        prices_by_city_and_quality = self._build_latest_price_index(list(albion_object.prices.all()))
+        recipe = albion_object.output_recipes.first()
+        recipe_input_prices_by_object = self._build_recipe_input_price_indexes(recipe)
+        row = {
             "object": albion_object,
-            "city_summaries": self._build_city_summaries(albion_object),
-            "city_details": self._build_city_details(albion_object),
+            "city_summaries": self._build_city_summaries(
+                prices_by_city_and_quality,
+                recipe,
+                recipe_input_prices_by_object,
+            ),
             "gathering_gear_type": gear_type,
             "gathering_gear_type_key": gear_type["key"],
             "gathering_gear_type_label": gear_type["label"],
             "detail_key": f"{gear_type['key']}:{albion_object.type_code}:{albion_object.tier_enchantment_notation}",
         }
+        if include_details:
+            row["city_details"] = self._build_city_details(
+                prices_by_city_and_quality,
+                recipe,
+                recipe_input_prices_by_object,
+            )
+        return row
 
-    def _build_city_summaries(self, albion_object) -> list[CityMarketSummary]:
-        prices_by_city_and_quality = self._build_latest_price_index(list(albion_object.prices.all()))
-        recipe = albion_object.output_recipes.first()
-        recipe_input_prices_by_object = self._build_recipe_input_price_indexes(recipe)
+    def _build_city_summaries(self, prices_by_city_and_quality, recipe, recipe_input_prices_by_object) -> list[CityMarketSummary]:
         city_summaries = []
         for city, label in City.choices:
             city_summaries.append(
@@ -107,7 +125,7 @@ class GatheringGearMarketSummaryService(AlbionMarketSummaryCore):
 
     def _build_city_summary(self, city, label, prices_by_quality, recipe, recipe_input_prices_by_object) -> CityMarketSummary:
         sell_price, sell_price_freshness, buy_price_freshness = self._build_city_price_summary(prices_by_quality)
-        craft_cost, has_stale_inputs = self._build_craft_cost_for_summary(
+        craft_cost, has_stale_inputs, _, _ = self._build_craft_cost_breakdown(
             recipe,
             city,
             recipe_input_prices_by_object,
@@ -130,7 +148,7 @@ class GatheringGearMarketSummaryService(AlbionMarketSummaryCore):
                 is_hidden=is_hidden,
             )
 
-        net_sell_price = self._apply_trade_fee_to_sell_price(sell_price)
+        net_sell_price = self._apply_sale_fees_to_sell_price(sell_price)
         craft_margin = None if craft_cost is None or net_sell_price is None else net_sell_price - craft_cost
         craft_margin_percent = self._build_craft_margin_percent(craft_margin, craft_cost)
         return CityMarketSummary(
@@ -145,10 +163,7 @@ class GatheringGearMarketSummaryService(AlbionMarketSummaryCore):
             is_hidden=is_hidden,
         )
 
-    def _build_city_details(self, albion_object) -> list[CityPriceDetail]:
-        prices_by_city_and_quality = self._build_latest_price_index(list(albion_object.prices.all()))
-        recipe = albion_object.output_recipes.first()
-        recipe_input_prices_by_object = self._build_recipe_input_price_indexes(recipe)
+    def _build_city_details(self, prices_by_city_and_quality, recipe, recipe_input_prices_by_object) -> list[CityPriceDetail]:
         city_details = []
         for city, label in City.choices:
             city_details.append(
@@ -188,13 +203,40 @@ class GatheringGearMarketSummaryService(AlbionMarketSummaryCore):
         is_hidden = any(quality_detail.is_hidden for quality_detail in quality_details) or any(
             input_detail.is_hidden for input_detail in input_details
         )
-        craft_cost, _ = self._build_craft_cost_for_summary(recipe, city, recipe_input_prices_by_object)
+        craft_cost, _, raw_input_cost, input_cost_before_buy_tax = self._build_craft_cost_breakdown(
+            recipe,
+            city,
+            recipe_input_prices_by_object,
+        )
         sell_price, _, _ = self._build_city_price_summary(prices_by_quality)
-        net_sell_price = self._apply_trade_fee_to_sell_price(sell_price)
+        net_sell_price = self._apply_sale_fees_to_sell_price(sell_price)
         craft_margin = None if net_sell_price is None or craft_cost is None else net_sell_price - craft_cost
+        has_resource_inputs = any(
+            input_detail.resource_return_rate is not None for input_detail in input_details
+        )
+        resource_return_rate = self._build_resource_return_rate(recipe, city) if has_resource_inputs else None
+        resource_return_amount = (
+            None
+            if not has_resource_inputs or raw_input_cost is None or input_cost_before_buy_tax is None
+            else raw_input_cost - input_cost_before_buy_tax
+        )
+        buy_tax_amount = (
+            None
+            if craft_cost is None or input_cost_before_buy_tax is None
+            else craft_cost - input_cost_before_buy_tax
+        )
+        sale_fee_amount = None if sell_price is None or net_sell_price is None else sell_price - net_sell_price
         return CityPriceDetail(
             city=city,
             label=label,
+            sell_price=sell_price,
+            raw_input_cost=raw_input_cost,
+            input_cost_before_buy_tax=input_cost_before_buy_tax,
+            resource_return_rate=resource_return_rate,
+            resource_return_amount=resource_return_amount,
+            buy_tax_amount=buy_tax_amount,
+            sale_fee_amount=sale_fee_amount,
+            net_sell_price=net_sell_price,
             craft_cost=craft_cost,
             craft_margin=craft_margin,
             is_hidden=is_hidden,
@@ -210,10 +252,19 @@ class GatheringGearMarketSummaryService(AlbionMarketSummaryCore):
             sell_price, sell_price_freshness, buy_price_freshness = self._build_city_price_summary(
                 city_prices_by_quality
             )
+            raw_cost = None if sell_price is None else recipe_input.quantity * sell_price
+            resource_return_amount = None
+            if raw_cost is not None and recipe_input.object.type_id in self.RESOURCE_INPUT_TYPES:
+                resource_return_amount = raw_cost - self._build_input_total_cost(
+                    quantity=recipe_input.quantity,
+                    sell_price=sell_price,
+                    object_type=recipe_input.object.type_id,
+                    resource_return_rate=resource_return_rate,
+                )
             total_cost = self._build_input_total_cost(
                 quantity=recipe_input.quantity,
                 sell_price=sell_price,
-                object_type=recipe_input.object.type_code,
+                object_type=recipe_input.object.type_id,
                 resource_return_rate=resource_return_rate,
             )
             is_hidden = self._is_stale_freshness(sell_price_freshness) or self._is_stale_freshness(
@@ -223,6 +274,9 @@ class GatheringGearMarketSummaryService(AlbionMarketSummaryCore):
                 InputPriceDetail(
                     label=recipe_input.object.display_name,
                     quantity=recipe_input.quantity,
+                    raw_cost=raw_cost,
+                    resource_return_rate=resource_return_rate if recipe_input.object.type_id in self.RESOURCE_INPUT_TYPES else None,
+                    resource_return_amount=resource_return_amount,
                     sell_price=sell_price,
                     sell_price_freshness=sell_price_freshness,
                     buy_price_freshness=buy_price_freshness,
@@ -233,11 +287,25 @@ class GatheringGearMarketSummaryService(AlbionMarketSummaryCore):
         return input_details
 
     def _build_craft_cost_for_summary(self, recipe, city, recipe_input_prices_by_object) -> tuple[int | None, bool]:
+        craft_cost, has_stale_inputs, _, _ = self._build_craft_cost_breakdown(
+            recipe,
+            city,
+            recipe_input_prices_by_object,
+        )
+        return craft_cost, has_stale_inputs
+
+    def _build_craft_cost_breakdown(
+        self,
+        recipe,
+        city,
+        recipe_input_prices_by_object,
+    ) -> tuple[int | None, bool, int | None, int | None]:
         if recipe is None:
-            return None, False
+            return None, False, None, None
 
         resource_return_rate = self._build_resource_return_rate(recipe, city)
-        raw_cost = 0
+        raw_input_cost = 0
+        input_cost_before_buy_tax = 0
         has_stale_inputs = False
         for recipe_input in recipe.inputs.all():
             city_prices_by_quality = recipe_input_prices_by_object.get(recipe_input.object_id, {}).get(city, {})
@@ -250,15 +318,17 @@ class GatheringGearMarketSummaryService(AlbionMarketSummaryCore):
             total_cost = self._build_input_total_cost(
                 quantity=recipe_input.quantity,
                 sell_price=sell_price,
-                object_type=recipe_input.object.type_code,
+                object_type=recipe_input.object.type_id,
                 resource_return_rate=resource_return_rate,
             )
-            if total_cost is None:
-                return None, has_stale_inputs
-            raw_cost += total_cost
-        if raw_cost == 0:
-            return None, has_stale_inputs
-        return self._apply_trade_fee_to_craft_cost(raw_cost), has_stale_inputs
+            if total_cost is None or sell_price is None:
+                return None, has_stale_inputs, None, None
+            raw_input_cost += recipe_input.quantity * sell_price
+            input_cost_before_buy_tax += total_cost
+        if input_cost_before_buy_tax == 0:
+            return None, has_stale_inputs, None, None
+        craft_cost = self._apply_buy_tax_to_craft_cost(input_cost_before_buy_tax)
+        return craft_cost, has_stale_inputs, raw_input_cost, input_cost_before_buy_tax
 
     def _build_recipe_input_price_indexes(self, recipe):
         if recipe is None:
@@ -268,9 +338,16 @@ class GatheringGearMarketSummaryService(AlbionMarketSummaryCore):
             for recipe_input in recipe.inputs.all()
         }
 
+    def _apply_buy_tax_to_craft_cost(self, craft_cost: int) -> int:
+        return int(round((craft_cost * 102) / 100))
+
+    def _apply_sale_fees_to_sell_price(self, sell_price: int | None) -> int | None:
+        if sell_price is None:
+            return None
+        return int(round((sell_price * 935) / 1000))
+
     def _find_gear_type(self, aodp_id):
         for gear_type in GATHERING_GEAR_RESOURCE_GROUPS:
             if gear_type["aodp_id_fragment"] in aodp_id:
                 return gear_type
         return {"key": "unknown", "label": "Unknown", "aodp_id_fragment": ""}
-

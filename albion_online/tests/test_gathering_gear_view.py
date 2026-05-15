@@ -362,7 +362,9 @@ class TestGatheringGearView:
         assert response.status_code == 200
         assert b'data-detail-key="ore:HEAD:4.2"' in response.content
         assert b"Bridgewatch" in response.content
-        assert b"Craft cost:" in response.content
+        assert b"Craft cost real" in response.content
+        assert b"Resource return" in response.content
+        assert b"Sale fee" in response.content
 
     def test_post_refreshes_prices(self, authenticated_client, monkeypatch):
         gathering_gear_view = import_module("albion_online.views.gathering_gear")
