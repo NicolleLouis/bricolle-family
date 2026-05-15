@@ -12,7 +12,9 @@ class ArtifactSalvagePriceRefreshService(GroupedPriceRefreshCore):
         super().__init__(fetcher or AlbionOnlineDataPriceFetcher())
 
     def refresh_prices(self) -> list:
-        return self.refresh_prices_from_groups([self._get_all_objects()])
+        return self.refresh_prices_from_groups(
+            [self._get_family_objects(family) for family in ARTIFACT_SALVAGE_FAMILIES]
+        )
 
     def describe_refresh_targets(self) -> dict:
         family_descriptions = []
@@ -28,11 +30,11 @@ class ArtifactSalvagePriceRefreshService(GroupedPriceRefreshCore):
                 }
             )
 
-        all_objects = list(self._get_all_objects())
+        all_objects = [albion_object for family in family_descriptions for albion_object in family["item_ids"]]
         return {
-            "batch_count": 1 if all_objects else 0,
+            "batch_count": sum(1 for family in family_descriptions if family["count"]),
             "count": len(all_objects),
-            "item_ids": [albion_object.aodp_id for albion_object in all_objects],
+            "item_ids": all_objects,
             "families": family_descriptions,
         }
 

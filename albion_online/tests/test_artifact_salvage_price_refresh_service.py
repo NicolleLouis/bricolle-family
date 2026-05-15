@@ -22,7 +22,7 @@ def _create_object(aodp_id, type_id, tier):
 
 @pytest.mark.django_db
 class TestArtifactSalvagePriceRefreshService:
-    def test_refresh_prices_fetches_one_batch_for_all_families(self, monkeypatch):
+    def test_refresh_prices_fetches_one_batch_per_family(self, monkeypatch):
         fake_families = (
             {
                 "key": "rune",
@@ -102,17 +102,12 @@ class TestArtifactSalvagePriceRefreshService:
 
         created_prices = service.refresh_prices()
 
-        assert len(fetcher.requested_objects_batches) == 1
-        assert set(fetcher.requested_objects_batches[0]) == {
-            rune_artifact.aodp_id,
-            rune_shard.aodp_id,
-            soul_artifact.aodp_id,
-            soul_shard.aodp_id,
-            relic_artifact.aodp_id,
-            relic_shard.aodp_id,
-            avalonian_artifact.aodp_id,
-            avalonian_shard.aodp_id,
-        }
+        assert fetcher.requested_objects_batches == [
+            [rune_artifact.aodp_id, rune_shard.aodp_id],
+            [soul_artifact.aodp_id, soul_shard.aodp_id],
+            [relic_artifact.aodp_id, relic_shard.aodp_id],
+            [avalonian_artifact.aodp_id, avalonian_shard.aodp_id],
+        ]
         assert created_prices and len(created_prices) == 8
 
     def test_describe_refresh_targets_returns_the_flat_item_ids_and_family_breakdown(self, monkeypatch):
@@ -155,7 +150,7 @@ class TestArtifactSalvagePriceRefreshService:
 
         description = service.describe_refresh_targets()
 
-        assert description["batch_count"] == 1
+        assert description["batch_count"] == 2
         assert description["count"] == 4
         assert set(description["item_ids"]) == {
             rune_shard.aodp_id,
