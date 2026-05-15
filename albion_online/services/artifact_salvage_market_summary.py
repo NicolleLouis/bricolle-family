@@ -7,7 +7,7 @@ from albion_online.services.market_summary_querysets import build_market_summary
 
 
 class ArtifactSalvageMarketSummaryService(AlbionMarketSummaryCore):
-    COLUMN_TIERS = (6, 7, 8)
+    COLUMN_TIERS = (7, 8)
     BUY_ORDER_TAX_RATE = 0.025
     TARGET_MARGIN = 0.10
     SALE_NET_FACTOR = 0.935
