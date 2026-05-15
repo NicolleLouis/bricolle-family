@@ -65,7 +65,7 @@ Risks:
 
 ### ART-SALVAGE-002 - Build salvage pricing service and formula tests
 
-Status: `not started`
+Status: `done`
 
 Goal:
 - Implement the backend service that builds the artifact salvage page data.
