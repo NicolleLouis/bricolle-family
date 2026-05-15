@@ -214,7 +214,7 @@ Risks:
 
 ### ART-SALVAGE-005 - Add navigation links and finish integration tests
 
-Status: `not started`
+Status: `done`
 
 Goal:
 - Make the new page discoverable from the app entry points.
