@@ -89,6 +89,18 @@
                                 </td>
                             {% endfor %}
                         </tr>
+                        <tr>
+                            <th scope="row" class="text-nowrap">{{ section.buy_order_row.label }}</th>
+                            {% for cell in section.buy_order_row.cells %}
+                                <td class="text-center">
+                                    {% if cell.current_price is not None %}
+                                        <span class="badge bg-dark fs-6">{{ cell.current_price|compact_price }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
                         {% for artifact_row in section.artifact_rows %}
                             <tr>
                                 <th scope="row" class="text-nowrap">{{ artifact_row.label }}</th>
@@ -97,7 +109,6 @@
                                         <div class="d-flex flex-column align-items-center gap-1">
                                             {% if cell.current_price is not None %}
                                                 <span class="fw-semibold">{{ cell.current_price|compact_price }}</span>
-                                                <small class="text-muted">BO {{ cell.buy_order_price|compact_price }}</small>
                                             {% else %}
                                                 <span class="text-muted">-</span>
                                             {% endif %}
@@ -152,4 +163,3 @@
 })();
 </script>
 {% endblock %}
-

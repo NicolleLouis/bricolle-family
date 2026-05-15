@@ -70,17 +70,15 @@ class TestArtifactSalvageMarketSummaryService:
         assert [column["label"] for column in rune_section["columns"]] == ["T6", "T7", "T8"]
         assert rune_section["base_row"]["label"] == "Rune x10"
         assert [cell["current_price"] for cell in rune_section["base_row"]["cells"]] == [1000, 2000, 3000]
+        assert [cell["current_price"] for cell in rune_section["buy_order_row"]["cells"]] == [829, 1659, 2488]
 
         first_row = rune_section["artifact_rows"][0]
         assert first_row["label"] == "Bloodforged Blade"
         assert first_row["cells"][0]["current_price"] == 900
-        assert first_row["cells"][0]["buy_order_price"] == 829
         assert first_row["cells"][0]["price_state"] == "green"
         assert first_row["cells"][1]["current_price"] == 1000
-        assert first_row["cells"][1]["buy_order_price"] == 1659
         assert first_row["cells"][1]["price_state"] == "green"
         assert first_row["cells"][2]["current_price"] is None
-        assert first_row["cells"][2]["buy_order_price"] == 2488
         assert first_row["cells"][2]["price_state"] is None
 
     def test_build_sections_keeps_missing_objects_and_prices_safe(self):
@@ -91,8 +89,8 @@ class TestArtifactSalvageMarketSummaryService:
 
         soul_section = next(section for section in sections if section["key"] == "soul")
         assert len(soul_section["artifact_rows"]) == 29
+        assert [cell["current_price"] for cell in soul_section["buy_order_row"]["cells"]] == [None, None, None]
         assert soul_section["artifact_rows"][0]["cells"][0]["current_price"] is None
-        assert soul_section["artifact_rows"][0]["cells"][0]["buy_order_price"] is None
         assert soul_section["artifact_rows"][0]["cells"][0]["price_state"] is None
 
     def test_build_buy_order_price_uses_the_documented_formula(self):

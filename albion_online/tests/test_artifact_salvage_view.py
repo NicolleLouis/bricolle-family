@@ -85,9 +85,9 @@ class TestArtifactSalvageView:
         assert b"Relic" in response.content
         assert b"Avalonian" in response.content
         assert b"Rune x10" in response.content
+        assert b"Buy order" in response.content
         assert b"Bloodforged Blade" in response.content
         assert b"table-success" in response.content
-        assert b"BO" in response.content
 
     def test_get_rejects_invalid_city_and_uses_default(self, authenticated_client):
         response = authenticated_client.get(f"{reverse('albion_online:artifact_salvage')}?city=all")

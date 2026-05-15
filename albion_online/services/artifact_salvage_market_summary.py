@@ -30,6 +30,7 @@ class ArtifactSalvageMarketSummaryService(AlbionMarketSummaryCore):
                     "label": family["label"],
                     "columns": [self._build_column(tier) for tier in self.COLUMN_TIERS],
                     "base_row": self._build_base_row(family, shard_prices_by_tier),
+                    "buy_order_row": self._build_buy_order_row(shard_prices_by_tier),
                     "artifact_rows": self._build_artifact_rows(
                         family,
                         selected_city,
@@ -84,8 +85,20 @@ class ArtifactSalvageMarketSummaryService(AlbionMarketSummaryCore):
                     "label": f"T{tier}",
                     "object": None,
                     "current_price": None if shard_prices_by_tier[tier] is None else shard_prices_by_tier[tier] * 10,
-                    "buy_order_price": None,
-                    "price_state": None,
+                }
+                for tier in self.COLUMN_TIERS
+            ],
+        }
+
+    def _build_buy_order_row(self, shard_prices_by_tier):
+        return {
+            "label": "Buy order",
+            "cells": [
+                {
+                    "tier": tier,
+                    "label": f"T{tier}",
+                    "object": None,
+                    "current_price": self._build_buy_order_price(shard_prices_by_tier[tier]),
                 }
                 for tier in self.COLUMN_TIERS
             ],
@@ -118,7 +131,6 @@ class ArtifactSalvageMarketSummaryService(AlbionMarketSummaryCore):
             "label": f"T{tier}",
             "object": albion_object,
             "current_price": current_price,
-            "buy_order_price": buy_order_price,
             "price_state": self._build_price_state(current_price, buy_order_price),
         }
 
