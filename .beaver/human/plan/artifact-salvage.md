@@ -165,7 +165,7 @@ Risks:
 
 ### ART-SALVAGE-004 - Add artifact salvage view, route, and template
 
-Status: `not started`
+Status: `done`
 
 Goal:
 - Expose the new artifact salvage page through Django routing and render the new UI.

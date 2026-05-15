@@ -1,0 +1,155 @@
+{% extends "albion_online/base.html" %}
+{% load price_format %}
+
+{% block content %}
+<div class="d-flex flex-column gap-4">
+    <div class="position-sticky top-0 bg-white pt-2 pb-3" style="z-index: 1020;">
+        <div class="d-flex justify-content-between align-items-center gap-3 shadow-sm border rounded-3 bg-light px-3 py-2">
+            <div>
+                <h1 class="h3 mb-1">Artifact Salvage</h1>
+                <p class="text-muted mb-0">Artifact salvage market tracker with one-click price refresh.</p>
+            </div>
+            <div class="d-flex flex-wrap align-items-center justify-content-end gap-2 ms-auto">
+                <form method="get" action="{% url 'albion_online:artifact_salvage' %}" class="d-flex align-items-center gap-2">
+                    <label for="cityFilter" class="form-label mb-0 text-muted small">City</label>
+                    <select id="cityFilter" name="city" class="form-select form-select-sm" onchange="this.form.submit()">
+                        {% for city_filter_option in city_filter_options %}
+                            <option value="{{ city_filter_option.value }}" {% if city_filter_option.value == selected_city_filter %}selected{% endif %}>
+                                {{ city_filter_option.label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+                <form method="post" action="{% url 'albion_online:artifact_salvage' %}?city={{ selected_city_filter }}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Refresh Price</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% if price_refresh_job %}
+        <div
+            class="alert {% if price_refresh_job.status == 'failed' %}alert-danger{% elif price_refresh_job.status == 'success' %}alert-success{% else %}alert-warning{% endif %}"
+            id="priceRefreshJobBanner"
+            data-price-refresh-job-id="{{ price_refresh_job.id }}"
+            data-price-refresh-job-status-url="{{ price_refresh_job_status_url }}"
+            data-price-refresh-job-status="{{ price_refresh_job.status }}"
+        >
+            <div class="d-flex justify-content-between align-items-center gap-3">
+                <div>
+                    <strong>
+                        {% if price_refresh_job.status == 'failed' %}
+                            Price refresh failed
+                        {% elif price_refresh_job.status == 'success' %}
+                            Prices are ready
+                        {% else %}
+                            Refresh in progress
+                        {% endif %}
+                    </strong>
+                    <div class="small">
+                        {% if price_refresh_job.status == 'failed' %}
+                            {{ price_refresh_job.error_message }}
+                        {% elif price_refresh_job.status == 'success' %}
+                            {{ price_refresh_job.refreshed_count }} price entries refreshed.
+                        {% else %}
+                            The page will refresh automatically when prices are ready.
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% for section in sections %}
+        <div class="card">
+            <div class="card-header bg-white">
+                <h2 class="h5 mb-0 text-capitalize">{{ section.label }}</h2>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Artifact</th>
+                            {% for column in section.columns %}
+                                <th scope="col" class="text-center">{{ column.label }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row" class="text-nowrap">{{ section.base_row.label }}</th>
+                            {% for cell in section.base_row.cells %}
+                                <td class="text-center">
+                                    {% if cell.current_price is not None %}
+                                        <span class="badge bg-secondary fs-6">{{ cell.current_price|compact_price }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        {% for artifact_row in section.artifact_rows %}
+                            <tr>
+                                <th scope="row" class="text-nowrap">{{ artifact_row.label }}</th>
+                                {% for cell in artifact_row.cells %}
+                                    <td class="text-center {% if cell.price_state == 'green' %}table-success{% elif cell.price_state == 'red' %}table-danger{% endif %}">
+                                        <div class="d-flex flex-column align-items-center gap-1">
+                                            {% if cell.current_price is not None %}
+                                                <span class="fw-semibold">{{ cell.current_price|compact_price }}</span>
+                                                <small class="text-muted">BO {{ cell.buy_order_price|compact_price }}</small>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+(() => {
+    const priceRefreshJobBanner = document.getElementById('priceRefreshJobBanner');
+    if (priceRefreshJobBanner) {
+        const priceRefreshJobStatusUrl = priceRefreshJobBanner.dataset.priceRefreshJobStatusUrl;
+        const refreshUrl = new URL(window.location.href);
+        refreshUrl.searchParams.delete('refresh_job_id');
+        const refreshPage = () => window.location.replace(refreshUrl.toString());
+        const refreshBanner = async () => {
+            const response = await fetch(priceRefreshJobStatusUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!response.ok) {
+                return;
+            }
+            const payload = await response.json();
+            if (payload.status === 'success') {
+                priceRefreshJobBanner.className = 'alert alert-success';
+                priceRefreshJobBanner.querySelector('strong').textContent = 'Prices are ready';
+                priceRefreshJobBanner.querySelector('.small').textContent = `${payload.refreshed_count} price entries refreshed.`;
+                window.setTimeout(refreshPage, 500);
+                return;
+            }
+            if (payload.status === 'failed') {
+                priceRefreshJobBanner.className = 'alert alert-danger';
+                priceRefreshJobBanner.querySelector('strong').textContent = 'Price refresh failed';
+                priceRefreshJobBanner.querySelector('.small').textContent = payload.error_message || 'Unknown error.';
+                return;
+            }
+            window.setTimeout(refreshBanner, 2000);
+        };
+
+        if (priceRefreshJobBanner.dataset.priceRefreshJobStatus !== 'success' && priceRefreshJobBanner.dataset.priceRefreshJobStatus !== 'failed') {
+            window.setTimeout(refreshBanner, 1000);
+        } else if (priceRefreshJobBanner.dataset.priceRefreshJobStatus === 'success') {
+            window.setTimeout(refreshPage, 500);
+        }
+    }
+})();
+</script>
+{% endblock %}
+
