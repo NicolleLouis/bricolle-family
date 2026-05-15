@@ -2,14 +2,18 @@ from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.core.cache import cache
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.views.decorators.http import require_GET
 
 from albion_online.constants.city import City
 from albion_online.models import PriceRefreshJob
 from albion_online.services.artifact_salvage_market_summary import (
     ArtifactSalvageMarketSummaryService,
+)
+from albion_online.services.artifact_salvage_price_refresh import (
+    ArtifactSalvagePriceRefreshService,
 )
 from albion_online.services.price_refresh_cache import ARTIFACT_SALVAGE_CACHE_VERSION_KEY
 from albion_online.tasks import refresh_price_job
@@ -120,3 +124,9 @@ def artifact_salvage(request):
             "sections": sections,
         },
     )
+
+
+@require_GET
+def artifact_salvage_refresh_targets(request):
+    # Temporary debug endpoint to inspect the exact objects sent to AODP.
+    return JsonResponse(ArtifactSalvagePriceRefreshService().describe_refresh_targets())

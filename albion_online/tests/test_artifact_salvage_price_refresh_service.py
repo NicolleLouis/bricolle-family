@@ -22,7 +22,7 @@ def _create_object(aodp_id, type_id, tier):
 
 @pytest.mark.django_db
 class TestArtifactSalvagePriceRefreshService:
-    def test_refresh_prices_fetches_one_batch_per_family(self, monkeypatch):
+    def test_refresh_prices_fetches_one_batch_for_all_families(self, monkeypatch):
         fake_families = (
             {
                 "key": "rune",
@@ -114,3 +114,68 @@ class TestArtifactSalvagePriceRefreshService:
             avalonian_shard.aodp_id,
         }
         assert created_prices and len(created_prices) == 8
+
+    def test_describe_refresh_targets_returns_the_flat_item_ids_and_family_breakdown(self, monkeypatch):
+        fake_families = (
+            {
+                "key": "rune",
+                "label": "Rune",
+                "shard_aodp_id_fragment": "TEST_RUNE_SHARD_FRAGMENT",
+                "artifacts": (
+                    {
+                        "label": "Rune Artifact",
+                        "aodp_id_fragment": "TEST_RUNE_ARTIFACT_FRAGMENT",
+                    },
+                ),
+            },
+            {
+                "key": "soul",
+                "label": "Soul",
+                "shard_aodp_id_fragment": "TEST_SOUL_SHARD_FRAGMENT",
+                "artifacts": (
+                    {
+                        "label": "Soul Artifact",
+                        "aodp_id_fragment": "TEST_SOUL_ARTIFACT_FRAGMENT",
+                    },
+                ),
+            },
+        )
+        monkeypatch.setattr(artifact_salvage_price_refresh, "ARTIFACT_SALVAGE_FAMILIES", fake_families)
+
+        _get_or_create_type_group(ObjectType.ARTEFACT)
+        _get_or_create_type_group(ObjectType.RUNE)
+        _get_or_create_type_group(ObjectType.SOUL)
+
+        rune_shard = _create_object("TEST_RUNE_SHARD_FRAGMENT_T6", ObjectType.RUNE, 6)
+        rune_artifact = _create_object("TEST_RUNE_ARTIFACT_FRAGMENT_T6", ObjectType.ARTEFACT, 6)
+        soul_shard = _create_object("TEST_SOUL_SHARD_FRAGMENT_T6", ObjectType.SOUL, 6)
+        soul_artifact = _create_object("TEST_SOUL_ARTIFACT_FRAGMENT_T6", ObjectType.ARTEFACT, 6)
+
+        service = ArtifactSalvagePriceRefreshService()
+
+        description = service.describe_refresh_targets()
+
+        assert description["batch_count"] == 1
+        assert description["count"] == 4
+        assert set(description["item_ids"]) == {
+            rune_shard.aodp_id,
+            rune_artifact.aodp_id,
+            soul_shard.aodp_id,
+            soul_artifact.aodp_id,
+        }
+        assert description["families"] == [
+            {
+                "key": "rune",
+                "label": "Rune",
+                "shard_aodp_id_fragment": "TEST_RUNE_SHARD_FRAGMENT",
+                "item_ids": [rune_artifact.aodp_id, rune_shard.aodp_id],
+                "count": 2,
+            },
+            {
+                "key": "soul",
+                "label": "Soul",
+                "shard_aodp_id_fragment": "TEST_SOUL_SHARD_FRAGMENT",
+                "item_ids": [soul_artifact.aodp_id, soul_shard.aodp_id],
+                "count": 2,
+            },
+        ]

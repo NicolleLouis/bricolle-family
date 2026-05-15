@@ -1,7 +1,7 @@
 from django.urls import path
 
 from albion_online.views.craft_profitability import craft_profitability_mark_done
-from albion_online.views.artifact_salvage import artifact_salvage
+from albion_online.views.artifact_salvage import artifact_salvage, artifact_salvage_refresh_targets
 from albion_online.views.home import home
 from albion_online.views.gathering_gear import (
     gathering_gear,
@@ -21,6 +21,11 @@ app_name = "albion_online"
 urlpatterns = [
     path("", home, name="home"),
     path("artifact_salvage/", artifact_salvage, name="artifact_salvage"),
+    path(
+        "artifact_salvage/debug/refresh-targets/",
+        artifact_salvage_refresh_targets,
+        name="artifact_salvage_refresh_targets",
+    ),
     path("gathering_gear/", gathering_gear, name="gathering_gear"),
     path("gathering_gear/detail/", gathering_gear_detail_panel, name="gathering_gear_detail_panel"),
     path("craft_profitability/done/", craft_profitability_mark_done, name="craft_profitability_mark_done"),

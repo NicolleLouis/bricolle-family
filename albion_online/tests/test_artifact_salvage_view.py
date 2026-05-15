@@ -1,5 +1,6 @@
 from importlib import import_module
 from datetime import timedelta
+import json
 
 import pytest
 from django.contrib.auth.models import User
@@ -116,3 +117,25 @@ class TestArtifactSalvageView:
         job = PriceRefreshJob.objects.get()
         assert job.kind == PriceRefreshJob.Kind.ARTIFACT_SALVAGE
         assert job.status == PriceRefreshJob.Status.QUEUED
+
+    def test_debug_refresh_targets_returns_aodp_item_ids(self, authenticated_client):
+        _create_object("TEST_RUNE_SHARD_T6_VIEW", ObjectType.RUNE, 6)
+        _create_object(
+            "TEST_RUNE_ARTIFACT_T6_ARTEFACT_MAIN_SCIMITAR_MORGANA_VIEW",
+            ObjectType.ARTEFACT,
+            6,
+        )
+
+        response = authenticated_client.get(
+            reverse("albion_online:artifact_salvage_refresh_targets")
+        )
+
+        payload = json.loads(response.content)
+
+        assert response.status_code == 200
+        assert payload["batch_count"] == 1
+        assert "TEST_RUNE_ARTIFACT_T6_ARTEFACT_MAIN_SCIMITAR_MORGANA_VIEW" in payload["item_ids"]
+        assert "TEST_RUNE_SHARD_T6_VIEW" in payload["item_ids"]
+        assert payload["families"][0]["key"] == "rune"
+        assert "TEST_RUNE_ARTIFACT_T6_ARTEFACT_MAIN_SCIMITAR_MORGANA_VIEW" in payload["families"][0]["item_ids"]
+        assert "TEST_RUNE_SHARD_T6_VIEW" in payload["families"][0]["item_ids"]
