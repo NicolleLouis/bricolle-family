@@ -95,7 +95,7 @@
                             {% for cell in section.base_row.cells %}
                                 <td class="text-center">
                                     {% if cell.current_price is not None %}
-                                        <span class="badge bg-secondary fs-6">{{ cell.current_price|compact_price }}</span>
+                                        <span class="badge bg-secondary fs-6" {% if cell.price_age_label %}title="{{ cell.price_age_label }}"{% endif %}>{{ cell.current_price|compact_price }}</span>
                                     {% else %}
                                         <span class="text-muted">-</span>
                                     {% endif %}
@@ -107,7 +107,7 @@
                             {% for cell in section.buy_order_row.cells %}
                                 <td class="text-center">
                                     {% if cell.current_price is not None %}
-                                        <span class="badge bg-dark fs-6">{{ cell.current_price|compact_price }}</span>
+                                        <span class="badge bg-dark fs-6" {% if cell.price_age_label %}title="{{ cell.price_age_label }}"{% endif %}>{{ cell.current_price|compact_price }}</span>
                                     {% else %}
                                         <span class="text-muted">-</span>
                                     {% endif %}
@@ -121,7 +121,7 @@
                                     <td class="text-center {% if cell.price_state == 'green_strong' %}artifact-salvage-price-green-strong{% elif cell.price_state == 'green_pale' %}artifact-salvage-price-green-pale{% elif cell.price_state == 'red' %}artifact-salvage-price-red{% endif %}">
                                         <div class="d-flex flex-column align-items-center gap-1">
                                             {% if cell.current_price is not None %}
-                                                <span class="fw-semibold">{{ cell.current_price|compact_price }}</span>
+                                                <span class="fw-semibold" {% if cell.price_age_label %}title="{{ cell.price_age_label }}"{% endif %}>{{ cell.current_price|compact_price }}</span>
                                             {% else %}
                                                 <span class="text-muted">-</span>
                                             {% endif %}

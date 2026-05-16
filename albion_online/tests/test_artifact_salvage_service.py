@@ -69,11 +69,16 @@ class TestArtifactSalvageMarketSummaryService:
         assert rune_section["base_row"]["label"] == "Rune x10"
         assert [cell["current_price"] for cell in rune_section["base_row"]["cells"]] == [2000, 3000]
         assert [cell["current_price"] for cell in rune_section["buy_order_row"]["cells"]] == [1659, 2488]
+        assert [cell["price_age_label"] for cell in rune_section["base_row"]["cells"]] == [
+            "Dernier prix: il y a 0 heures",
+            "Dernier prix: il y a 0 heures",
+        ]
 
         first_row = rune_section["artifact_rows"][0]
         assert first_row["label"] == "Bloodforged Blade"
         assert first_row["cells"][0]["current_price"] == 1000
         assert first_row["cells"][0]["price_state"] == "green_strong"
+        assert first_row["cells"][0]["price_age_label"] == "Dernier prix: il y a 0 heures"
         assert first_row["cells"][1]["current_price"] == 2600
         assert first_row["cells"][1]["price_state"] == "green_pale"
 

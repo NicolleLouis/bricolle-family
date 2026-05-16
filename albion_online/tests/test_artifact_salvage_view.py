@@ -90,6 +90,7 @@ class TestArtifactSalvageView:
         assert b"Bloodforged Blade" in response.content
         assert b"artifact-salvage-price-green-pale" in response.content
         assert b"artifact-salvage-price-green-strong" in response.content
+        assert b'title="Dernier prix: il y a 0 heures"' in response.content
 
     def test_get_rejects_invalid_city_and_uses_default(self, authenticated_client):
         response = authenticated_client.get(f"{reverse('albion_online:artifact_salvage')}?city=all")
