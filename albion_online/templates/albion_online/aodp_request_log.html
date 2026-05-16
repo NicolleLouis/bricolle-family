@@ -1,0 +1,92 @@
+{% extends "albion_online/base.html" %}
+
+{% block content %}
+<div class="d-flex flex-column gap-4">
+    <div class="position-sticky top-0 bg-white pt-2 pb-3" style="z-index: 1020;">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 shadow-sm border rounded-3 bg-light px-3 py-2">
+            <div>
+                <h1 class="h3 mb-1">AODP request logs</h1>
+                <p class="text-muted mb-0">Inspect the latest AODP requests and responses for debugging.</p>
+            </div>
+            <form method="get" action="{% url 'albion_online:aodp_request_log' %}" class="ms-lg-auto d-flex gap-2 align-items-center">
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ search_string }}"
+                    class="form-control"
+                    placeholder="Search request query or response body"
+                    aria-label="Search request logs"
+                >
+                <button type="submit" class="btn btn-primary">Search</button>
+                {% if search_string %}
+                    <a href="{% url 'albion_online:aodp_request_log' %}" class="btn btn-outline-secondary">Clear</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Time</th>
+                        <th scope="col">Source</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Request</th>
+                        <th scope="col">Response</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request_log in request_logs %}
+                        <tr class="{% if request_log.is_error %}table-danger{% endif %}">
+                            <td class="text-nowrap">{{ request_log.created_at }}</td>
+                            <td>
+                                <span class="badge {% if request_log.is_error %}bg-danger{% else %}bg-success{% endif %}">
+                                    {{ request_log.source }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if request_log.response_status_code %}
+                                    <span class="badge {% if request_log.is_error %}bg-danger{% else %}bg-primary{% endif %}">
+                                        {{ request_log.response_status_code }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">No response</span>
+                                {% endif %}
+                                {% if request_log.duration_ms %}
+                                    <div class="text-muted small mt-1">{{ request_log.duration_ms }} ms</div>
+                                {% endif %}
+                            </td>
+                            <td class="text-break">
+                                <div class="small text-muted mb-1">{{ request_log.request_url }}</div>
+                                <details>
+                                    <summary class="text-primary">Request query</summary>
+                                    <pre class="mb-0 text-wrap">{{ request_log.request_query_string|default:"-" }}</pre>
+                                </details>
+                            </td>
+                            <td class="text-break">
+                                <details>
+                                    <summary class="text-primary">Response body</summary>
+                                    <pre class="mb-0 text-wrap">{{ request_log.response_body_raw|default:"-" }}</pre>
+                                </details>
+                                {% if request_log.error_message %}
+                                    <div class="text-danger small mt-2">
+                                        {{ request_log.error_message }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                No AODP request logs found.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

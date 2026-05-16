@@ -166,7 +166,7 @@ Risks:
 
 ### AODP-004 - Add the AODP request log page, route, and navigation entry
 
-Status: `not started`
+Status: `done`
 
 Goal:
 - Expose a searchable front page for AODP request logs and make it reachable from the Albion header.

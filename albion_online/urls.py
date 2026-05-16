@@ -1,5 +1,6 @@
 from django.urls import path
 
+from albion_online.views.aodp_request_log import aodp_request_log
 from albion_online.views.craft_profitability import craft_profitability_mark_done
 from albion_online.views.artifact_salvage import artifact_salvage, artifact_salvage_refresh_targets
 from albion_online.views.home import home
@@ -20,6 +21,7 @@ app_name = "albion_online"
 
 urlpatterns = [
     path("", home, name="home"),
+    path("aodp_request_logs/", aodp_request_log, name="aodp_request_log"),
     path("artifact_salvage/", artifact_salvage, name="artifact_salvage"),
     path(
         "artifact_salvage/debug/refresh-targets/",

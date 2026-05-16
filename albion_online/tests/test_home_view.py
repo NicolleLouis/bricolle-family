@@ -24,6 +24,8 @@ class TestHomeView:
         assert b"Leather Jacket" in response.content
         assert b"Artifact Salvage" in response.content
         assert b"Gathering Gear" in response.content
+        assert b"AODP Logs" in response.content
         assert reverse("albion_online:leather_jacket").encode() in response.content
         assert reverse("albion_online:artifact_salvage").encode() in response.content
         assert reverse("albion_online:gathering_gear").encode() in response.content
+        assert reverse("albion_online:aodp_request_log").encode() in response.content
