@@ -68,7 +68,7 @@ Risks:
 
 ### AODP-002 - Add request log read/search/purge helpers
 
-Status: `not started`
+Status: `done`
 
 Goal:
 - Add the internal helper layer that reads, filters, formats, and purges logs without creating any write path outside the price fetcher.
