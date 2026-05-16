@@ -116,7 +116,7 @@ Risks:
 
 ### AODP-003 - Instrument the price fetcher with non-blocking log persistence and purge
 
-Status: `not started`
+Status: `done`
 
 Goal:
 - Persist AODP request logs only from the price fetcher path, and make the purge best-effort so it never blocks the actual fetch.

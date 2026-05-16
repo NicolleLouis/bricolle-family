@@ -7,6 +7,7 @@ import requests
 
 from albion_online.constants.city import City
 from albion_online.models import Object, Price
+from albion_online.services.aodp_request_log_service import AodpRequestLogService
 
 logger = logging.getLogger(__name__)
 
@@ -26,10 +27,11 @@ class AlbionOnlineDataPriceFetcher:
         "Brecilien": City.BRECILIEN,
     }
 
-    def __init__(self, session=None, clock=None, sleeper=None):
+    def __init__(self, session=None, clock=None, sleeper=None, request_log_service=None):
         self._session = session or requests.Session()
         self._clock = clock or (lambda: datetime.now(timezone.utc))
         self._sleep = sleeper or time.sleep
+        self._request_log_service = request_log_service or AodpRequestLogService()
         self.last_request_at = None
 
     def fetch_current_prices(
@@ -37,6 +39,7 @@ class AlbionOnlineDataPriceFetcher:
         objects,
         locations: list[str] | None = None,
         qualities: list[int] | None = None,
+        request_log_source: str = "price_fetcher",
     ) -> list[Price]:
         object_by_aodp_id = {albion_object.aodp_id: albion_object for albion_object in objects}
         if not object_by_aodp_id:
@@ -44,13 +47,15 @@ class AlbionOnlineDataPriceFetcher:
 
         created_prices = []
         for object_batch in self._build_object_batches(list(object_by_aodp_id.values()), locations, qualities):
-            payload = self._fetch_price_payload(object_batch, locations, qualities)
+            payload = self._fetch_price_payload(object_batch, locations, qualities, request_log_source)
             prices = self._build_prices_from_payload(payload, object_by_aodp_id)
             created_prices.extend(Price.objects.bulk_create(prices, batch_size=500))
         return created_prices
 
-    def _fetch_price_payload(self, objects: list[Object], locations, qualities):
+    def _fetch_price_payload(self, objects: list[Object], locations, qualities, request_log_source: str):
         url = self._build_url(objects, locations, qualities)
+        request_query_string = urlencode(self._build_query_params(locations, qualities))
+        self._purge_expired_request_logs()
         logger.info(
             "Albion Online Data request url=%s item_ids=%s",
             url,
@@ -58,9 +63,51 @@ class AlbionOnlineDataPriceFetcher:
         )
         self._sleep_until_rate_limit()
         self.last_request_at = self._clock()
-        response = self._session.get(url, timeout=30)
-        response.raise_for_status()
-        return response.json()
+        request_started_at = time.perf_counter()
+        try:
+            response = self._session.get(url, timeout=30)
+        except Exception as error:
+            self._record_request_log(
+                source=request_log_source,
+                request_url=url,
+                request_query_string=request_query_string,
+                response_status_code=None,
+                response_body_raw="",
+                error_message=str(error),
+                is_error=True,
+                duration_ms=self._build_duration_ms(request_started_at),
+            )
+            raise
+
+        response_body_raw = response.text
+        duration_ms = self._build_duration_ms(request_started_at)
+        try:
+            response.raise_for_status()
+            payload = response.json()
+        except Exception as error:
+            self._record_request_log(
+                source=request_log_source,
+                request_url=url,
+                request_query_string=request_query_string,
+                response_status_code=getattr(response, "status_code", None),
+                response_body_raw=response_body_raw,
+                error_message=str(error),
+                is_error=True,
+                duration_ms=duration_ms,
+            )
+            raise
+
+        self._record_request_log(
+            source=request_log_source,
+            request_url=url,
+            request_query_string=request_query_string,
+            response_status_code=getattr(response, "status_code", None),
+            response_body_raw=response_body_raw,
+            error_message="",
+            is_error=False,
+            duration_ms=duration_ms,
+        )
+        return payload
 
     def _build_object_batches(self, objects: list[Object], locations, qualities) -> list[list[Object]]:
         batches = []
@@ -92,6 +139,41 @@ class AlbionOnlineDataPriceFetcher:
         if qualities:
             query_params["qualities"] = ",".join(str(quality) for quality in qualities)
         return query_params
+
+    def _build_duration_ms(self, request_started_at):
+        return int(round((time.perf_counter() - request_started_at) * 1000))
+
+    def _record_request_log(
+        self,
+        *,
+        source: str,
+        request_url: str,
+        request_query_string: str,
+        response_status_code: int | None,
+        response_body_raw: str,
+        error_message: str,
+        is_error: bool,
+        duration_ms: int | None,
+    ):
+        try:
+            self._request_log_service._create_log(
+                source=source,
+                request_url=request_url,
+                request_query_string=request_query_string,
+                response_status_code=response_status_code,
+                response_body_raw=response_body_raw,
+                error_message=error_message,
+                is_error=is_error,
+                duration_ms=duration_ms,
+            )
+        except Exception:
+            logger.exception("Failed to persist AODP request log.")
+
+    def _purge_expired_request_logs(self):
+        try:
+            self._request_log_service.purge_expired()
+        except Exception:
+            logger.exception("Failed to purge expired AODP request logs.")
 
     def _build_prices_from_payload(self, payload, object_by_aodp_id: dict[str, Object]) -> list[Price]:
         prices = []

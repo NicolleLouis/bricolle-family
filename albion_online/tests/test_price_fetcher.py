@@ -1,17 +1,24 @@
+import json
 from datetime import datetime, timezone
 
 import pytest
+import requests
 
 from albion_online.constants.city import City
-from albion_online.models import Object, Price
+from albion_online.models import AodpRequestLog, Object, Price
 from albion_online.services.price_fetcher import AlbionOnlineDataPriceFetcher
 
 
 class FakeResponse:
-    def __init__(self, payload):
+    def __init__(self, payload, text=None, status_code=200, raise_for_status_error=None):
         self._payload = payload
+        self.text = text if text is not None else json.dumps(payload)
+        self.status_code = status_code
+        self._raise_for_status_error = raise_for_status_error
 
     def raise_for_status(self):
+        if self._raise_for_status_error is not None:
+            raise self._raise_for_status_error
         return None
 
     def json(self):
@@ -34,6 +41,18 @@ class FakeClock:
 
     def __call__(self):
         return self._moments.pop(0)
+
+
+class FakeRequestLogService:
+    def __init__(self):
+        self.logged_requests = []
+
+    def purge_expired(self):
+        raise RuntimeError("purge failed")
+
+    def _create_log(self, **kwargs):
+        self.logged_requests.append(kwargs)
+        return kwargs
 
 
 @pytest.mark.django_db
@@ -75,6 +94,28 @@ class TestAlbionOnlineDataPriceFetcher:
         assert price.buy_price_max == 4700
         assert price.sell_price_min_date.isoformat() == "2026-04-26T18:05:00"
         assert price.buy_price_max_date.isoformat() == "2026-04-26T18:05:00"
+        log = AodpRequestLog.objects.get()
+        assert log.source == "price_fetcher"
+        assert log.request_query_string == "locations=Bridgewatch&qualities=2"
+        assert log.response_status_code == 200
+        assert log.response_body_raw == json.dumps(
+            [
+                {
+                    "item_id": "T4_BAG",
+                    "city": "Bridgewatch",
+                    "quality": 2,
+                    "sell_price_min": 4873,
+                    "sell_price_min_date": "2026-04-26T18:05:00",
+                    "sell_price_max": 5000,
+                    "sell_price_max_date": "2026-04-26T18:05:00",
+                    "buy_price_min": 4300,
+                    "buy_price_min_date": "2026-04-26T18:05:00",
+                    "buy_price_max": 4700,
+                    "buy_price_max_date": "2026-04-26T18:05:00",
+                },
+            ]
+        )
+        assert log.is_error is False
         assert session.requested_urls == [
             "https://europe.albion-online-data.com/api/v2/stats/prices/T4_BAG.json?locations=Bridgewatch&qualities=2"
         ]
@@ -102,6 +143,60 @@ class TestAlbionOnlineDataPriceFetcher:
 
         assert any("Albion Online Data request url=" in record.message for record in caplog.records)
         assert any("T4_BAG" in record.message for record in caplog.records)
+
+    def test_fetch_current_prices_records_error_responses(self):
+        albion_object = Object.objects.get(aodp_id="T4_BAG")
+
+        class ErrorSession:
+            def __init__(self):
+                self.requested_urls = []
+
+            def get(self, url, timeout):
+                self.requested_urls.append(url)
+                response = FakeResponse(
+                    [],
+                    text='{"detail":"boom"}',
+                    status_code=500,
+                    raise_for_status_error=requests.HTTPError("500 Server Error"),
+                )
+                return response
+
+        session = ErrorSession()
+
+        with pytest.raises(requests.HTTPError):
+            AlbionOnlineDataPriceFetcher(session=session).fetch_current_prices([albion_object])
+
+        log = AodpRequestLog.objects.get()
+        assert log.is_error is True
+        assert log.response_status_code == 500
+        assert log.response_body_raw == '{"detail":"boom"}'
+        assert "500 Server Error" in log.error_message
+        assert session.requested_urls == [
+            "https://europe.albion-online-data.com/api/v2/stats/prices/T4_BAG.json"
+        ]
+
+    def test_fetch_current_prices_keeps_going_when_purge_fails(self):
+        albion_object = Object.objects.get(aodp_id="T4_BAG")
+        session = FakeSession(
+            [
+                {
+                    "item_id": "T4_BAG",
+                    "city": "Bridgewatch",
+                    "quality": 2,
+                    "sell_price_min": 4873,
+                    "sell_price_min_date": "2026-04-26T18:05:00",
+                },
+            ]
+        )
+
+        fetcher = AlbionOnlineDataPriceFetcher(session=session, request_log_service=FakeRequestLogService())
+
+        prices = fetcher.fetch_current_prices([albion_object])
+
+        assert len(prices) == 1
+        assert session.requested_urls == [
+            "https://europe.albion-online-data.com/api/v2/stats/prices/T4_BAG.json"
+        ]
 
     def test_fetch_current_prices_without_filters_omits_query_string(self):
         albion_object = Object.objects.get(aodp_id="T4_BAG")
