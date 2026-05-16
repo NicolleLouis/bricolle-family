@@ -91,10 +91,18 @@ class TestArtifactSalvagePriceRefreshService:
         class FakeFetcher:
             def __init__(self):
                 self.requested_objects_batches = []
+                self.request_log_sources = []
 
-            def fetch_current_prices(self, objects, locations=None, qualities=None):
+            def fetch_current_prices(
+                self,
+                objects,
+                locations=None,
+                qualities=None,
+                request_log_source="price_fetcher",
+            ):
                 batch = list(objects)
                 self.requested_objects_batches.append([albion_object.aodp_id for albion_object in batch])
+                self.request_log_sources.append(request_log_source)
                 return [object() for _ in batch]
 
         fetcher = FakeFetcher()
@@ -108,6 +116,7 @@ class TestArtifactSalvagePriceRefreshService:
             [relic_artifact.aodp_id, relic_shard.aodp_id],
             [avalonian_artifact.aodp_id, avalonian_shard.aodp_id],
         ]
+        assert set(fetcher.request_log_sources) == {"artifact_salvage"}
         assert created_prices and len(created_prices) == 8
 
     def test_describe_refresh_targets_returns_the_flat_item_ids_and_family_breakdown(self, monkeypatch):

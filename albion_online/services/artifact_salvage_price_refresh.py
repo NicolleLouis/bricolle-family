@@ -8,6 +8,8 @@ from albion_online.services.price_fetcher import AlbionOnlineDataPriceFetcher
 
 
 class ArtifactSalvagePriceRefreshService(GroupedPriceRefreshCore):
+    request_log_source = "artifact_salvage"
+
     def __init__(self, fetcher=None):
         super().__init__(fetcher or AlbionOnlineDataPriceFetcher())
 

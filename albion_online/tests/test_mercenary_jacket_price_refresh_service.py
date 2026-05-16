@@ -11,9 +11,11 @@ from albion_online.services.mercenary_jacket_price_refresh import (
 class FakeFetcher:
     def __init__(self):
         self.requested_objects_batches = []
+        self.request_log_sources = []
 
-    def fetch_current_prices(self, objects):
+    def fetch_current_prices(self, objects, request_log_source="price_fetcher"):
         self.requested_objects_batches.append(list(objects))
+        self.request_log_sources.append(request_log_source)
         return []
 
 
@@ -81,6 +83,7 @@ class TestLeatherJacketPriceRefreshService:
         LeatherJacketPriceRefreshService(fetcher=fetcher).refresh_prices()
 
         assert len(fetcher.requested_objects_batches) == len(LEATHER_JACKET_TYPES) + 1
+        assert set(fetcher.request_log_sources) == {"leather_jacket"}
         assert mercenary_jacket in fetcher.requested_objects_batches[0]
         assert hunter_jacket in fetcher.requested_objects_batches[1]
         assert assassin_jacket in fetcher.requested_objects_batches[2]

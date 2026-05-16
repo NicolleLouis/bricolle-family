@@ -219,7 +219,7 @@ Risks:
 
 ### AODP-005 - Add integration coverage and clean up any cross-cutting fallout
 
-Status: `not started`
+Status: `done`
 
 Goal:
 - Close any gaps left by the new logging feature with focused regression tests and any necessary import or navigation fixes.

@@ -7,6 +7,8 @@ from albion_online.services.price_fetcher import AlbionOnlineDataPriceFetcher
 
 
 class GatheringGearPriceRefreshService(GroupedPriceRefreshCore):
+    request_log_source = "gathering_gear"
+
     def __init__(self, fetcher=None):
         super().__init__(fetcher or AlbionOnlineDataPriceFetcher())
 

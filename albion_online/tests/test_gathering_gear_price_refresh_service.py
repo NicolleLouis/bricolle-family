@@ -10,9 +10,11 @@ from albion_online.services.gathering_gear_price_refresh import (
 class FakeFetcher:
     def __init__(self):
         self.requested_objects_batches = []
+        self.request_log_sources = []
 
-    def fetch_current_prices(self, objects):
+    def fetch_current_prices(self, objects, request_log_source="price_fetcher"):
         self.requested_objects_batches.append(list(objects))
+        self.request_log_sources.append(request_log_source)
         return []
 
 
@@ -198,6 +200,7 @@ class TestGatheringGearPriceRefreshService:
         GatheringGearPriceRefreshService(fetcher=fetcher).refresh_prices(selected_resource_filter="ore")
 
         assert len(fetcher.requested_objects_batches) == 7
+        assert set(fetcher.request_log_sources) == {"gathering_gear"}
         flattened_requested_objects = {
             object_instance for batch in fetcher.requested_objects_batches for object_instance in batch
         }
